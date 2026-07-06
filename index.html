@@ -109,7 +109,13 @@ function useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPin
     const init=()=>{
       if(!window.L||!mapRef.current)return;
       const map=window.L.map(mapRef.current,{zoomControl:true,attributionControl:true}).setView([8.5,-66.5],6);
-      window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+      const tiles=[
+        {url:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",attr:"Esri",maxZ:18},
+        {url:"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",attr:"© CARTO",maxZ:20},
+        {url:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",attr:"© OpenStreetMap",maxZ:19},
+      ];
+      let ti=0,tl=window.L.tileLayer(tiles[ti].url,{maxZoom:tiles[ti].maxZ,attribution:tiles[ti].attr}).addTo(map);
+      map.on("tileerror",()=>{ti++;if(ti<tiles.length){map.removeLayer(tl);tl=window.L.tileLayer(tiles[ti].url,{maxZoom:tiles[ti].maxZ,attribution:tiles[ti].attr}).addTo(map);}});
       mapInst.current=map;ready.current=true;setTimeout(()=>map.invalidateSize(),300);
     };
     cleanupIntervals();
