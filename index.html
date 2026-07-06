@@ -123,8 +123,10 @@ function useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPin
         {url:"https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",attr:"Wikimedia",maxZ:18},
         {url:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",attr:"OSM",maxZ:19},
       ];
-      let ti=0,tl=window.L.tileLayer(tiles[ti].url,{maxZoom:tiles[ti].maxZ,attribution:tiles[ti].attr}).addTo(map);
-      map.on("tileerror",()=>{ti++;if(ti<tiles.length){map.removeLayer(tl);tl=window.L.tileLayer(tiles[ti].url,{maxZoom:tiles[ti].maxZ,attribution:tiles[ti].attr}).addTo(map);}});
+      map.getPane("tilePane").style.background="#1a1a2e";
+      let ti=0,switched=false,tl=window.L.tileLayer(tiles[ti].url,{maxZoom:tiles[ti].maxZ,attribution:tiles[ti].attr}).addTo(map);
+      map.on("tileerror",()=>{if(switched)return;switched=true;ti++;if(ti<tiles.length){map.removeLayer(tl);tl=window.L.tileLayer(tiles[ti].url,{maxZoom:tiles[ti].maxZ,attribution:tiles[ti].attr}).addTo(map);setTimeout(()=>{switched=false;},3000);}});
+      map.on("tileload",()=>{switched=false;});
       mapInst.current=map;ready.current=true;setTimeout(()=>map.invalidateSize(),300);
     };
     cleanupIntervals();
