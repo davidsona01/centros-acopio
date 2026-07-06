@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Nacional de Centros de Acopio</title>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+const distKm=(la1,lo1,la2,lo2)=>{const R=6371,dLat=(la2-la1)*Math.PI/180,dLon=(lo2-lo1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));};
+
+const fmtWA=(num)=>{if(!num)return"";const c=num.replace(/\D/g,"");if(c.startsWith("58"))return c;return"58"+c.replace(/^0+/,"");};
+
+const fmtTel=(num)=>{if(!num)return"#";const d=num.replace(/\D/g,"");if(d)return"tel:"+d;const m={a:2,b:2,c:2,d:3,e:3,f:3,g:4,h:4,i:4,j:5,k:5,l:5,m:6,n:6,o:6,p:7,q:7,r:7,s:7,t:8,u:8,v:8,w:9,x:9,y:9,z:9};return"tel:"+num.toLowerCase().split("").map(c=>m[c]||c).join("");};
+
+const genId=(existentes)=>{let id;do{id="A"+String(Math.floor(Math.random()*9000)+1000)}while(existentes.some(e=>e.id===id));return id;};
+
+const hashPass=async(pass)=>{const enc=new TextEncoder().encode(pass);const buf=await crypto.subtle.digest("SHA-256",enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");};
+
+const HASHED_ADMIN_PASS="6051fc84a7a0d74c225fb18a496b09952da5642e60723ecae543298edd7d82d6";
+
+const T_DARK={bg:"#0D0D1A",surface:"#1C1C2E",surface2:"#13131F",border:"#2D2D44",text:"#F0F0F0",textMuted:"#888",textFaint:"#555",inputBg:"#13131F",statBg:"rgba(0,0,0,.35)",tagBg:"#2D2D44",tagText:"#aaa",critBg:"#3D0A0A",critText:"#FF6B6B",cardShadow:"0 1px 4px rgba(0,0,0,.3)",alertBg:"#1A0000",alertBorder:"#5C1A1A",alertText:"#FF6B6B"};
+const T_LIGHT={bg:"#F0F4FA",surface:"#FFFFFF",surface2:"#F4F6FB",border:"#DDE3EE",text:"#1A1A2E",textMuted:"#6B7280",textFaint:"#9CA3AF",inputBg:"#FFFFFF",statBg:"rgba(0,0,0,.18)",tagBg:"#EEF0F8",tagText:"#6B7280",critBg:"#FEE2E2",critText:"#DC2626",cardShadow:"0 1px 4px rgba(0,0,0,.07)",alertBg:"#FFF0F0",alertBorder:"#FCA5A5",alertText:"#DC2626"};
+
+const EMERGENCIAS=[
+  {num:"911",label:"Emergencias",icon:"🚨",color:"#FF3B3B"},
+  {num:"171",label:"CICPC",icon:"👮",color:"#FF8C00"},
+  {num:"172",label:"Bomberos",icon:"🚒",color:"#FF5722"},
+  {num:"0800-RESCATE",label:"Protección Civil",icon:"🛡️",color:"#2196F3"},
+  {num:"112",label:"Menores no acomp.",icon:"👶",color:"#9C27B0"},
+  {num:"0800-4637-283",label:"Cruz Roja",icon:"🏥",color:"#E53935"},
+  {num:"0212-628-3111",label:"Gran Meliá (Refugio)",icon:"🏨",color:"#4CAF50"},
+];
+
+const REFUGIOS=[
+  {id:"R001",nombre:"Gran Meliá Caracas",tipo:"Hotel-Refugio",ciudad:"Caracas",estado:"Distrito Capital",direccion:"Av. Casanova c/calle El Recreo, Sabana Grande",lat:10.4909,lng:-66.8737,tel:"0212-628-3111",verificado:true,capacidad:500,recibido:380},
+  {id:"R002",nombre:"Poliedro de Caracas (Voluntarios)",tipo:"Centro de Registro",ciudad:"Caracas",estado:"Distrito Capital",direccion:"Av. Fuerzas Armadas, El Paraíso",lat:10.4714,lng:-66.9356,tel:"0212-671-5111",verificado:true,capacidad:7876,recibido:7876},
+  {id:"R003",nombre:"Campamentos ONU – La Guaira",tipo:"Refugio Multiservicios",ciudad:"La Guaira",estado:"Vargas (La Guaira)",direccion:"Zona costera afectada, La Guaira",lat:10.6040,lng:-66.8880,tel:"Coordinación ONU",verificado:true,capacidad:2000,recibido:1800},
+  {id:"R004",nombre:"Estadio José Bernardo Pérez",tipo:"Albergue de Emergencia",ciudad:"Valencia",estado:"Carabobo",direccion:"Av. Michelena, Valencia",lat:10.1899,lng:-67.9939,tel:"0241-881-0000",verificado:true,capacidad:3000,recibido:1200},
+  {id:"R005",nombre:"ULA Táchira",tipo:"Centro de Acopio / Refugio",ciudad:"San Cristóbal",estado:"Táchira",direccion:"Av. Universidad, San Cristóbal",lat:7.7743,lng:-72.2093,tel:"0276-345-0000",verificado:true,capacidad:400,recibido:150},
+];
+
+const CENTROS_INIT=[
+  {id:"A001",nombre:"Quinta El Bejucal – Altamira (Comando ConVzla)",estado:"Miranda",ciudad:"Caracas",tipo:"Sede Organización",responsable:"Comando ConVzla",whatsapp:"04120000001",capacidad:500,recibido:320,verificado:true,necesidades:{"Agua potable (botellones)":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Ropa adulto (dama)":"ALTO","Cobijas/frazadas":"ALTO","Medicamentos básicos":"ALTO"},lat:10.4983,lng:-66.8486,direccion:"Cuarta Av. de Altamira, entre 9na y 10ma transversal, 5ta El Bejucal",fecha:"2026-06-25"},
+  {id:"A002",nombre:"Iglesia La Paz – Montalbán",estado:"Distrito Capital",ciudad:"Caracas",tipo:"Iglesia/Templo",responsable:"Parroquia La Paz",whatsapp:"04140000002",capacidad:300,recibido:180,verificado:true,necesidades:{"Colchonetas":"CRÍTICO","Pañales bebé":"CRÍTICO","Agua potable (bolsas)":"ALTO","Jabón de baño":"MEDIO"},lat:10.4914,lng:-66.9291,direccion:"Iglesia La Paz, Montalbán 1, Municipio Libertador",fecha:"2026-06-25"},
+  {id:"A003",nombre:"Iglesia San Bernardino de la Siena",estado:"Distrito Capital",ciudad:"Caracas",tipo:"Iglesia/Templo",responsable:"Parroquia San Bernardino",whatsapp:"04160000003",capacidad:250,recibido:140,verificado:true,necesidades:{"Fórmula infantil":"CRÍTICO","Leche en polvo":"ALTO","Ropa infantil (niño)":"ALTO","Calzado adulto":"MEDIO"},lat:10.5052,lng:-66.9128,direccion:"Parroquia de San Bernardino, Caracas",fecha:"2026-06-25"},
+  {id:"A004",nombre:"Terrazas del Club Hípico Caracas",estado:"Distrito Capital",ciudad:"Caracas",tipo:"Centro Deportivo",responsable:"Rotaract Caracas",whatsapp:"04120000004",capacidad:400,recibido:200,verificado:true,necesidades:{"Carpas/toldos":"CRÍTICO","Colchonetas":"CRÍTICO","Arroz":"ALTO","Aceite":"ALTO","Cloro":"MEDIO"},lat:10.4620,lng:-66.8780,direccion:"Terrazas del Club Hípico, Las Mercedes, Caracas",fecha:"2026-06-25"},
+  {id:"A005",nombre:"Sede Comando ConVzla – Maracay",estado:"Aragua",ciudad:"Maracay",tipo:"Sede Organización",responsable:"Comando ConVzla Aragua",whatsapp:"04140000005",capacidad:350,recibido:180,verificado:true,necesidades:{"Agua potable (botellones)":"CRÍTICO","Harina de maíz":"CRÍTICO","Palas":"ALTO","Herramientas básicas":"ALTO"},lat:10.2469,lng:-67.5958,direccion:"Paseo de la Libertad, Av. Las Delicias, frente al Centro Médico de Maracay",fecha:"2026-06-25"},
+  {id:"A006",nombre:"Operación ConVzla – El Viñedo Valencia",estado:"Carabobo",ciudad:"Valencia",tipo:"Sede Organización",responsable:"Vente Carabobo / Todos con Venezuela",whatsapp:"04140000006",capacidad:600,recibido:390,verificado:true,necesidades:{"Láminas de zinc":"CRÍTICO","Cemento":"ALTO","Colchonetas":"ALTO","Pañales adulto":"MEDIO","Sábanas":"MEDIO"},lat:10.1793,lng:-67.9929,direccion:"Av. Monseñor Adams, El Viñedo. Edificio Talislandia, mezzanina, Valencia",fecha:"2026-06-25"},
+  {id:"A007",nombre:"Cuerpo de Bomberos Guacara",estado:"Carabobo",ciudad:"Guacara",tipo:"Centro Comunitario",responsable:"Cuerpo de Bomberos",whatsapp:"04120000007",capacidad:200,recibido:80,verificado:true,necesidades:{"Agua potable (botellones)":"CRÍTICO","Alimentos enlatados":"ALTO","Ropa adulto (caballero)":"MEDIO"},lat:10.2208,lng:-67.8781,direccion:"Carretera Nacional Guacara, Carabobo",fecha:"2026-06-25"},
+  {id:"A008",nombre:"Cáritas Barquisimeto",estado:"Lara",ciudad:"Barquisimeto",tipo:"Sede Organización",responsable:"Cáritas Barquisimeto",whatsapp:"02514468402",capacidad:500,recibido:260,verificado:true,necesidades:{"Leche en polvo":"CRÍTICO","Fórmula infantil":"ALTO","Ropa infantil (niña)":"ALTO","Calzado infantil":"MEDIO","Papel higiénico":"BAJO"},lat:10.0578,lng:-69.3467,direccion:"Carrera 18, entre calles 34 y 35, Barquisimeto, Lara",fecha:"2026-06-25"},
+  {id:"A009",nombre:"Tatas Food – Barquisimeto",estado:"Lara",ciudad:"Barquisimeto",tipo:"Sede Organización",responsable:"Coordinación Local",whatsapp:"04160000009",capacidad:200,recibido:90,verificado:true,necesidades:{"Arroz":"CRÍTICO","Caraotas/frijoles":"ALTO","Sal":"MEDIO","Aceite":"MEDIO"},lat:10.0621,lng:-69.3521,direccion:"Carrera 15 entre calles 13A y 13B, Barquisimeto, Lara",fecha:"2026-06-25"},
+  {id:"A010",nombre:"Centro Acopio Voluntad Popular – Angostura",estado:"Bolívar",ciudad:"Ciudad Bolívar",tipo:"Sede Organización",responsable:"Voluntad Popular Bolívar",whatsapp:"04150000010",capacidad:300,recibido:110,verificado:true,necesidades:{"Agua potable (botellones)":"ALTO","Alimentos enlatados":"ALTO","Cobijas/frazadas":"MEDIO","Linternas":"MEDIO"},lat:8.1225,lng:-63.5497,direccion:"Esquina de Banesco, Av. República, Municipio Angostura del Orinoco",fecha:"2026-06-25"},
+  {id:"A011",nombre:"Sede UNT Zulia – Centro de Acopio",estado:"Zulia",ciudad:"Maracaibo",tipo:"Sede Organización",responsable:"Un Nuevo Tiempo Zulia",whatsapp:"04160000011",capacidad:400,recibido:170,verificado:true,necesidades:{"Agua potable (bolsas)":"CRÍTICO","Harina de maíz":"ALTO","Ropa adulto (dama)":"ALTO","Toallas sanitarias":"MEDIO"},lat:10.6416,lng:-71.6124,direccion:"Sede UNT Zulia, Maracaibo",fecha:"2026-06-25"},
+  {id:"A012",nombre:"Colegio de Médicos de Mérida",estado:"Mérida",ciudad:"Mérida",tipo:"Sede Organización",responsable:"Colegio de Médicos Mérida",whatsapp:"04140000012",capacidad:150,recibido:60,verificado:true,necesidades:{"Medicamentos básicos":"CRÍTICO","Gasas estériles":"CRÍTICO","Agua potable (botellones)":"ALTO","Colchonetas":"MEDIO"},lat:8.5982,lng:-71.1445,direccion:"Sede Colegio de Médicos, Mérida",fecha:"2026-06-26"},
+  {id:"A013",nombre:"ULA Táchira – Centro de Acopio",estado:"Táchira",ciudad:"San Cristóbal",tipo:"Escuela/Liceo",responsable:"ULA Táchira",whatsapp:"02763450000",capacidad:500,recibido:200,verificado:true,necesidades:{"Agua potable (botellones)":"ALTO","Alimentos no perecederos":"ALTO","Ropa en buen estado":"MEDIO"},lat:7.7743,lng:-72.2093,direccion:"Av. Universidad, ULA Táchira, San Cristóbal",fecha:"2026-06-25"},
+  {id:"A014",nombre:"CNP Paraguaná – Centro de Acopio",estado:"Falcón",ciudad:"Punto Fijo",tipo:"Sede Organización",responsable:"CNP Paraguaná",whatsapp:"04120000014",capacidad:200,recibido:50,verificado:false,necesidades:{"Alimentos enlatados":"ALTO","Ropa adulto (caballero)":"MEDIO","Pilas/baterías":"MEDIO"},lat:11.7056,lng:-70.2136,direccion:"Sede CNP Paraguaná, Punto Fijo, Falcón",fecha:"2026-06-26"},
+  {id:"A015",nombre:"Acopio Emergencia Catia La Mar",estado:"Vargas (La Guaira)",ciudad:"La Guaira",tipo:"Plaza/Espacio Público",responsable:"Comité Vecinal Catia La Mar",whatsapp:"04120000015",capacidad:300,recibido:280,verificado:false,necesidades:{"Agua potable (botellones)":"CRÍTICO","Colchonetas":"CRÍTICO","Carpas/toldos":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Pañales bebé":"CRÍTICO"},lat:10.5994,lng:-67.0369,direccion:"Plaza principal Catia La Mar, La Guaira",fecha:"2026-06-25"},
+];
+
+const NIVEL={
+  "CRÍTICO":{bg:"#FF3B3B",text:"#fff",label:"🔴 CRÍTICO"},
+  "ALTO":{bg:"#FF8C00",text:"#fff",label:"🟠 ALTO"},
+  "MEDIO":{bg:"#F5C518",text:"#1a1a1a",label:"🟡 MEDIO"},
+  "BAJO":{bg:"#4CAF50",text:"#fff",label:"🟢 BAJO"},
+};
+
+const ESTADOS=["Amazonas","Anzoátegui","Apure","Aragua","Barinas","Bolívar","Carabobo","Cojedes","Delta Amacuro","Distrito Capital","Falcón","Guárico","Lara","Mérida","Miranda","Monagas","Nueva Esparta","Portuguesa","Sucre","Táchira","Trujillo","Vargas (La Guaira)","Yaracuy","Zulia"];
+const CIUDADES={"Amazonas":["Puerto Ayacucho","Maroa","San Fernando de Atabapo"],"Anzoátegui":["Barcelona","Puerto La Cruz","El Tigre","Anaco","Lechería"],"Apure":["San Fernando de Apure","Birúaca","Guasdualito","Elorza"],"Aragua":["Maracay","Turmero","La Victoria","Cagua","Palo Negro"],"Barinas":["Barinas","Socopó","Santa Bárbara","Ciudad Bolivia"],"Bolívar":["Ciudad Bolívar","Puerto Ordaz","San Félix","Upata","Caicara del Orinoco"],"Carabobo":["Valencia","Puerto Cabello","Güigüe","Guacara","Naguanagua","San Diego"],"Cojedes":["San Carlos","Tinaquillo","Las Vegas","El Baúl"],"Delta Amacuro":["Tucupita","Pedernales","Curiapo"],"Distrito Capital":["Caracas"],"Falcón":["Coro","Punto Fijo","Tucacas","La Vela de Coro","Churuguara"],"Guárico":["San Juan de los Morros","Calabozo","Valle de la Pascua","Zaraza","Altagracia de Orituco"],"Lara":["Barquisimeto","Carora","El Tocuyo","Cabudare","Quíbor"],"Mérida":["Mérida","El Vigía","Ejido","Tovar","Santa Elena de Arenales"],"Miranda":["Guarenas","Guatire","Los Teques","Caracas","Santa Teresa","Charallave","Ocumare del Tuy"],"Monagas":["Maturín","Punta de Mata","Temblador","Caripito"],"Nueva Esparta":["Porlamar","La Asunción","Juan Griego","Pampatar"],"Portuguesa":["Acarigua","Guanare","Araure","Villa Bruzual"],"Sucre":["Cumaná","Carúpano","Yaguaraparo","Río Caribe"],"Táchira":["San Cristóbal","Táriba","La Fría","San Antonio del Táchira","Rubio"],"Trujillo":["Trujillo","Valera","Boconó","Sabana de Mendoza","Escuque"],"Vargas (La Guaira)":["La Guaira","Maiquetía","Naiguatá","Caraballeda","Catia La Mar"],"Yaracuy":["San Felipe","Chivacoa","Nirgua","Yaritagua","Cocorote"],"Zulia":["Maracaibo","Cabimas","Ciudad Ojeda","Machiques","Santa Rita","Los Puertos de Altagracia"]};
+const CIUDADES_FLAT=[...new Set(Object.values(CIUDADES).flat())].sort();
+const INSUMOS={"🥤 Agua y Alimentos":["Agua potable (botellones)","Agua potable (bolsas)","Leche en polvo","Fórmula infantil","Alimentos enlatados","Arroz","Caraotas/frijoles","Harina de maíz","Azúcar","Aceite","Sal","Galletas","Atún/sardinas"],"🏠 Enseres y Refugio":["Colchonetas","Cobijas/frazadas","Sábanas","Almohadas","Carpas/toldos","Hamacas","Linternas","Velas","Pilas/baterías","Generador eléctrico"],"👕 Ropa y Calzado":["Ropa adulto (dama)","Ropa adulto (caballero)","Ropa infantil (niña)","Ropa infantil (niño)","Calzado adulto","Calzado infantil","Ropa interior"],"🧼 Higiene Personal":["Jabón de baño","Champú","Pasta dental","Cepillos de dientes","Papel higiénico","Toallas sanitarias","Pañales bebé","Pañales adulto","Desinfectante","Alcohol en gel","Cloro"],"🧹 Limpieza":["Escobas","Trapeadores","Bolsas de basura","Detergente","Jabón en polvo","Esponjas","Guantes de goma"],"📦 Herramientas":["Palas","Picos","Carretillas","Plástico negro","Láminas de zinc","Cemento","Herramientas básicas","Gasas estériles","Medicamentos básicos"],"🍼 Bebés":["Pañales (0-3 meses)","Pañales (4-6 meses)","Toallitas húmedas","Crema antipañalitis","Biberones","Juguetes"]};
+const TIPOS=["Centro Comunitario","Iglesia/Templo","Escuela/Liceo","Junta de Vecinos","Alcaldía/Gobernación","Centro Deportivo","Plaza/Espacio Público","Sede Organización","Otro"];
+
+function CertQR({value,size=140}){
+  const svgRef=useRef(null);
+  useEffect(()=>{
+    if(!value||!svgRef.current)return;
+    const draw=()=>{
+      if(!window.QRCode||!svgRef.current)return;
+      const qr=window.QRCode(0,"M");
+      qr.addData(value);
+      qr.make();
+      const mod=qr.getModuleCount(),cell=size/mod;
+      const p=[`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`];
+      p.push(`<rect width="${size}" height="${size}" fill="#fff"/>`);
+      for(let r=0;r<mod;r++)for(let c=0;c<mod;c++)if(qr.isDark(r,c))p.push(`<rect x="${c*cell}" y="${r*cell}" width="${cell}" height="${cell}" fill="#111"/>`);
+      p.push("</svg>");
+      svgRef.current.innerHTML=p.join("");
+    };
+    if(window.QRCode){draw();return;}
+    const s=document.createElement("script");s.id="qr-gen";s.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js";s.onload=draw;document.head.appendChild(s);
+  },[value,size]);
+  return(<div ref={svgRef} style={{width:size,height:size,display:"flex",alignItems:"center",justifyContent:"center",background:"#fff",borderRadius:4}}/>);
+}
+
+function useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPin){
+  const mapInst=useRef(null),mrkMap=useRef({}),userMrk=useRef(null),circRef=useRef(null),ready=useRef(false);
+  const intervals=useRef([]);
+  const firstUserPos=useRef(true);
+  const cleanupIntervals=()=>{intervals.current.forEach(clearInterval);intervals.current=[];};
+  useEffect(()=>{
+    if(!mapRef.current||mapInst.current)return;
+    const init=()=>{
+      if(!window.L||!mapRef.current)return;
+      const map=window.L.map(mapRef.current,{zoomControl:true,attributionControl:true}).setView([8.5,-66.5],6);
+      window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+      mapInst.current=map;ready.current=true;setTimeout(()=>map.invalidateSize(),300);
+    };
+    cleanupIntervals();
+    if(window.L){setTimeout(init,50);return;}
+    if(!document.getElementById("lf-css")){const l=document.createElement("link");l.id="lf-css";l.rel="stylesheet";l.href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css";document.head.appendChild(l);}
+    if(!document.getElementById("lf-js")){const s=document.createElement("script");s.id="lf-js";s.src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js";s.onload=()=>setTimeout(init,80);document.head.appendChild(s);}
+    else{const id=setInterval(()=>{if(window.L){clearInterval(id);init();}},100);intervals.current.push(id);}
+    return()=>{cleanupIntervals();if(mapInst.current){mapInst.current.remove();mapInst.current=null;ready.current=false;}};
+  },[]);
+
+  useEffect(()=>{
+    const draw=()=>{
+      const map=mapInst.current,L=window.L;if(!map||!L)return;
+      Object.values(mrkMap.current).forEach(m=>m.remove());mrkMap.current={};
+      refugios.forEach(r=>{
+        if(!r.lat||!r.lng)return;
+        const icon=L.divIcon({className:"",html:`<div style="width:32px;height:32px;border-radius:4px;background:#4285F4;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:15px">🏕️</div>`,iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18]});
+        const popup=`<div style="font-family:Inter,sans-serif;min-width:200px;padding:4px 0"><div style="background:#1A73E8;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:5px;font-weight:700">🏕️ REFUGIO / ALBERGUE</div><div style="font-weight:800;font-size:13px;color:#111;margin-bottom:2px">${r.nombre}</div><div style="color:#555;font-size:11px;margin-bottom:5px">📍 ${r.ciudad}, ${r.estado}</div><div style="font-size:11px;color:#333">${r.direccion}</div>${r.tel?`<div style="margin-top:5px;font-size:11px;color:#1A73E8">📞 ${r.tel}</div>`:""}  </div>`;
+        mrkMap.current[`R-${r.id}`]=L.marker([r.lat,r.lng],{icon}).addTo(map).bindPopup(popup,{maxWidth:250});
+      });
+      centros.forEach(c=>{
+        if(!c.lat||!c.lng)return;
+        const crit=Object.values(c.necesidades||{}).filter(v=>v==="CRÍTICO").length;
+        const activo=c.id===pinActivoId,cercano=cercanoIds.includes(c.id);
+        const color=crit>0?"#FF3B3B":c.verificado?"#4CAF50":"#FF8C00";
+        const sz=activo?46:cercano?40:34;
+        const ring=activo?"border:3px solid #fff;box-shadow:0 0 0 4px #CF1A2F,0 3px 14px rgba(0,0,0,.5);":cercano?"border:3px solid #FFD700;box-shadow:0 0 0 3px #FFD700,0 3px 10px rgba(0,0,0,.4);":"border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);";
+        const emoji=crit>0?"🔴":c.verificado?"✅":"📦";
+        const icon=L.divIcon({className:"",html:`<div style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};${ring}display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:${sz>38?17:13}px">${emoji}</span></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz],popupAnchor:[0,-sz-4]});
+        const urg=Object.entries(c.necesidades||{}).filter(([,v])=>v==="CRÍTICO").map(([k])=>k).slice(0,3);
+        const badge=cercano&&!activo?`<div style="background:#1A73E8;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:5px;font-weight:700">📍 Cercano a ti</div><br/>`:"";
+        const popup=`<div style="font-family:Inter,sans-serif;min-width:220px;padding:4px 0">${badge}<div style="font-weight:800;font-size:14px;color:#111;margin-bottom:2px">${c.nombre}</div><div style="color:#666;font-size:11px;margin-bottom:5px">📍 ${c.ciudad}, ${c.estado}</div>${c.verificado?'<span style="background:#E8F5E9;color:#2E7D32;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700">✓ Verificado</span>':'<span style="background:#FFF8E1;color:#F57F17;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700">⏳ Pendiente</span>'}${urg.length?`<div style="margin-top:7px"><div style="font-size:10px;color:#999;margin-bottom:3px">Necesita urgente:</div>${urg.map(u=>`<span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:10px;padding:2px 6px;border-radius:4px;margin:1px;font-weight:600">🔴 ${u}</span>`).join("")}</div>`:""}<div style="margin-top:9px;display:flex;gap:5px"><a href="https://wa.me/${fmtWA(c.whatsapp)}" target="_blank" style="flex:1;text-align:center;background:#075E54;color:#fff;border-radius:5px;padding:6px 4px;font-size:11px;font-weight:700;text-decoration:none">💬 WhatsApp</a><a href="https://www.google.com/maps?q=${c.lat},${c.lng}&z=17" target="_blank" style="flex:1;text-align:center;background:#1A73E8;color:#fff;border-radius:5px;padding:6px 4px;font-size:11px;font-weight:700;text-decoration:none">🗺️ Maps</a></div></div>`;
+        const mrk=L.marker([c.lat,c.lng],{icon,zIndexOffset:activo?2000:cercano?1000:0}).addTo(map).bindPopup(popup,{maxWidth:260});
+        mrk.on("click",()=>onPin(c));mrkMap.current[c.id]=mrk;
+      });
+    };
+    if(ready.current){draw();return;}
+    const poll=()=>{if(ready.current){clearInterval(poll);draw();}};
+    poll.i=setInterval(poll,200);intervals.current.push(poll.i);
+    return()=>{if(poll.i)clearInterval(poll.i);};
+  },[centros,refugios,pinActivoId,cercanoIds]);
+
+  useEffect(()=>{
+    const go=()=>{
+      const map=mapInst.current,L=window.L;if(!map||!L||!userPos)return;
+      userMrk.current?.remove();circRef.current?.remove();
+      const icon=L.divIcon({className:"",html:`<div style="width:22px;height:22px;border-radius:50%;background:#4285F4;border:3px solid #fff;box-shadow:0 0 0 5px rgba(66,133,244,.25)"></div>`,iconSize:[22,22],iconAnchor:[11,11]});
+      userMrk.current=L.marker([userPos.lat,userPos.lng],{icon,zIndexOffset:3000}).addTo(map).bindPopup("<b style='font-family:Inter'>📍 Tu ubicación</b>").openPopup();
+      circRef.current=L.circle([userPos.lat,userPos.lng],{radius:userPos.acc||800,color:"#4285F4",fillColor:"#4285F4",fillOpacity:0.07,weight:1}).addTo(map);
+      if(firstUserPos.current){firstUserPos.current=false;map.flyTo([userPos.lat,userPos.lng],12,{duration:1.8});}
+    };
+    if(ready.current){go();return;}
+    const poll=()=>{if(ready.current){clearInterval(poll);go();}};
+    poll.i=setInterval(poll,200);intervals.current.push(poll.i);
+    return()=>{if(poll.i)clearInterval(poll.i);};
+  },[userPos]);
+
+  const flyTo=(c)=>{const map=mapInst.current,L=window.L;if(!map||!L||!c.lat||!c.lng)return;map.flyTo([c.lat,c.lng],15,{duration:1.1});const key=mrkMap.current[c.id]?c.id:`R-${c.id}`;setTimeout(()=>mrkMap.current[key]?.openPopup(),1250);};
+  return{flyTo,mapInst};
+}
+
+function PanelEmergencias({T}){
+  return(
+    <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 16px",marginBottom:16,boxShadow:T.cardShadow}}>
+      <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+        <span style={{background:"#FF3B3B",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:11}}>🚨 EMERGENCIA</span>
+        <span>Números de emergencia Venezuela</span>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))",gap:6}}>
+        {EMERGENCIAS.map(e=>(
+          <a key={e.num} href={fmtTel(e.num)} style={{
+            display:"flex",alignItems:"center",gap:8,background:T.surface2,
+            border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",
+            textDecoration:"none",transition:"all .15s",cursor:"pointer",
+            borderLeft:`3px solid ${e.color}`
+          }}
+            onMouseEnter={ev=>ev.currentTarget.style.borderColor=e.color}
+            onMouseLeave={ev=>ev.currentTarget.style.borderColor=T.border}>
+            <span style={{fontSize:18,flexShrink:0}}>{e.icon}</span>
+            <div>
+              <div style={{fontWeight:800,fontSize:13,color:e.color,lineHeight:1}}>{e.num}</div>
+              <div style={{fontSize:10,color:T.textMuted,marginTop:1}}>{e.label}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div style={{marginTop:8,fontSize:10,color:T.textFaint}}>
+        Fuentes: <a href="https://terremotovenezuela.app" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4"}}>terremotovenezuela.app</a> · <a href="https://centraldeayudavenezuela.com" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4"}}>centraldeayudavenezuela.com</a>
+      </div>
+    </div>
+  );
+}
+
+function BarraBusqueda({busqCiudad,setBusqCiudad,busqNombre,setBusqNombre,filtrados,total,pinActivo,T}){
+  const [showSugs,setShowSugs]=useState(false);
+  const [sugs,setSugs]=useState([]);
+  const onChange=v=>{setBusqCiudad(v);if(v.length>1){const f=CIUDADES_FLAT.filter(c=>c.toLowerCase().includes(v.toLowerCase())).slice(0,6);setSugs(f);setShowSugs(true);}else{setSugs([]);setShowSugs(false);}};
+  const si={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
+  return(
+    <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 16px",marginBottom:14,boxShadow:T.cardShadow}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:10,alignItems:"flex-end"}}>
+        <div style={{position:"relative"}}>
+          <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.3}}>🏙️ Ciudad o Estado</label>
+          <input value={busqCiudad} onChange={e=>onChange(e.target.value)} onBlur={()=>setTimeout(()=>setShowSugs(false),150)} placeholder="Ej: Caracas, La Guaira, Zulia..." style={si}/>
+          {showSugs&&sugs.length>0&&(
+            <div style={{position:"absolute",top:"100%",left:0,right:0,background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,zIndex:100,boxShadow:"0 4px 12px rgba(0,0,0,.15)",overflow:"hidden",marginTop:2}}>
+              {sugs.map(c=><div key={c} onMouseDown={()=>{setBusqCiudad(c);setShowSugs(false);}} style={{padding:"8px 12px",cursor:"pointer",fontSize:13,color:T.text,display:"flex",alignItems:"center",gap:6}} onMouseEnter={e=>e.currentTarget.style.background=T.surface2} onMouseLeave={e=>e.currentTarget.style.background="transparent"}><span style={{color:"#CF1A2F"}}>📍</span>{c}</div>)}
+            </div>
+          )}
+        </div>
+        <div>
+          <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.3}}>🔍 Nombre del centro</label>
+          <input value={busqNombre} onChange={e=>setBusqNombre(e.target.value)} placeholder="Ej: Cáritas, Comando..." style={si}/>
+        </div>
+        <button onClick={()=>{setBusqCiudad("");setBusqNombre("");}} style={{background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 14px",cursor:"pointer",fontSize:12,fontWeight:600,whiteSpace:"nowrap"}}>✕ Limpiar</button>
+      </div>
+      <div style={{marginTop:7,fontSize:11,color:T.textMuted}}>
+        <strong style={{color:T.text}}>{filtrados}</strong> de {total} centros
+        {busqCiudad&&<span> · <strong style={{color:"#CF1A2F"}}>{busqCiudad}</strong></span>}
+        {pinActivo&&<span style={{color:"#CF1A2F",marginLeft:8,fontWeight:600}}>· 📍 {pinActivo.nombre}</span>}
+      </div>
+    </div>
+  );
+}
+
+function MapaPrincipal({centros,refugios,pinActivoId,onPinClick,mapaRef,T}){
+  const mapRef=useRef(null);
+  const [userPos,setUserPos]=useState(null);
+  const [cercanos,setCercanos]=useState([]);
+  const [gpsLoad,setGpsLoad]=useState(false);
+  const [gpsErr,setGpsErr]=useState("");
+  const [mapLoaded,setMapLoaded]=useState(false);
+  useEffect(()=>{if(!mapRef.current)return;const o=new MutationObserver(()=>{if(mapRef.current?.querySelector(".leaflet-container")){setMapLoaded(true);o.disconnect();}});o.observe(mapRef.current,{childList:true,subtree:true});return()=>o.disconnect();},[]);
+  const cercanoIds=cercanos.map(c=>c.id);
+  const {flyTo}=useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPinClick);
+  useEffect(()=>{if(mapaRef)mapaRef.current={flyTo};},[flyTo]);
+
+  const usarGPS=()=>{
+    setGpsLoad(true);setGpsErr("");setCercanos([]);
+    if(!navigator.geolocation){setGpsErr("Sin soporte GPS.");setGpsLoad(false);return;}
+    navigator.geolocation.getCurrentPosition(
+      pos=>{const{latitude:la,longitude:lo,accuracy:acc}=pos.coords;setUserPos({lat:la,lng:lo,acc});const ord=centros.filter(c=>c.lat&&c.lng).map(c=>({...c,dist:distKm(la,lo,c.lat,c.lng)})).sort((a,b)=>a.dist-b.dist).slice(0,5);setCercanos(ord);setGpsLoad(false);},
+      ()=>{setGpsErr("No se pudo obtener ubicación.");setGpsLoad(false);},
+      {timeout:12000,enableHighAccuracy:true}
+    );
+  };
+
+  return(
+    <div style={{borderRadius:14,overflow:"hidden",border:`1px solid ${T.border}`,boxShadow:"0 4px 20px rgba(0,0,0,.1)",marginBottom:22}}>
+      <div style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+        <div>
+          <span style={{fontWeight:700,fontSize:14,color:T.text}}>🗺️ Mapa de Centros de Acopio y Refugios</span>
+          <div style={{fontSize:10,color:T.textMuted,marginTop:1}}>
+            <span style={{marginRight:10}}>📦 {centros.length} centros de acopio</span>
+            <span>🏕️ {refugios.length} refugios/albergues</span>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
+          <div style={{display:"flex",gap:8,alignItems:"center",background:T.surface2,borderRadius:8,padding:"5px 10px",border:`1px solid ${T.border}`,fontSize:10,color:T.textMuted,flexWrap:"wrap"}}>
+            {[["🔴","Crítico"],["✅","Verificado"],["🏕️","Refugio"],["⭐","Cercano"]].map(([ic,lb])=>(
+              <span key={lb} style={{display:"flex",alignItems:"center",gap:2}}>{ic} {lb}</span>
+            ))}
+          </div>
+          <button onClick={usarGPS} disabled={gpsLoad} style={{background:userPos?"#0D3D1F":"#CF1A2F",color:userPos?"#4CAF50":"#fff",border:userPos?"1px solid #1A5C2A":"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
+            {gpsLoad?"⏳ Buscando...":userPos?"📡 Actualizar":"📡 Ver centros cercanos a mí"}
+          </button>
+        </div>
+      </div>
+      {gpsErr&&<div style={{background:"#FFEBEE",color:"#C62828",padding:"7px 16px",fontSize:12}}>⚠️ {gpsErr}</div>}
+      <div style={{position:"relative"}}>
+        {!mapLoaded&&<div style={{position:"absolute",inset:0,zIndex:500,background:T.surface2,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}><div style={{width:32,height:32,border:"3px solid",borderColor:`${T.border} ${T.border} ${T.text} ${T.border}`,borderRadius:"50%",animation:"spin .8s linear infinite"}}/><div style={{fontSize:12,color:T.textMuted}}>Cargando mapa...</div><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style></div>}
+        <div ref={mapRef} style={{width:"100%",height:580}}/>
+        {userPos&&<div style={{position:"absolute",top:10,right:10,zIndex:1000,background:"rgba(13,61,31,.92)",color:"#4CAF50",borderRadius:7,padding:"5px 11px",fontSize:11,fontWeight:700}}>📡 Ubicación activa</div>}
+      </div>
+      {cercanos.length>0&&(
+        <div style={{background:T.surface,borderTop:`1px solid ${T.border}`,padding:"12px 16px"}}>
+          <div style={{fontWeight:700,fontSize:13,color:"#4CAF50",marginBottom:10}}>📡 {cercanos.length} centros más cercanos a ti</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(230px,1fr))",gap:8}}>
+            {cercanos.map((c,i)=>{
+              const crit=Object.values(c.necesidades||{}).filter(v=>v==="CRÍTICO").length;
+              const mc=i===0?"#FFD700":i===1?"#C0C0C0":i===2?"#CD7F32":T.border;
+              return(
+                <div key={c.id} onClick={()=>{onPinClick(c);flyTo(c);}} style={{background:c.id===pinActivoId?(T===T_DARK?"#2A0A0F":"#FFF5F5"):T.surface2,border:`1.5px solid ${mc}`,borderRadius:10,padding:"9px 12px",cursor:"pointer",borderLeft:`4px solid ${mc}`,transition:"all .15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                  <div style={{display:"flex",gap:7,alignItems:"center",marginBottom:4}}>
+                    <div style={{width:21,height:21,borderRadius:"50%",background:mc,color:i<3?"#111":"#fff",fontSize:10,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{i+1}</div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontWeight:700,fontSize:12,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.nombre}</div>
+                      <div style={{fontSize:10,color:T.textMuted}}>{c.ciudad}</div>
+                    </div>
+                  </div>
+                  <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
+                    <span style={{fontSize:12,color:"#4285F4",fontWeight:700}}>📍 {c.dist.toFixed(1)} km</span>
+                    {crit>0&&<span style={{fontSize:10,background:"#FEE2E2",color:"#DC2626",padding:"1px 5px",borderRadius:4,fontWeight:700}}>🔴 {crit}</span>}
+                    {c.verificado&&<span style={{fontSize:10,color:"#4CAF50",fontWeight:600}}>✓</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Certificado({centro,onClose}){
+  const [copied,setCopied]=useState(false);
+  const fecha=new Date().toLocaleDateString("es-VE",{day:"2-digit",month:"long",year:"numeric"});
+  const gmaps=centro.lat&&centro.lng?`https://www.google.com/maps?q=${centro.lat},${centro.lng}&z=17`:"#";
+  const copiar=()=>{const t=`🇻🇪 CERTIFICADO CENTRO DE ACOPIO\nID: ${centro.id}\nCentro: ${centro.nombre}\nEstado: ${centro.estado} · Ciudad: ${centro.ciudad}\nDirección: ${centro.direccion||"N/D"}\nCoordinador: ${centro.responsable}\nWhatsApp: +58 ${fmtWA(centro.whatsapp)}\nCoordenadas: ${centro.lat?.toFixed(5)}, ${centro.lng?.toFixed(5)}\nEmitido: ${fecha}\n✅ Sistema Nacional de Acopio Venezuela`;navigator.clipboard.writeText(t).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);});};
+  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={onClose}><div style={{background:"#0D0D1A",border:"1px solid #2D2D44",borderRadius:16,width:"100%",maxWidth:440,overflow:"hidden"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#8B0000,#CF1A2F)",padding:"18px 22px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:26}}>🇻🇪</span><div><div style={{fontSize:10,color:"rgba(255,255,255,.7)",letterSpacing:1}}>SISTEMA NACIONAL DE ACOPIO · 2026</div><div style={{fontWeight:800,fontSize:15,color:"#fff"}}>Certificado de Centro de Acopio</div></div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:6,cursor:"pointer",fontSize:16}}>×</button></div><div style={{padding:"20px 22px"}}><div style={{display:"flex",gap:14,alignItems:"center",marginBottom:18}}><div style={{background:"#fff",padding:10,borderRadius:10,border:"3px solid #CF1A2F",flexShrink:0}}><CertQR value={`ACOPIO-VEN-${centro.id}-${centro.nombre}`} size={110}/></div><div><div style={{fontSize:10,color:"#666",marginBottom:2}}>CÓDIGO DE CERTIFICACIÓN</div><div style={{fontWeight:900,fontSize:26,color:"#CF1A2F",letterSpacing:2}}>{centro.id}</div><div style={{marginTop:6}}>{centro.verificado?<span style={{background:"#0D3D1F",color:"#4CAF50",fontSize:11,padding:"3px 10px",borderRadius:20,fontWeight:700}}>✓ VERIFICADO</span>:<span style={{background:"#2D2D00",color:"#F5C518",fontSize:11,padding:"3px 10px",borderRadius:20,fontWeight:700}}>⏳ PENDIENTE</span>}</div><div style={{fontSize:10,color:"#555",marginTop:5}}>Emitido: {fecha}</div></div></div><div style={{display:"grid",gap:5,marginBottom:14}}>{[["📦 Centro",centro.nombre],["🗺️ Ubicación",`${centro.ciudad}, ${centro.estado}`],["📍 Dirección",centro.direccion||"N/D"],["👤 Coordinador",centro.responsable],["💬 WhatsApp",`+58 ${fmtWA(centro.whatsapp)}`],["📌 Coords",centro.lat?`${centro.lat.toFixed(5)}, ${centro.lng.toFixed(5)}`:"N/D"]].map(([k,v])=><div key={k} style={{display:"flex",gap:8}}><span style={{color:"#666",fontSize:12,width:90,flexShrink:0}}>{k}</span><span style={{color:"#D0D0D0",fontSize:12,fontWeight:600}}>{v}</span></div>)}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}><button onClick={copiar} style={{background:copied?"#0D3D1F":"#1C1C2E",color:copied?"#4CAF50":"#F0F0F0",border:`1px solid ${copied?"#4CAF50":"#2D2D44"}`,borderRadius:8,padding:"9px 6px",cursor:"pointer",fontWeight:700,fontSize:12}}>{copied?"✅ ¡Copiado!":"📋 Copiar"}</button><a href={gmaps} target="_blank" rel="noopener noreferrer" style={{background:"#0D1A3D",color:"#4285F4",border:"1px solid #1A2D5C",borderRadius:8,padding:"9px 6px",fontWeight:700,fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>🗺️ Maps</a></div></div></div></div>);
+}
+
+function Detalle({centro,onClose,onCert,T}){
+  const [tab,setTab]=useState("necesidades");if(!centro)return null;
+  const pct=Math.round((centro.recibido/centro.capacidad)*100);
+  const embed=centro.lat&&centro.lng?`https://maps.google.com/maps?q=${centro.lat},${centro.lng}&z=16&output=embed`:null;
+  const gmaps=centro.lat&&centro.lng?`https://www.google.com/maps?q=${centro.lat},${centro.lng}&z=17`:"#";
+  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:660,maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#CF1A2F,#8B0000)",padding:"18px 22px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between"}}><div><div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginBottom:3}}>{centro.tipo} · {centro.estado}</div><div style={{fontWeight:800,fontSize:17,color:"#fff"}}>{centro.nombre}</div><div style={{fontSize:12,color:"rgba(255,255,255,.8)",marginTop:3}}>📍 {centro.ciudad} · {centro.direccion||""}</div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:30,height:30,borderRadius:7,cursor:"pointer",fontSize:17,flexShrink:0}}>×</button></div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:T.border}}>{[["Capacidad",centro.capacidad+" unid."],["Donaciones",`${centro.recibido} (${pct}%)`],["Coordinador",centro.responsable]].map(([k,v])=><div key={k} style={{background:T.surface2,padding:"9px 12px",textAlign:"center"}}><div style={{fontSize:10,color:T.textMuted,marginBottom:2}}>{k}</div><div style={{fontSize:12,fontWeight:700,color:T.text}}>{v}</div></div>)}</div><div style={{display:"flex",borderBottom:`1px solid ${T.border}`}}>{[["necesidades","📋 Insumos"],["ubicacion","📍 Ubicación"],["contacto","💬 Contacto"],["qr","📲 QR"]].map(([t,lbl])=><button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"9px 4px",background:"none",border:"none",color:tab===t?"#CF1A2F":T.textMuted,fontWeight:tab===t?700:400,fontSize:12,borderBottom:tab===t?"2px solid #CF1A2F":"2px solid transparent",cursor:"pointer"}}>{lbl}</button>)}</div><div style={{padding:16}}>{tab==="necesidades"&&<div style={{display:"grid",gap:6}}>{Object.entries(centro.necesidades).sort((a,b)=>{"CRÍTICO ALTO MEDIO BAJO".indexOf(a[1])-"CRÍTICO ALTO MEDIO BAJO".indexOf(b[1])}).map(([ins,nv])=>{const{bg,text,label}=NIVEL[nv]||{};return(<div key={ins} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:T.surface2,borderRadius:8,padding:"9px 12px",borderLeft:`3px solid ${bg}`}}><span style={{color:T.text,fontSize:13}}>{ins}</span><span style={{background:bg,color:text,padding:"2px 9px",borderRadius:20,fontSize:11,fontWeight:700}}>{label}</span></div>);})}</div>}{tab==="ubicacion"&&<div>{embed?(<><div style={{borderRadius:10,overflow:"hidden",border:`1px solid ${T.border}`,marginBottom:10}}><iframe title="mapa" src={embed} width="100%" height="220" style={{border:"none",display:"block"}} loading="lazy" allowFullScreen/></div><a href={gmaps} target="_blank" rel="noopener noreferrer" style={{display:"block",textAlign:"center",background:"#1A73E8",color:"#fff",borderRadius:8,padding:"9px",fontWeight:700,fontSize:13,textDecoration:"none"}}>🗺️ Cómo llegar en Google Maps</a></>):(<div style={{textAlign:"center",padding:"24px",color:T.textFaint}}><div style={{fontSize:28,marginBottom:6}}>📍</div><div>Ubicación GPS no disponible.</div></div>)}</div>}{tab==="contacto"&&<div style={{textAlign:"center",padding:"8px 0"}}><div style={{fontSize:32,marginBottom:4}}>💬</div><div style={{fontWeight:700,color:T.text,fontSize:16,marginBottom:2}}>{centro.responsable}</div><div style={{color:T.textMuted,fontSize:12,marginBottom:16}}>Coordinador del Centro de Acopio</div><a href={`https://wa.me/${fmtWA(centro.whatsapp)}`} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:8,background:"#075E54",color:"#fff",borderRadius:10,padding:"11px 24px",fontWeight:700,fontSize:14,textDecoration:"none"}}><span style={{fontSize:20}}>📱</span>Contactar por WhatsApp</a><div style={{marginTop:8,fontSize:12,color:T.textMuted}}>+58 {fmtWA(centro.whatsapp)}</div></div>}{tab==="qr"&&<div style={{textAlign:"center"}}><div style={{background:"#fff",padding:12,borderRadius:12,display:"inline-block",boxShadow:"0 0 0 4px #CF1A2F",marginBottom:10}}><CertQR value={`ACOPIO-VEN-${centro.id}-${centro.nombre}`} size={150}/></div><div style={{background:T.surface2,borderRadius:8,padding:"7px 18px",display:"inline-block",marginBottom:12}}><div style={{fontSize:10,color:T.textMuted}}>Código</div><div style={{fontWeight:900,color:"#CF1A2F",fontSize:22,letterSpacing:3}}>{centro.id}</div></div><div><button onClick={()=>onCert(centro)} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"9px 20px",cursor:"pointer",fontWeight:700,fontSize:13}}>📋 Ver y Copiar Certificado</button></div></div>}</div></div></div>);
+}
+
+function Registro({centros,onClose,onGuardar,T}){
+  const [step,setStep]=useState(1);const [form,setForm]=useState({nombre:"",estado:"",ciudad:"",tipo:"",responsable:"",whatsapp:"",capacidad:"",direccion:""});const [lat,setLat]=useState(null);const [lng,setLng]=useState(null);const [niveles,setNiveles]=useState({});const [idGen,setIdGen]=useState(null);const [nuevoC,setNuevoC]=useState(null);const [copied,setCopied]=useState(false);
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));const ciudades=CIUDADES[form.estado]||[];const ok1=form.nombre&&form.estado&&form.tipo&&form.responsable&&form.whatsapp;
+  const toggle=(ins,nv)=>setNiveles(n=>{const x={...n};x[ins]===nv?delete x[ins]:(x[ins]=nv);return x;});
+  const registrar=()=>{const id=genId(centros||[]);const c={...form,id,capacidad:parseInt(form.capacidad)||200,recibido:0,verificado:false,necesidades:niveles,lat:lat,lng:lng,fecha:new Date().toISOString().slice(0,10)};onGuardar(c);setIdGen(id);setNuevoC(c);setStep(3);};
+  const copiarCert=()=>{if(!nuevoC)return;const t=`🇻🇪 CERTIFICADO CENTRO DE ACOPIO\nID: ${idGen}\nCentro: ${nuevoC.nombre}\nCoordinador: ${nuevoC.responsable}\nWhatsApp: +58 ${fmtWA(nuevoC.whatsapp)}\nEstado: ${nuevoC.estado} · Ciudad: ${nuevoC.ciudad}`;navigator.clipboard.writeText(t).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);});};
+  const si={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
+  const ss={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none"};
+  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:560,maxHeight:"92vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#CF1A2F,#8B0000)",padding:"15px 20px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:11,color:"rgba(255,255,255,.7)"}}>Paso {step} de 3</div><div style={{fontWeight:800,fontSize:15,color:"#fff"}}>{step===1?"📦 Datos del Centro":step===2?"📋 Insumos Necesarios":"✅ Registro Exitoso"}</div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:7,cursor:"pointer",fontSize:16}}>×</button></div><div style={{padding:16}}><div style={{height:4,background:T.border,borderRadius:4,marginBottom:16}}><div style={{height:4,width:`${(step/3)*100}%`,background:"#CF1A2F",borderRadius:4,transition:"width .4s"}}/></div>{step===1&&<div style={{display:"grid",gap:10}}>{[["Nombre del Centro","nombre","text","Ej: Acopio Iglesia San Pedro"],["Coordinador Responsable","responsable","text","Nombre completo"],["Número de WhatsApp","whatsapp","tel","Ej: 04121234567"],["Capacidad (kg/unidades)","capacidad","number","Ej: 500"]].map(([lbl,key,type,ph])=><div key={key}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>{lbl}</label><input value={form[key]} onChange={e=>set(key,e.target.value)} type={type} placeholder={ph} style={si}/></div>)}<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Estado</label><select value={form.estado} onChange={e=>{set("estado",e.target.value);set("ciudad","");}} style={ss}><option value="">Seleccionar...</option>{ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}</select></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Ciudad</label><select value={form.ciudad} onChange={e=>set("ciudad",e.target.value)} style={ss}><option value="">Seleccionar...</option>{ciudades.map(c=><option key={c} value={c}>{c}</option>)}</select></div></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>Tipo de Centro</label><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{TIPOS.map(t=><button key={t} onClick={()=>set("tipo",t)} style={{padding:"4px 10px",borderRadius:20,fontSize:11,cursor:"pointer",background:form.tipo===t?"#CF1A2F":T.surface2,color:form.tipo===t?"#fff":T.textMuted,border:form.tipo===t?"1px solid #CF1A2F":`1px solid ${T.border}`}}>{t}</button>)}</div></div><div style={{borderTop:`1px solid ${T.border}`,paddingTop:10}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>📍 Dirección</label><input value={form.direccion} onChange={e=>set("direccion",e.target.value)} placeholder="Ej: Av. Principal, frente a..." style={si}/></div><button onClick={()=>setStep(2)} disabled={!ok1} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:ok1?"pointer":"not-allowed",fontWeight:700,fontSize:14,opacity:ok1?1:0.4,marginTop:4}}>Continuar → Insumos</button></div>}{step===2&&<div><p style={{color:T.textMuted,fontSize:12,marginBottom:12}}>Selecciona los insumos y el nivel de urgencia:</p><div style={{display:"grid",gap:12,maxHeight:360,overflow:"auto",paddingRight:4}}>{Object.entries(INSUMOS).map(([cat,items])=><div key={cat}><div style={{color:T.textMuted,fontSize:11,fontWeight:700,marginBottom:5,paddingBottom:3,borderBottom:`1px solid ${T.border}`}}>{cat}</div><div style={{display:"grid",gap:3}}>{items.map(ins=><div key={ins} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.surface2,borderRadius:6,padding:"6px 9px"}}><span style={{color:T.text,fontSize:12}}>{ins}</span><div style={{display:"flex",gap:2}}>{["CRÍTICO","ALTO","MEDIO","BAJO"].map(nv=><button key={nv} onClick={()=>toggle(ins,nv)} style={{padding:"2px 5px",borderRadius:4,fontSize:10,cursor:"pointer",fontWeight:600,background:niveles[ins]===nv?NIVEL[nv].bg:T.border,color:niveles[ins]===nv?NIVEL[nv].text:T.textMuted,border:"none"}}>{nv.slice(0,3)}</button>)}</div></div>)}</div></div>)}</div><div style={{display:"flex",gap:7,marginTop:12}}><button onClick={()=>setStep(1)} style={{flex:1,background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>← Atrás</button><button onClick={registrar} style={{flex:2,background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>✓ Registrar Centro</button></div></div>}{step===3&&nuevoC&&<div style={{textAlign:"center",padding:"6px 0"}}><div style={{fontSize:40,marginBottom:5}}>✅</div><div style={{fontWeight:800,fontSize:17,color:T.text,marginBottom:3}}>¡Centro Registrado!</div><div style={{color:T.textMuted,fontSize:12,marginBottom:16}}>{form.nombre} — pendiente de verificación.</div><div style={{background:"#fff",padding:12,borderRadius:12,display:"inline-block",boxShadow:"0 0 0 4px #CF1A2F",marginBottom:10}}><CertQR value={`ACOPIO-VEN-${idGen}-${form.nombre}`} size={140}/></div><div style={{background:T.surface2,borderRadius:8,padding:"7px 18px",display:"inline-block",marginBottom:3}}><div style={{fontSize:10,color:T.textMuted}}>Código</div><div style={{fontWeight:900,color:"#CF1A2F",fontSize:24,letterSpacing:3}}>{idGen}</div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:10,marginTop:10}}><button onClick={copiarCert} style={{background:copied?"#0D3D1F":"#1C1C2E",color:copied?"#4CAF50":"#F0F0F0",border:`1px solid ${copied?"#4CAF50":"#2D2D44"}`,borderRadius:8,padding:"9px 6px",cursor:"pointer",fontWeight:700,fontSize:12}}>{copied?"✅ ¡Copiado!":"📋 Copiar Certificado"}</button><a href={`https://wa.me/${fmtWA(form.whatsapp)}?text=${encodeURIComponent("✅ Centro registrado: "+form.nombre+" · Código: "+idGen)}`} target="_blank" rel="noopener noreferrer" style={{background:"#075E54",color:"#fff",borderRadius:8,padding:"9px 6px",fontWeight:700,fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>💬 Enviar por WA</a></div><button onClick={onClose} style={{width:"100%",background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px",cursor:"pointer",fontWeight:700,fontSize:13}}>Ver Panel</button></div>}</div></div></div>);
+}
+
+function Tarjeta({centro,activo,onSeleccionar,onVerDetalle,onCert,T}){
+  const criticos=Object.entries(centro.necesidades||{}).filter(([,v])=>v==="CRÍTICO");
+  const pct=Math.round((centro.recibido/centro.capacidad)*100);
+  const barColor=pct>90?"#FF3B3B":pct>70?"#FF8C00":"#4CAF50";
+  return(<div onClick={()=>onSeleccionar(centro)} style={{background:activo?(T===T_DARK?"#2A0A0F":"#FFF5F5"):T.surface,border:`1.5px solid ${activo?"#CF1A2F":criticos.length>0?"rgba(255,59,59,.4)":T.border}`,borderRadius:12,padding:"11px 14px",cursor:"pointer",borderLeft:`4px solid ${activo?"#CF1A2F":criticos.length>0?"#FF3B3B":"#4CAF50"}`,boxShadow:activo?"0 0 0 2px rgba(207,26,47,.15)":T.cardShadow,transition:"all .15s"}}
+    onMouseEnter={e=>{if(!activo)e.currentTarget.style.borderColor="#CF1A2F";}}
+    onMouseLeave={e=>{if(!activo)e.currentTarget.style.borderColor=criticos.length>0?"rgba(255,59,59,.4)":T.border;}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,marginBottom:4}}>
+      <div style={{flex:1}}>
+        <div style={{display:"flex",gap:4,marginBottom:3,flexWrap:"wrap"}}>
+          <span style={{fontSize:10,background:T.tagBg,color:T.tagText,padding:"1px 6px",borderRadius:20}}>{centro.tipo}</span>
+          {centro.verificado&&<span style={{fontSize:10,background:"#E8F5E9",color:"#2E7D32",padding:"1px 6px",borderRadius:20}}>✓ Verificado</span>}
+          {activo&&<span style={{fontSize:10,background:"#CF1A2F",color:"#fff",padding:"1px 6px",borderRadius:20}}>📍 En mapa</span>}
+        </div>
+        <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1,lineHeight:1.3}}>{centro.nombre}</div>
+        <div style={{color:T.textMuted,fontSize:11}}>📍 {centro.ciudad}, {centro.estado}</div>
+      </div>
+      <div style={{textAlign:"right",flexShrink:0}}>
+        <div style={{fontSize:9,color:T.textMuted}}>Capac.</div>
+        <div style={{fontWeight:800,fontSize:15,color:pct>90?"#FF3B3B":pct>70?"#FF8C00":T.text}}>{pct}%</div>
+      </div>
+    </div>
+    <div style={{height:3,background:T.border,borderRadius:4,margin:"5px 0"}}><div style={{height:3,width:`${Math.min(pct,100)}%`,background:barColor,borderRadius:4}}/></div>
+    {criticos.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:5}}>{criticos.slice(0,3).map(([k])=><span key={k} style={{fontSize:9,background:T.critBg,color:T.critText,padding:"1px 5px",borderRadius:4,fontWeight:600}}>🔴 {k}</span>)}{criticos.length>3&&<span style={{fontSize:9,color:T.textMuted}}>+{criticos.length-3}</span>}</div>}
+    <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+      <a href={`https://wa.me/${fmtWA(centro.whatsapp)}`} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:3,background:"#E8F5E9",color:"#1B5E20",border:"1px solid #A5D6A7",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>💬 WA</a>
+      <a href={centro.lat&&centro.lng?`https://www.google.com/maps?q=${centro.lat},${centro.lng}&z=17`:`https://www.google.com/maps/search/${encodeURIComponent(centro.nombre+", Venezuela")}`} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:3,background:"#E3F2FD",color:"#0D47A1",border:"1px solid #90CAF9",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>🗺️ Maps</a>
+      <button onClick={e=>{e.stopPropagation();onCert(centro);}} style={{display:"flex",alignItems:"center",gap:3,background:"#FFF8E1",color:"#E65100",border:"1px solid #FFCC02",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,cursor:"pointer"}}>📲 QR</button>
+      <button onClick={e=>{e.stopPropagation();onVerDetalle(centro);}} style={{marginLeft:"auto",background:"none",color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:5,padding:"3px 7px",fontSize:10,cursor:"pointer"}}>Ver →</button>
+    </div>
+  </div>);
+}
+
+function Dashboard({centros,refugios,onClose,T}){
+  const totalCrit=centros.reduce((a,c)=>a+Object.values(c.necesidades||{}).filter(v=>v==="CRÍTICO").length,0);
+  const totalRecibido=centros.reduce((a,c)=>a+c.recibido,0);
+  const totalCapacidad=centros.reduce((a,c)=>a+c.capacidad,0);
+  const verificados=centros.filter(c=>c.verificado).length;
+  const porEstado={};centros.forEach(c=>{if(!porEstado[c.estado])porEstado[c.estado]=0;porEstado[c.estado]++;});
+  const topEstados=Object.entries(porEstado).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const insumosCrit={};centros.forEach(c=>Object.entries(c.necesidades||{}).forEach(([k,v])=>{if(v==="CRÍTICO"){if(!insumosCrit[k])insumosCrit[k]=0;insumosCrit[k]++;}}));
+  const topInsumos=Object.entries(insumosCrit).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const pctGeneral=totalCapacidad>0?Math.round((totalRecibido/totalCapacidad)*100):0;
+
+  const imprimirPDF=()=>{
+    const fecha=new Date().toLocaleDateString("es-VE",{day:"2-digit",month:"long",year:"numeric"});
+    const filas=centros.map(c=>{const crit=Object.entries(c.necesidades||{}).filter(([,v])=>v==="CRÍTICO").map(([k])=>k).join(", ")||"—";return`<tr><td>${c.id}</td><td>${c.nombre}</td><td>${c.estado}</td><td>${c.ciudad}</td><td>${c.tipo}</td><td>${c.recibido}/${c.capacidad}</td><td style="color:${crit!=="—"?"#C62828":"#2E7D32"}">${crit}</td><td>${c.verificado?"✓ Sí":"⏳ No"}</td></tr>`;}).join("");
+    const filasRefugios=refugios.map(r=>`<tr><td>${r.id}</td><td>${r.nombre}</td><td>${r.estado}</td><td>${r.ciudad}</td><td>${r.tipo}</td><td>${r.recibido}/${r.capacidad} pers.</td><td>${r.tel||"N/D"}</td><td>${r.verificado?"✓ Sí":"⏳ No"}</td></tr>`).join("");
+    const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Red de Acopio Venezuela</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:30px;color:#1a1a1a}h1{color:#8B0000;font-size:22px;margin-bottom:4px}h2{color:#CF1A2F;font-size:15px;margin:20px 0 8px}p{color:#666;font-size:12px;margin-bottom:16px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.stat{background:#F4F6FB;border:1px solid #DDE3EE;border-radius:8px;padding:12px;text-align:center}.stat-val{font-size:22px;font-weight:800;color:#8B0000}.stat-lbl{font-size:10px;color:#6B7280;margin-top:2px}table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px}th{background:#8B0000;color:#fff;padding:6px 8px;text-align:left}td{padding:5px 8px;border-bottom:1px solid #eee}.crit{margin:12px 0}.crit-item{display:inline-block;background:#FEE2E2;color:#C62828;padding:3px 8px;border-radius:4px;font-size:11px;margin:2px;font-weight:600}footer{margin-top:30px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#aaa;text-align:center}@media print{body{padding:20px}}</style></head><body><h1>🇻🇪 Red Nacional de Centros de Acopio</h1><p>Emergencia Sísmica Venezuela · 24 de junio de 2026 · Reporte generado: ${fecha}</p><div class="stats"><div class="stat"><div class="stat-val">${centros.length}</div><div class="stat-lbl">Centros de Acopio</div></div><div class="stat"><div class="stat-val">${refugios.length}</div><div class="stat-lbl">Refugios/Albergues</div></div><div class="stat"><div class="stat-val">${totalCrit}</div><div class="stat-lbl">Alertas Críticas</div></div><div class="stat"><div class="stat-val">${verificados}/${centros.length}</div><div class="stat-lbl">Verificados</div></div></div><h2>📊 Insumos con Demanda Crítica</h2><div class="crit">${topInsumos.map(([ins,n])=>`<span class="crit-item">🔴 ${ins} (${n} centros)</span>`).join("")}</div><h2>📦 Centros de Acopio</h2><table><thead><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Ciudad</th><th>Tipo</th><th>Donac./Cap.</th><th>Insumos Críticos</th><th>Verificado</th></tr></thead><tbody>${filas}</tbody></table><h2>🏕️ Refugios y Albergues</h2><table><thead><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Ciudad</th><th>Tipo</th><th>Ocup./Cap.</th><th>Teléfono</th><th>Verificado</th></tr></thead><tbody>${filasRefugios}</tbody></table><footer>Sistema Nacional de Acopio · Emergencia Sísmica Venezuela 2026 · Datos sujetos a actualización constante</footer></body></html>`;
+    const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;top:0;left:0;width:0;height:0;border:none;";document.body.appendChild(iframe);
+    const w=iframe.contentWindow;w.document.write(html);w.document.close();
+    setTimeout(()=>{w.print();setTimeout(()=>document.body.removeChild(iframe),500);},500);
+  };
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={onClose}>
+      <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:900,maxHeight:"92vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+        <div style={{background:"linear-gradient(135deg,#0D1A3D,#1A73E8)",padding:"18px 22px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div><div style={{fontSize:11,color:"rgba(255,255,255,.7)"}}>Panel de Administración</div><div style={{fontWeight:800,fontSize:18,color:"#fff"}}>📊 Dashboard — Sistema de Acopio</div></div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={imprimirPDF} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:12}}>🖨️ Imprimir Reporte PDF</button>
+            <button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:32,height:32,borderRadius:8,cursor:"pointer",fontSize:18}}>×</button>
+          </div>
+        </div>
+        <div style={{padding:20}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
+            {[["📦",centros.length,"Centros de Acopio","#CF1A2F"],["🏕️",refugios.length,"Refugios","#1A73E8"],["🔴",totalCrit,"Alertas Críticas","#FF3B3B"],["✅",`${verificados}/${centros.length}`,"Verificados","#4CAF50"],].map(([ic,v,lbl,color])=>(
+              <div key={lbl} style={{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,padding:"14px",textAlign:"center",borderBottom:`3px solid ${color}`}}>
+                <div style={{fontSize:24,marginBottom:2}}>{ic}</div>
+                <div style={{fontWeight:900,fontSize:24,color:color}}>{v}</div>
+                <div style={{fontSize:11,color:T.textMuted,marginTop:2}}>{lbl}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
+            <div style={{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,padding:14}}>
+              <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:10}}>📈 Uso de capacidad general</div>
+              <div style={{height:8,background:T.border,borderRadius:4,marginBottom:8}}>
+                <div style={{height:8,width:`${pctGeneral}%`,background:pctGeneral>85?"#FF3B3B":pctGeneral>60?"#FF8C00":"#4CAF50",borderRadius:4}}/>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:T.textMuted}}>
+                <span>Donaciones: <strong style={{color:T.text}}>{totalRecibido.toLocaleString()}</strong></span>
+                <span>Capacidad: <strong style={{color:T.text}}>{totalCapacidad.toLocaleString()}</strong></span>
+                <span style={{fontWeight:700,color:pctGeneral>85?"#FF3B3B":"#4CAF50"}}>{pctGeneral}%</span>
+              </div>
+            </div>
+            <div style={{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,padding:14}}>
+              <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:10}}>🗺️ Centros por Estado (top 6)</div>
+              {topEstados.map(([est,n])=>(
+                <div key={est} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+                  <span style={{fontSize:11,color:T.textMuted,width:130,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{est}</span>
+                  <div style={{flex:1,height:5,background:T.border,borderRadius:4}}>
+                    <div style={{height:5,width:`${(n/centros.length)*100}%`,background:"#CF1A2F",borderRadius:4}}/>
+                  </div>
+                  <span style={{fontSize:11,fontWeight:700,color:T.text,width:16,textAlign:"right"}}>{n}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,padding:14,marginBottom:16}}>
+            <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:10}}>🚨 Insumos con Mayor Demanda Crítica</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:6}}>
+              {topInsumos.map(([ins,n])=>(
+                <div key={ins} style={{background:T.surface,border:"1px solid rgba(255,59,59,.3)",borderRadius:8,padding:"8px 10px",borderLeft:"3px solid #FF3B3B"}}>
+                  <div style={{fontWeight:700,fontSize:12,color:T.text,marginBottom:2}}>{ins}</div>
+                  <div style={{fontSize:11,color:"#FF3B3B",fontWeight:700}}>🔴 {n} centro{n>1?"s":""} lo necesitan</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,overflow:"hidden"}}>
+            <div style={{padding:"12px 16px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontWeight:700,fontSize:13,color:T.text}}>📋 Listado de Centros de Acopio ({centros.length})</div>
+              <button onClick={imprimirPDF} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:6,padding:"5px 12px",cursor:"pointer",fontWeight:700,fontSize:11}}>🖨️ Imprimir</button>
+            </div>
+            <div style={{overflow:"auto",maxHeight:280}}>
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
+                <thead><tr style={{background:T.surface,position:"sticky",top:0}}>
+                  {["ID","Centro","Estado","Ciudad","Tipo","Donac./Cap.","Críticos","Verif."].map(h=><th key={h} style={{padding:"8px 10px",textAlign:"left",fontWeight:700,color:T.textMuted,borderBottom:`1px solid ${T.border}`}}>{h}</th>)}
+                </tr></thead>
+                <tbody>{centros.map((c,i)=>{
+                  const crit=Object.entries(c.necesidades||{}).filter(([,v])=>v==="CRÍTICO").length;
+                  return(<tr key={c.id} style={{background:i%2===0?T.surface2:T.surface}}>
+                    <td style={{padding:"7px 10px",color:T.textMuted,fontFamily:"monospace"}}>{c.id}</td>
+                    <td style={{padding:"7px 10px",color:T.text,fontWeight:600,maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.nombre}</td>
+                    <td style={{padding:"7px 10px",color:T.textMuted}}>{c.estado}</td>
+                    <td style={{padding:"7px 10px",color:T.textMuted}}>{c.ciudad}</td>
+                    <td style={{padding:"7px 10px",color:T.textMuted}}>{c.tipo}</td>
+                    <td style={{padding:"7px 10px",color:T.text}}>{c.recibido}/{c.capacidad}</td>
+                    <td style={{padding:"7px 10px"}}>{crit>0?<span style={{color:"#DC2626",fontWeight:700}}>🔴 {crit}</span>:<span style={{color:"#4CAF50"}}>✓ OK</span>}</td>
+                    <td style={{padding:"7px 10px"}}>{c.verificado?<span style={{color:"#4CAF50",fontWeight:700}}>✓</span>:<span style={{color:"#F59E0B"}}>⏳</span>}</td>
+                  </tr>);
+                })}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoginAdmin({onLogin,onClose,T}){
+  const [pass,setPass]=useState("");const [err,setErr]=useState("");const [loading,setLoading]=useState(false);
+  const intentar=async()=>{setLoading(true);setErr("");try{const h=await hashPass(pass);if(h===HASHED_ADMIN_PASS){onLogin();}else{setErr("Contraseña incorrecta.");setPass("");}}catch{setErr("Error de verificación.");}setLoading(false);};
+  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,width:"100%",maxWidth:360,padding:0,overflow:"hidden"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#0D1A3D,#1A73E8)",padding:"18px 22px",textAlign:"center"}}><div style={{fontSize:32,marginBottom:4}}>🔐</div><div style={{fontWeight:800,fontSize:16,color:"#fff"}}>Acceso Administrador</div><div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:2}}>Sistema Nacional de Acopio Venezuela</div></div><div style={{padding:"20px 22px"}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:6,fontWeight:600}}>Contraseña de acceso</label><input type="password" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&intentar()} placeholder="Ingresa la contraseña..." autoFocus style={{width:"100%",background:T.inputBg,border:`1px solid ${err?"#FF3B3B":T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:6}}/>{err&&<div style={{color:"#DC2626",fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={intentar} disabled={loading} style={{width:"100%",background:loading?"#666":"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:loading?"wait":"pointer",fontWeight:700,fontSize:14,marginBottom:8}}>{loading?"⏳ Verificando...":"Entrar al Dashboard"}</button><button onClick={onClose} style={{width:"100%",background:"none",color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px",cursor:"pointer",fontSize:13}}>Cancelar</button><div style={{marginTop:10,fontSize:10,color:T.textFaint,textAlign:"center"}}>💡 Contacta al administrador para obtener acceso</div></div></div></div>);
+}
+
+function App(){
+  const [darkMode,setDarkMode]=useState(true);
+  const T=darkMode?T_DARK:T_LIGHT;
+  const [centros,setCentros]=useState(CENTROS_INIT);
+  const [refugios]=useState(REFUGIOS);
+  const [pinActivo,setPinActivo]=useState(null);
+  const [busqCiudad,setBusqCiudad]=useState("");
+  const [busqNombre,setBusqNombre]=useState("");
+  const [detalle,setDetalle]=useState(null);
+  const [registro,setRegistro]=useState(false);
+  const [cert,setCert]=useState(null);
+  const [showLogin,setShowLogin]=useState(false);
+  const [showDash,setShowDash]=useState(false);
+  const [adminOk,setAdminOk]=useState(false);
+  const mapaRef=useRef({flyTo:null});
+
+  const filtrados=centros.filter(c=>{
+    if(busqCiudad&&!c.ciudad.toLowerCase().includes(busqCiudad.toLowerCase())&&!c.estado.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
+    if(busqNombre&&!c.nombre.toLowerCase().includes(busqNombre.toLowerCase()))return false;
+    return true;
+  });
+
+  const seleccionarCentro=(c)=>{setPinActivo(c);if(mapaRef.current?.flyTo)mapaRef.current.flyTo(c);document.getElementById("mapa-id")?.scrollIntoView({behavior:"smooth",block:"start"});};
+  const totalCrit=centros.reduce((a,c)=>a+Object.values(c.necesidades||{}).filter(v=>v==="CRÍTICO").length,0);
+  const totalRecibido=centros.reduce((a,c)=>a+c.recibido,0);
+  const verificados=centros.filter(c=>c.verificado).length;
+  const contador={};centros.forEach(c=>Object.entries(c.necesidades||{}).forEach(([k,v])=>{if(!contador[k])contador[k]={CRÍTICO:0};if(v==="CRÍTICO")contador[k].CRÍTICO++;}));
+  const topCrit=Object.entries(contador).filter(([,v])=>v.CRÍTICO>0).sort((a,b)=>b[1].CRÍTICO-a[1].CRÍTICO).slice(0,5);
+
+  return(
+    <div style={{fontFamily:"'Inter',system-ui,sans-serif",background:T.bg,minHeight:"100vh",color:T.text,fontSize:14,transition:"background .3s,color .3s"}}>
+      <div style={{position:"relative",overflow:"hidden",minHeight:110}}>
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
+          <div style={{flex:1,background:"#CF1A2F"}}/>
+          <div style={{flex:1,background:"#FFD100"}}/>
+          <div style={{flex:1,background:"#003DA5"}}/>
+        </div>
+        <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.52)"}}/>
+        <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",opacity:.13,pointerEvents:"none",fontSize:140,lineHeight:1}}>🇻🇪</div>
+        <div style={{position:"relative",zIndex:2,maxWidth:1280,margin:"0 auto",padding:"14px 20px"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:14}}>
+              <span style={{fontSize:44,filter:"drop-shadow(0 2px 4px rgba(0,0,0,.4))"}}>🇻🇪</span>
+              <div>
+                <div style={{fontWeight:900,fontSize:20,color:"#fff",lineHeight:1.1,textShadow:"0 2px 8px rgba(0,0,0,.5)"}}>Red Nacional de Centros de Acopio</div>
+                <div style={{fontSize:12,color:"rgba(255,255,255,.85)",marginTop:3,textShadow:"0 1px 4px rgba(0,0,0,.5)"}}>Emergencia Sísmica Venezuela · Terremotos 7.2 y 7.5 · 24 de junio de 2026</div>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
+              <div style={{fontSize:12,background:"rgba(255,60,60,.35)",border:"1px solid rgba(255,100,100,.5)",color:"#FFB0B0",padding:"4px 12px",borderRadius:20,backdropFilter:"blur(4px)"}}>🔴 EMERGENCIA ACTIVA · {new Date().toLocaleDateString("es-VE")}</div>
+              <button onClick={()=>setDarkMode(d=>!d)} style={{background:"rgba(255,255,255,.18)",color:"#fff",border:"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 13px",cursor:"pointer",fontWeight:600,fontSize:12,backdropFilter:"blur(4px)"}}>{darkMode?"☀️ Claro":"🌙 Oscuro"}</button>
+              <button onClick={()=>{if(adminOk){setShowDash(true);}else{setShowLogin(true);}}} style={{background:"rgba(26,115,232,.85)",color:"#fff",border:"1px solid rgba(255,255,255,.3)",borderRadius:8,padding:"6px 13px",cursor:"pointer",fontWeight:700,fontSize:12,backdropFilter:"blur(4px)"}}>📊 {adminOk?"Dashboard":"Admin"}</button>
+              <button onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:12}}>
+            {[["📦",centros.length,"Centros de Acopio","#FFD100"],["🏕️",refugios.length,"Refugios activos","#4FC3F7"],["🔴",totalCrit,"Alertas críticas","#FF8080"],["✅",`${verificados}/${centros.length}`,"Verificados","#81C784"]].map(([ic,v,lbl,color])=>(
+              <div key={lbl} style={{background:"rgba(0,0,0,.35)",backdropFilter:"blur(4px)",borderRadius:10,padding:"9px 12px",borderBottom:`2px solid ${color}`}}>
+                <div style={{fontSize:11,color:"rgba(255,255,255,.65)",marginBottom:1}}>{ic} {lbl}</div>
+                <div style={{fontWeight:800,fontSize:20,color:"#fff",textShadow:"0 1px 4px rgba(0,0,0,.5)"}}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div style={{maxWidth:1280,margin:"0 auto",padding:"18px 20px"}}>
+        {topCrit.length>0&&(
+          <div style={{background:T.alertBg,border:`1px solid ${T.alertBorder}`,borderRadius:12,padding:"10px 16px",marginBottom:14}}>
+            <div style={{fontWeight:700,color:T.alertText,fontSize:13,marginBottom:6}}>🚨 Insumos más urgentes en toda la red:</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>{topCrit.map(([ins,c])=><span key={ins} style={{background:T.critBg,color:T.critText,padding:"2px 9px",borderRadius:6,fontSize:12,fontWeight:600}}>{ins} <span style={{opacity:.75}}>({c.CRÍTICO} centros)</span></span>)}</div>
+          </div>
+        )}
+        <PanelEmergencias T={T}/>
+        <BarraBusqueda busqCiudad={busqCiudad} setBusqCiudad={setBusqCiudad} busqNombre={busqNombre} setBusqNombre={setBusqNombre} filtrados={filtrados.length} total={centros.length} pinActivo={pinActivo} T={T}/>
+        <div id="mapa-id">
+          <MapaPrincipal centros={filtrados.length>0?filtrados:centros} refugios={refugios} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} T={T}/>
+        </div>
+        <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <span>📋 Centros de Acopio Registrados</span>
+          <span style={{fontSize:11,color:T.textMuted,fontWeight:400}}>Toca una tarjeta para verlo en el mapa 👆</span>
+        </div>
+        {filtrados.length===0
+          ?<div style={{textAlign:"center",padding:"28px",color:T.textFaint,background:T.surface,borderRadius:12,marginBottom:14}}><div style={{fontSize:28,marginBottom:6}}>🔍</div><div>No se encontraron centros con esos criterios.</div></div>
+          :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:18}}>{filtrados.map(c=><Tarjeta key={c.id} centro={c} activo={pinActivo?.id===c.id} T={T} onSeleccionar={seleccionarCentro} onVerDetalle={setDetalle} onCert={setCert}/>)}</div>
+        }
+        <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏕️ Refugios y Albergues Verificados</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
+          {refugios.map(r=>(
+            <div key={r.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #1A73E8"}}>
+              <div style={{display:"flex",gap:4,marginBottom:3}}><span style={{fontSize:10,background:"#E3F2FD",color:"#0D47A1",padding:"1px 6px",borderRadius:20}}>🏕️ Refugio</span>{r.verificado&&<span style={{fontSize:10,background:"#E8F5E9",color:"#2E7D32",padding:"1px 6px",borderRadius:20}}>✓ Verificado</span>}</div>
+              <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1}}>{r.nombre}</div>
+              <div style={{color:T.textMuted,fontSize:11,marginBottom:5}}>📍 {r.ciudad}, {r.estado}</div>
+              <div style={{color:T.textFaint,fontSize:11,marginBottom:6}}>{r.direccion}</div>
+              <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                {r.tel&&r.tel!=="Coordinación ONU"&&<a href={`tel:${r.tel.replace(/\D/g,"")}`} style={{display:"flex",alignItems:"center",gap:3,background:"#E8F5E9",color:"#1B5E20",border:"1px solid #A5D6A7",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>📞 {r.tel}</a>}
+                <a href={`https://www.google.com/maps?q=${r.lat},${r.lng}&z=17`} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:3,background:"#E3F2FD",color:"#0D47A1",border:"1px solid #90CAF9",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>🗺️ Maps</a>
+                <span style={{fontSize:10,color:T.textMuted,marginLeft:"auto"}}>Ocup: {r.recibido}/{r.capacidad}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{padding:"11px 14px",background:T.surface,border:`1px dashed ${T.border}`,borderRadius:12,textAlign:"center",cursor:"pointer",marginBottom:16}} onClick={()=>setRegistro(true)}><span style={{color:"#CF1A2F",fontWeight:700,fontSize:13}}>+ ¿Tu centro de acopio no aparece? Regístralo gratis →</span></div>
+      </div>
+      <div style={{borderTop:`1px solid ${T.border}`,padding:"12px 20px",background:T.surface}}>
+        <div style={{maxWidth:1280,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+          <div style={{fontSize:11,color:T.textFaint}}>Red Nacional de Centros de Acopio · Emergencia Sísmica Venezuela 2026 · Mapa: OpenStreetMap</div>
+          <div style={{display:"flex",gap:12,fontSize:11}}>
+            <a href="https://panitasmap.org" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4",textDecoration:"none"}}>PanitasMap</a>
+            <a href="https://auxiliovenezuela.com" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4",textDecoration:"none"}}>AuxilioVenezuela</a>
+            <a href="https://centraldeayudavenezuela.com" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4",textDecoration:"none"}}>Central de Ayuda</a>
+          </div>
+        </div>
+      </div>
+      {detalle&&<Detalle centro={detalle} onClose={()=>setDetalle(null)} onCert={c=>{setDetalle(null);setCert(c);}} T={T}/>}
+      {registro&&<Registro centros={centros} onClose={()=>setRegistro(false)} onGuardar={c=>setCentros(p=>[...p,c])} T={T}/>}
+      {cert&&<Certificado centro={cert} onClose={()=>setCert(null)}/>}
+      {showLogin&&<LoginAdmin onLogin={()=>{setAdminOk(true);setShowLogin(false);setShowDash(true);}} onClose={()=>setShowLogin(false)} T={T}/>}
+      {showDash&&adminOk&&<Dashboard centros={centros} refugios={refugios} onClose={()=>setShowDash(false)} T={T}/>}
+    </div>
+  );
+}
+const root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App/>);
+</script>
+</body>
+</html>
