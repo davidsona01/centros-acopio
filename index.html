@@ -103,9 +103,16 @@ function useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPin
   const mapInst=useRef(null),mrkMap=useRef({}),userMrk=useRef(null),circRef=useRef(null),ready=useRef(false);
   const intervals=useRef([]);
   const firstUserPos=useRef(true);
+  const lfCDNs=["cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min","cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min","unpkg.com/leaflet@1.9.4/dist/leaflet.min"];
   const cleanupIntervals=()=>{intervals.current.forEach(clearInterval);intervals.current=[];};
   useEffect(()=>{
     if(!mapRef.current||mapInst.current)return;
+    if(!document.getElementById("lf-css")){const l=document.createElement("link");l.id="lf-css";l.rel="stylesheet";l.href="https://"+lfCDNs[0]+".css";document.head.appendChild(l);}
+    const tryLoad=(i=0)=>{
+      if(window.L){ready.current=true;return true;}
+      if(i>=lfCDNs.length){return false;}
+      const s=document.createElement("script");s.src="https://"+lfCDNs[i]+".js";s.onload=()=>{if(window.L)ready.current=true;};s.onerror=()=>{s.remove();tryLoad(i+1);};document.head.appendChild(s);return true;
+    };
     const init=()=>{
       if(!window.L||!mapRef.current)return;
       const map=window.L.map(mapRef.current,{zoomControl:true,attributionControl:true}).setView([8.5,-66.5],6);
@@ -120,9 +127,9 @@ function useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPin
     };
     cleanupIntervals();
     if(window.L){setTimeout(init,50);return;}
-    if(!document.getElementById("lf-css")){const l=document.createElement("link");l.id="lf-css";l.rel="stylesheet";l.href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css";document.head.appendChild(l);}
-    if(!document.getElementById("lf-js")){const s=document.createElement("script");s.id="lf-js";s.src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js";s.onload=()=>setTimeout(init,80);document.head.appendChild(s);}
-    else{const id=setInterval(()=>{if(window.L){clearInterval(id);init();}},100);intervals.current.push(id);}
+    tryLoad();
+    const id=setInterval(()=>{if(window.L){clearInterval(id);init();}},400);
+    intervals.current.push(id);
     return()=>{cleanupIntervals();if(mapInst.current){mapInst.current.remove();mapInst.current=null;ready.current=false;}};
   },[]);
 
@@ -248,7 +255,8 @@ function MapaPrincipal({centros,refugios,pinActivoId,onPinClick,mapaRef,T}){
   const [gpsLoad,setGpsLoad]=useState(false);
   const [gpsErr,setGpsErr]=useState("");
   const [mapLoaded,setMapLoaded]=useState(false);
-  useEffect(()=>{if(!mapRef.current)return;const o=new MutationObserver(()=>{if(mapRef.current?.querySelector(".leaflet-container")){setMapLoaded(true);o.disconnect();}});o.observe(mapRef.current,{childList:true,subtree:true});return()=>o.disconnect();},[]);
+  const [mapError,setMapError]=useState("");
+  useEffect(()=>{if(!mapRef.current)return;const o=new MutationObserver(()=>{if(mapRef.current?.querySelector(".leaflet-container")){setMapLoaded(true);}});o.observe(mapRef.current,{childList:true,subtree:true});setTimeout(()=>{if(!mapRef.current?.querySelector(".leaflet-container"))setMapError("No se pudo cargar el mapa. Prueba con VPN o recarga la página.");},10000);return()=>o.disconnect();},[]);
   const cercanoIds=cercanos.map(c=>c.id);
   const {flyTo}=useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPinClick);
   useEffect(()=>{if(mapaRef)mapaRef.current={flyTo};},[flyTo]);
@@ -286,7 +294,7 @@ function MapaPrincipal({centros,refugios,pinActivoId,onPinClick,mapaRef,T}){
       </div>
       {gpsErr&&<div style={{background:"#FFEBEE",color:"#C62828",padding:"7px 16px",fontSize:12}}>⚠️ {gpsErr}</div>}
       <div style={{position:"relative"}}>
-        {!mapLoaded&&<div style={{position:"absolute",inset:0,zIndex:500,background:T.surface2,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}><div style={{width:32,height:32,border:"3px solid",borderColor:`${T.border} ${T.border} ${T.text} ${T.border}`,borderRadius:"50%",animation:"spin .8s linear infinite"}}/><div style={{fontSize:12,color:T.textMuted}}>Cargando mapa...</div><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style></div>}
+        {!mapLoaded&&<div style={{position:"absolute",inset:0,zIndex:500,background:T.surface2,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,padding:20}}>{mapError?<><div style={{fontSize:32}}>⚠️</div><div style={{fontSize:13,color:"#FF6B6B",textAlign:"center",maxWidth:300}}>{mapError}</div><a href="https://davidsona01.github.io/centros-acopio/" style={{marginTop:6,fontSize:12,color:"#4285F4"}}>Recargar</a></>:<><div style={{width:32,height:32,border:"3px solid",borderColor:`${T.border} ${T.border} ${T.text} ${T.border}`,borderRadius:"50%",animation:"spin .8s linear infinite"}}/><div style={{fontSize:12,color:T.textMuted}}>Cargando mapa...</div><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style></>}</div>}
         <div ref={mapRef} style={{width:"100%",height:580}}/>
         {userPos&&<div style={{position:"absolute",top:10,right:10,zIndex:1000,background:"rgba(13,61,31,.92)",color:"#4CAF50",borderRadius:7,padding:"5px 11px",fontSize:11,fontWeight:700}}>📡 Ubicación activa</div>}
       </div>
