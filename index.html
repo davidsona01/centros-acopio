@@ -495,7 +495,10 @@ function LoginAdmin({onLogin,onClose,T}){
 function App(){
   const [darkMode,setDarkMode]=useState(true);
   const T=darkMode?T_DARK:T_LIGHT;
-  const [centros,setCentros]=useState(CENTROS_INIT);
+  const [centros,setCentros]=useState(()=>{
+    try{const d=localStorage.getItem("acopio_centros");return d?JSON.parse(d):CENTROS_INIT;}catch{return CENTROS_INIT;}
+  });
+  useEffect(()=>{try{localStorage.setItem("acopio_centros",JSON.stringify(centros));}catch{}},[centros]);
   const [refugios]=useState(REFUGIOS);
   const [pinActivo,setPinActivo]=useState(null);
   const [busqCiudad,setBusqCiudad]=useState("");
