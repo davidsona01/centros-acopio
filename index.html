@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0D47A1">
+<meta name="description" content="Red Nacional de Centros de Acopio - Emergencia Sísmica Venezuela 2026">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="data:application/json,{%22name%22:%22Red%20de%20Acopio%20Venezuela%22,%22short_name%22:%22AcopioVE%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230D47A1%22,%22theme_color%22:%22%230D47A1%22}">
 <title>Red Nacional de Centros de Acopio</title>
 <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -39,29 +44,39 @@ const EMERGENCIAS=[
 ];
 
 const REFUGIOS=[
-  {id:"R001",nombre:"Gran Meliá Caracas",tipo:"Hotel-Refugio",ciudad:"Caracas",estado:"Distrito Capital",direccion:"Av. Casanova c/calle El Recreo, Sabana Grande",lat:10.4909,lng:-66.8737,tel:"0212-628-3111",verificado:true,capacidad:500,recibido:380},
-  {id:"R002",nombre:"Poliedro de Caracas (Voluntarios)",tipo:"Centro de Registro",ciudad:"Caracas",estado:"Distrito Capital",direccion:"Av. Fuerzas Armadas, El Paraíso",lat:10.4714,lng:-66.9356,tel:"0212-671-5111",verificado:true,capacidad:7876,recibido:7876},
-  {id:"R003",nombre:"Campamentos ONU – La Guaira",tipo:"Refugio Multiservicios",ciudad:"La Guaira",estado:"Vargas (La Guaira)",direccion:"Zona costera afectada, La Guaira",lat:10.6040,lng:-66.8880,tel:"Coordinación ONU",verificado:true,capacidad:2000,recibido:1800},
-  {id:"R004",nombre:"Estadio José Bernardo Pérez",tipo:"Albergue de Emergencia",ciudad:"Valencia",estado:"Carabobo",direccion:"Av. Michelena, Valencia",lat:10.1899,lng:-67.9939,tel:"0241-881-0000",verificado:true,capacidad:3000,recibido:1200},
-  {id:"R005",nombre:"ULA Táchira",tipo:"Centro de Acopio / Refugio",ciudad:"San Cristóbal",estado:"Táchira",direccion:"Av. Universidad, San Cristóbal",lat:7.7743,lng:-72.2093,tel:"0276-345-0000",verificado:true,capacidad:400,recibido:150},
+  {id:"R001",nombre:"Cruz Roja Venezolana",tipo:"Sede Humanitaria",ciudad:"Caracas",estado:"Distrito Capital",direccion:"Av. Andrés Bello, edificio Cruz Roja Nº 4, Urb. San Bernardino",lat:10.5066,lng:-66.8946,tel:"112",verificado:true,capacidad:500,recibido:0},
+  {id:"R002",nombre:"Centro de Acopio Chacao - Plaza El Indio",tipo:"Centro/Shelter",ciudad:"Chacao",estado:"Miranda",direccion:"Plaza El Indio, frente a la Av. Francisco de Miranda, Chacao",lat:10.494,lng:-66.852,tel:"N/A",verificado:true,capacidad:300,recibido:0},
+  {id:"R003",nombre:"Centro de Acopio Mérida - Torre Alto Chama",tipo:"Centro/Shelter",ciudad:"Mérida",estado:"Mérida",direccion:"Urb. Alto Chama, Torre empresarial Alto Chama, Ave. Andrés Bello, Piso 4",lat:8.5568,lng:-71.1974,tel:"N/A",verificado:true,capacidad:250,recibido:0},
+  {id:"R004",nombre:"Cáritas de Venezuela - Guasdualito",tipo:"Sede Humanitaria",ciudad:"Guasdualito",estado:"Apure",direccion:"Avenida Miranda, frente a la Iglesia Virgen del Carmen",lat:7.2465107,lng:-70.7281843,tel:"N/A",verificado:true,capacidad:400,recibido:0},
+  {id:"R005",nombre:"Fitness Factory Cabudare",tipo:"Centro Comercial/Shelter",ciudad:"Cabudare",estado:"Lara",direccion:"CC Hipermercado Multimall, Avenida El Placer, con Av. Libertador",lat:10.0379546,lng:-69.2769685,tel:"N/A",verificado:true,capacidad:200,recibido:0},
+  {id:"R006",nombre:"AJE Venezuela - Polideportivo Los Naranjos",tipo:"Polideportivo/Shelter",ciudad:"Caracas",estado:"Distrito Capital",direccion:"Polideportivo Los Naranjos, Av. Este 3, Los Naranjos",lat:10.4402527,lng:-66.8380498,tel:"N/A",verificado:true,capacidad:5000,recibido:0},
+  {id:"R007",nombre:"Coliseo PoliSucre",tipo:"Coliseo/Shelter",ciudad:"Caracas",estado:"Distrito Capital",direccion:"La Urbina, Sede de la Policía Municipal de Sucre",lat:10.488,lng:-66.935,tel:"N/A",verificado:true,capacidad:3000,recibido:0},
+  {id:"R008",nombre:"Bomberos Universidad de Carabobo",tipo:"Universidad/Shelter",ciudad:"Valencia",estado:"Carabobo",direccion:"Sede del Cuerpo de Bomberos de la Universidad de Carabobo",lat:10.162,lng:-67.973,tel:"N/A",verificado:true,capacidad:1500,recibido:0},
+  {id:"R009",nombre:"FCU-UCV - Ciudad Universitaria",tipo:"Universidad/Shelter",ciudad:"Caracas",estado:"Distrito Capital",direccion:"FCU-UCV, Ciudad Universitaria de Caracas",lat:10.4892,lng:-66.8903,tel:"N/A",verificado:true,capacidad:2000,recibido:0},
+  {id:"R010",nombre:"Colegio Cristo Rey Altamira",tipo:"Colegio/Shelter",ciudad:"Caracas",estado:"Distrito Capital",direccion:"7ma Avenida entre 6ta y 7ma Transversal, Altamira",lat:10.47076,lng:-66.83726,tel:"N/A",verificado:true,capacidad:500,recibido:0},
 ];
 
 const CENTROS_INIT=[
-  {id:"A001",nombre:"Quinta El Bejucal – Altamira (Comando ConVzla)",estado:"Miranda",ciudad:"Caracas",tipo:"Sede Organización",responsable:"Comando ConVzla",whatsapp:"04120000001",capacidad:500,recibido:320,verificado:true,necesidades:{"Agua potable (botellones)":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Ropa adulto (dama)":"ALTO","Cobijas/frazadas":"ALTO","Medicamentos básicos":"ALTO"},lat:10.4983,lng:-66.8486,direccion:"Cuarta Av. de Altamira, entre 9na y 10ma transversal, 5ta El Bejucal",fecha:"2026-06-25"},
-  {id:"A002",nombre:"Iglesia La Paz – Montalbán",estado:"Distrito Capital",ciudad:"Caracas",tipo:"Iglesia/Templo",responsable:"Parroquia La Paz",whatsapp:"04140000002",capacidad:300,recibido:180,verificado:true,necesidades:{"Colchonetas":"CRÍTICO","Pañales bebé":"CRÍTICO","Agua potable (bolsas)":"ALTO","Jabón de baño":"MEDIO"},lat:10.4914,lng:-66.9291,direccion:"Iglesia La Paz, Montalbán 1, Municipio Libertador",fecha:"2026-06-25"},
-  {id:"A003",nombre:"Iglesia San Bernardino de la Siena",estado:"Distrito Capital",ciudad:"Caracas",tipo:"Iglesia/Templo",responsable:"Parroquia San Bernardino",whatsapp:"04160000003",capacidad:250,recibido:140,verificado:true,necesidades:{"Fórmula infantil":"CRÍTICO","Leche en polvo":"ALTO","Ropa infantil (niño)":"ALTO","Calzado adulto":"MEDIO"},lat:10.5052,lng:-66.9128,direccion:"Parroquia de San Bernardino, Caracas",fecha:"2026-06-25"},
-  {id:"A004",nombre:"Terrazas del Club Hípico Caracas",estado:"Distrito Capital",ciudad:"Caracas",tipo:"Centro Deportivo",responsable:"Rotaract Caracas",whatsapp:"04120000004",capacidad:400,recibido:200,verificado:true,necesidades:{"Carpas/toldos":"CRÍTICO","Colchonetas":"CRÍTICO","Arroz":"ALTO","Aceite":"ALTO","Cloro":"MEDIO"},lat:10.4620,lng:-66.8780,direccion:"Terrazas del Club Hípico, Las Mercedes, Caracas",fecha:"2026-06-25"},
-  {id:"A005",nombre:"Sede Comando ConVzla – Maracay",estado:"Aragua",ciudad:"Maracay",tipo:"Sede Organización",responsable:"Comando ConVzla Aragua",whatsapp:"04140000005",capacidad:350,recibido:180,verificado:true,necesidades:{"Agua potable (botellones)":"CRÍTICO","Harina de maíz":"CRÍTICO","Palas":"ALTO","Herramientas básicas":"ALTO"},lat:10.2469,lng:-67.5958,direccion:"Paseo de la Libertad, Av. Las Delicias, frente al Centro Médico de Maracay",fecha:"2026-06-25"},
-  {id:"A006",nombre:"Operación ConVzla – El Viñedo Valencia",estado:"Carabobo",ciudad:"Valencia",tipo:"Sede Organización",responsable:"Vente Carabobo / Todos con Venezuela",whatsapp:"04140000006",capacidad:600,recibido:390,verificado:true,necesidades:{"Láminas de zinc":"CRÍTICO","Cemento":"ALTO","Colchonetas":"ALTO","Pañales adulto":"MEDIO","Sábanas":"MEDIO"},lat:10.1793,lng:-67.9929,direccion:"Av. Monseñor Adams, El Viñedo. Edificio Talislandia, mezzanina, Valencia",fecha:"2026-06-25"},
-  {id:"A007",nombre:"Cuerpo de Bomberos Guacara",estado:"Carabobo",ciudad:"Guacara",tipo:"Centro Comunitario",responsable:"Cuerpo de Bomberos",whatsapp:"04120000007",capacidad:200,recibido:80,verificado:true,necesidades:{"Agua potable (botellones)":"CRÍTICO","Alimentos enlatados":"ALTO","Ropa adulto (caballero)":"MEDIO"},lat:10.2208,lng:-67.8781,direccion:"Carretera Nacional Guacara, Carabobo",fecha:"2026-06-25"},
-  {id:"A008",nombre:"Cáritas Barquisimeto",estado:"Lara",ciudad:"Barquisimeto",tipo:"Sede Organización",responsable:"Cáritas Barquisimeto",whatsapp:"02514468402",capacidad:500,recibido:260,verificado:true,necesidades:{"Leche en polvo":"CRÍTICO","Fórmula infantil":"ALTO","Ropa infantil (niña)":"ALTO","Calzado infantil":"MEDIO","Papel higiénico":"BAJO"},lat:10.0578,lng:-69.3467,direccion:"Carrera 18, entre calles 34 y 35, Barquisimeto, Lara",fecha:"2026-06-25"},
-  {id:"A009",nombre:"Tatas Food – Barquisimeto",estado:"Lara",ciudad:"Barquisimeto",tipo:"Sede Organización",responsable:"Coordinación Local",whatsapp:"04160000009",capacidad:200,recibido:90,verificado:true,necesidades:{"Arroz":"CRÍTICO","Caraotas/frijoles":"ALTO","Sal":"MEDIO","Aceite":"MEDIO"},lat:10.0621,lng:-69.3521,direccion:"Carrera 15 entre calles 13A y 13B, Barquisimeto, Lara",fecha:"2026-06-25"},
-  {id:"A010",nombre:"Centro Acopio Voluntad Popular – Angostura",estado:"Bolívar",ciudad:"Ciudad Bolívar",tipo:"Sede Organización",responsable:"Voluntad Popular Bolívar",whatsapp:"04150000010",capacidad:300,recibido:110,verificado:true,necesidades:{"Agua potable (botellones)":"ALTO","Alimentos enlatados":"ALTO","Cobijas/frazadas":"MEDIO","Linternas":"MEDIO"},lat:8.1225,lng:-63.5497,direccion:"Esquina de Banesco, Av. República, Municipio Angostura del Orinoco",fecha:"2026-06-25"},
-  {id:"A011",nombre:"Sede UNT Zulia – Centro de Acopio",estado:"Zulia",ciudad:"Maracaibo",tipo:"Sede Organización",responsable:"Un Nuevo Tiempo Zulia",whatsapp:"04160000011",capacidad:400,recibido:170,verificado:true,necesidades:{"Agua potable (bolsas)":"CRÍTICO","Harina de maíz":"ALTO","Ropa adulto (dama)":"ALTO","Toallas sanitarias":"MEDIO"},lat:10.6416,lng:-71.6124,direccion:"Sede UNT Zulia, Maracaibo",fecha:"2026-06-25"},
-  {id:"A012",nombre:"Colegio de Médicos de Mérida",estado:"Mérida",ciudad:"Mérida",tipo:"Sede Organización",responsable:"Colegio de Médicos Mérida",whatsapp:"04140000012",capacidad:150,recibido:60,verificado:true,necesidades:{"Medicamentos básicos":"CRÍTICO","Gasas estériles":"CRÍTICO","Agua potable (botellones)":"ALTO","Colchonetas":"MEDIO"},lat:8.5982,lng:-71.1445,direccion:"Sede Colegio de Médicos, Mérida",fecha:"2026-06-26"},
-  {id:"A013",nombre:"ULA Táchira – Centro de Acopio",estado:"Táchira",ciudad:"San Cristóbal",tipo:"Escuela/Liceo",responsable:"ULA Táchira",whatsapp:"02763450000",capacidad:500,recibido:200,verificado:true,necesidades:{"Agua potable (botellones)":"ALTO","Alimentos no perecederos":"ALTO","Ropa en buen estado":"MEDIO"},lat:7.7743,lng:-72.2093,direccion:"Av. Universidad, ULA Táchira, San Cristóbal",fecha:"2026-06-25"},
-  {id:"A014",nombre:"CNP Paraguaná – Centro de Acopio",estado:"Falcón",ciudad:"Punto Fijo",tipo:"Sede Organización",responsable:"CNP Paraguaná",whatsapp:"04120000014",capacidad:200,recibido:50,verificado:false,necesidades:{"Alimentos enlatados":"ALTO","Ropa adulto (caballero)":"MEDIO","Pilas/baterías":"MEDIO"},lat:11.7056,lng:-70.2136,direccion:"Sede CNP Paraguaná, Punto Fijo, Falcón",fecha:"2026-06-26"},
-  {id:"A015",nombre:"Acopio Emergencia Catia La Mar",estado:"Vargas (La Guaira)",ciudad:"La Guaira",tipo:"Plaza/Espacio Público",responsable:"Comité Vecinal Catia La Mar",whatsapp:"04120000015",capacidad:300,recibido:280,verificado:false,necesidades:{"Agua potable (botellones)":"CRÍTICO","Colchonetas":"CRÍTICO","Carpas/toldos":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Pañales bebé":"CRÍTICO"},lat:10.5994,lng:-67.0369,direccion:"Plaza principal Catia La Mar, La Guaira",fecha:"2026-06-25"},
+  {id:"A001",nombre:"AJE Venezuela - Polideportivo Los Naranjos",estado:"Miranda",ciudad:"Caracas",tipo:"Centro de Acopio",responsable:"AJE Venezuela",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.4402527,lng:-66.8380498,direccion:"Polideportivo Los Naranjos Belisario Academy, Av. Este 3, Los Naranjos",fecha:"2026-06-26"},
+  {id:"A002",nombre:"Alcaldía de Chacao - Sede Desarrollo Social",estado:"Caracas",ciudad:"Caracas",tipo:"Centro de Acopio",responsable:"Alcaldía de Chacao",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:10.4898,lng:-66.8552,direccion:"Calle Los Ángeles, lateral al Centro Comercial Sambil Chacao, Caracas",fecha:"2026-06-26"},
+  {id:"A003",nombre:"Alcaldía Padre Pedro Chien",estado:"Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Alcaldía Padre Pedro Chien",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.128,lng:-63.54,direccion:"Municipio Padre Pedro Chien - Sede de la Alcaldía",fecha:"2026-06-26"},
+  {id:"A004",nombre:"Animales Sin Nombre - Mérida",estado:"Mérida",ciudad:"Mérida",tipo:"Centro de Acopio",responsable:"Animales Sin Nombre",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Medicamentos básicos":"CRÍTICO"},lat:8.589886,lng:-71.1610437,direccion:"CC EL Rodeo, Mérida",fecha:"2026-06-26"},
+  {id:"A005",nombre:"Bomberos Unexpo",estado:"Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Bomberos Unexpo",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.128,lng:-63.54,direccion:"Caroní - Sede del Cuerpo de Bomberos de la Unexpo",fecha:"2026-06-26"},
+  {id:"A006",nombre:"Bomberos Universidad de Carabobo",estado:"Carabobo",ciudad:"Valencia",tipo:"Centro de Acopio",responsable:"Bomberos UC",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.162,lng:-67.973,direccion:"Sede del Cuerpo de Bomberos de la Universidad de Carabobo",fecha:"2026-06-26"},
+  {id:"A007",nombre:"Bulevar de Las Minas",estado:"Miranda",ciudad:"Los Teques",tipo:"Centro de Acopio",responsable:"Bulevar de Las Minas",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.344,lng:-67.042,direccion:"Bulevar de Las Minas, frente al Farmatodo de San Antonio de Los Altos",fecha:"2026-06-26"},
+  {id:"A008",nombre:"CacaoLab - Mérida",estado:"Mérida",ciudad:"Mérida",tipo:"Centro de Acopio",responsable:"CacaoLab",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Jabón de baño":"CRÍTICO","Medicamentos básicos":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:8.572,lng:-71.148,direccion:"Urb. La Lummonty, calle Las Colinas, Edif. Oneida, Mérida",fecha:"2026-06-26"},
+  {id:"A009",nombre:"Cámara de Comercio de Bolívar",estado:"Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Cámara de Comercio de Bolívar",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Alimentos enlatados":"CRÍTICO","Gasas estériles":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:8.132865,lng:-63.5441057,direccion:"Sede de la Cámara de Comercio e Industrias del estado Bolívar",fecha:"2026-06-26"},
+  {id:"A010",nombre:"Cáritas Barquisimeto",estado:"Lara",ciudad:"Barquisimeto",tipo:"Centro de Acopio",responsable:"Cáritas Barquisimeto",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Medicamentos básicos":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:10.07744,lng:-69.32223,direccion:"Carrera 18, entre calles 34 y 35 (sede principal)",fecha:"2026-06-26"},
+  {id:"A011",nombre:"Cáritas de Venezuela - Guasdualito",estado:"Apure",ciudad:"Guasdualito",tipo:"Centro de Acopio",responsable:"Cáritas de Venezuela",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Jabón de baño":"CRÍTICO","Medicamentos básicos":"CRÍTICO","Colchonetas":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:7.2465107,lng:-70.7281843,direccion:"Avenida Miranda, frente a la Iglesia Virgen del Carmen",fecha:"2026-06-26"},
+  {id:"A012",nombre:"Cáritas Mérida",estado:"Mérida",ciudad:"Mérida",tipo:"Centro de Acopio",responsable:"Cáritas Mérida",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Jabón de baño":"CRÍTICO","Medicamentos básicos":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:8.5933,lng:-71.1445,direccion:"Av. Las Américas, parroquia Santa Bárbara, Sede de Cáritas Mérida",fecha:"2026-06-26"},
+  {id:"A013",nombre:"Cáritas Venezuela - Caracas",estado:"Caracas",ciudad:"Caracas",tipo:"Centro de Acopio",responsable:"Cáritas Venezuela",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.505,lng:-66.903,direccion:"Sede de Cáritas Venezuela en Montalbán, Caracas",fecha:"2026-06-26"},
+  {id:"A014",nombre:"Casa de la Cultura Ciudad Piar",estado:"Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Casa de la Cultura Ciudad Piar",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.128,lng:-63.54,direccion:"Municipio Bolivariano Angostura - Casa de la Cultura, Ciudad Piar",fecha:"2026-06-26"},
+  {id:"A015",nombre:"CC Forum Plaza",estado:"Anzoátegui",ciudad:"Lechería",tipo:"Centro de Acopio",responsable:"CC Forum Plaza",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.136,lng:-64.686,direccion:"Centro Comercial Forum Plaza, Lechería",fecha:"2026-06-26"},
+  {id:"A016",nombre:"C.C. La Capilla - Av. 19 de Abril",estado:"Aragua",ciudad:"Maracay",tipo:"Centro de Acopio",responsable:"C.C. La Capilla",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Alimentos enlatados":"CRÍTICO","Gasas estériles":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:10.235,lng:-67.595,direccion:"Av. 19 de Abril, Maracay",fecha:"2026-06-26"},
+  {id:"A017",nombre:"CC Rodeo Plaza - PB",estado:"Mérida",ciudad:"Mérida",tipo:"Centro de Acopio",responsable:"CC Rodeo Plaza",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Jabón de baño":"CRÍTICO","Medicamentos básicos":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:8.585,lng:-71.155,direccion:"CC Rodeo Plaza, Planta Baja, Mérida",fecha:"2026-06-26"},
+  {id:"A018",nombre:"Centro de Acopio Chacao - Plaza El Indio",estado:"Caracas",ciudad:"Chacao",tipo:"Centro de Acopio",responsable:"Alcaldía de Chacao",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Medicamentos básicos":"CRÍTICO","Colchonetas":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:10.495,lng:-66.858,direccion:"Plaza El Indio, Chacao, Caracas",fecha:"2026-06-26"},
+  {id:"A019",nombre:"Centro de Acopio El Hatillo",estado:"Miranda",ciudad:"El Hatillo",tipo:"Centro de Acopio",responsable:"Centro de Acopio El Hatillo",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Alimentos enlatados":"CRÍTICO","Medicamentos básicos":"CRÍTICO"},lat:10.428,lng:-66.822,direccion:"Vía La Unión, El Hatillo",fecha:"2026-06-26"},
+  {id:"A020",nombre:"Centro de Acopio Mérida - Torre Alto Chama",estado:"Mérida",ciudad:"Mérida",tipo:"Centro de Acopio",responsable:"Torre Alto Chama",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{"Ropa adulto":"CRÍTICO","Alimentos enlatados":"CRÍTICO","Medicamentos básicos":"CRÍTICO","Colchonetas":"CRÍTICO","Agua potable (botellones)":"CRÍTICO"},lat:8.595,lng:-71.152,direccion:"Torre Alto Chama, Mérida",fecha:"2026-06-26"},
 ];
 
 const NIVEL={
@@ -76,6 +91,10 @@ const CIUDADES={"Amazonas":["Puerto Ayacucho","Maroa","San Fernando de Atabapo"]
 const CIUDADES_FLAT=[...new Set(Object.values(CIUDADES).flat())].sort();
 const INSUMOS={"🥤 Agua y Alimentos":["Agua potable (botellones)","Agua potable (bolsas)","Leche en polvo","Fórmula infantil","Alimentos enlatados","Arroz","Caraotas/frijoles","Harina de maíz","Azúcar","Aceite","Sal","Galletas","Atún/sardinas"],"🏠 Enseres y Refugio":["Colchonetas","Cobijas/frazadas","Sábanas","Almohadas","Carpas/toldos","Hamacas","Linternas","Velas","Pilas/baterías","Generador eléctrico"],"👕 Ropa y Calzado":["Ropa adulto (dama)","Ropa adulto (caballero)","Ropa infantil (niña)","Ropa infantil (niño)","Calzado adulto","Calzado infantil","Ropa interior"],"🧼 Higiene Personal":["Jabón de baño","Champú","Pasta dental","Cepillos de dientes","Papel higiénico","Toallas sanitarias","Pañales bebé","Pañales adulto","Desinfectante","Alcohol en gel","Cloro"],"🧹 Limpieza":["Escobas","Trapeadores","Bolsas de basura","Detergente","Jabón en polvo","Esponjas","Guantes de goma"],"📦 Herramientas":["Palas","Picos","Carretillas","Plástico negro","Láminas de zinc","Cemento","Herramientas básicas","Gasas estériles","Medicamentos básicos"],"🍼 Bebés":["Pañales (0-3 meses)","Pañales (4-6 meses)","Toallitas húmedas","Crema antipañalitis","Biberones","Juguetes"]};
 const TIPOS=["Centro Comunitario","Iglesia/Templo","Escuela/Liceo","Junta de Vecinos","Alcaldía/Gobernación","Centro Deportivo","Plaza/Espacio Público","Sede Organización","Otro"];
+
+const I18N={es:{title:"Red Nacional de Centros de Acopio",subtitle:"Emergencia Sísmica Venezuela · 24 de junio de 2026",emergencia:"EMERGENCIA ACTIVA",darkMode:"🌙",lightMode:"☀️",admin:"Admin",registrar:"+ Registrar Centro",centros:"Centros de Acopio",refugios:"Refugios",criticos:"Críticos",verificados:"Verificados",mapa:"Mapa de Centros",cercanos:"Centros cercanos",cargando:"Cargando mapa...",sinResultados:"No se encontraron centros",voluntarios:"Voluntarios",inventario:"Inventario",exportar:"Exportar",idioma:"ES",analiticas:"Analíticas"},en:{title:"National Collection Center Network",subtitle:"Venezuela Earthquake Emergency · June 24, 2026",emergencia:"ACTIVE EMERGENCY",darkMode:"🌙",lightMode:"☀️",admin:"Admin",registrar:"+ Register Center",centros:"Collection Centers",refugios:"Shelters",criticos:"Critical",verificados:"Verified",mapa:"Centers Map",cercanos:"Nearby centers",cargando:"Loading map...",sinResultados:"No centers found",voluntarios:"Volunteers",inventario:"Inventory",exportar:"Export",idioma:"EN",analiticas:"Analytics"}};
+let currentLang="es";
+const t=(k)=>I18N[currentLang]?.[k]||I18N.es[k]||k;
 
 function CertQR({value,size=140}){
   const svgRef=useRef(null);
@@ -97,6 +116,284 @@ function CertQR({value,size=140}){
     const s=document.createElement("script");s.id="qr-gen";s.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js";s.onload=draw;document.head.appendChild(s);
   },[value,size]);
   return(<div ref={svgRef} style={{width:size,height:size,display:"flex",alignItems:"center",justifyContent:"center",background:"#fff",borderRadius:4}}/>);
+}
+
+const HABILIDADES=["Primeros auxilios","Cocina","Logística","Médico","Enfermería","Construcción","Transporte","Comunicaciones","Administración","Limpieza","Educación","Psicología"];
+const DISPONIBILIDADES=["Mañana","Tarde","Noche","Completo"];
+
+function VoluntariosPanel({voluntarios,setVoluntarios,centros,T}){
+  const [showForm,setShowForm]=useState(false);
+  const [form,setForm]=useState({nombre:"",telefono:"",habilidades:[],disponibilidad:"",centroAsignado:""});
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const toggleHab=(h)=>setForm(f=>({...f,habilidades:f.habilidades.includes(h)?f.habilidades.filter(x=>x!==h):[...f.habilidades,h]}));
+  const registrar=()=>{if(!form.nombre||!form.telefono)return;const v={...form,id:"V"+Date.now(),fecha:new Date().toISOString().slice(0,10),activo:true,horas:0};setVoluntarios(p=>[...p,v]);setForm({nombre:"",telefono:"",habilidades:[],disponibilidad:"",centroAsignado:""});setShowForm(false);};
+  const activos=voluntarios.filter(v=>v.activo).length;
+  const asignados=voluntarios.filter(v=>v.centroAsignado).length;
+  const totalHoras=voluntarios.reduce((a,v)=>a+(v.horas||0),0);
+  const si={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"8px 10px",color:T.text,fontSize:12,outline:"none",boxSizing:"border-box"};
+  return(
+    <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:14,marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{fontWeight:700,fontSize:14,color:T.text}}>👥 {t("voluntarios")}</div>
+        <button onClick={()=>setShowForm(!showForm)} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:6,padding:"6px 12px",cursor:"pointer",fontWeight:700,fontSize:11}}>{showForm?"✕ Cancelar":"+ Registrar"}</button>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+        {[["👥",voluntarios.length,"Total","#4285F4"],["✅",activos,"Activos","#4CAF50"],["🔗",asignados,"Asignados","#FF8C00"],["⏱️",totalHoras,"Horas","#9C27B0"]].map(([ic,v,lbl,color])=>(
+          <div key={lbl} style={{background:T.surface2,borderRadius:8,padding:"8px",textAlign:"center",borderBottom:`2px solid ${color}`}}>
+            <div style={{fontSize:16}}>{ic}</div>
+            <div style={{fontWeight:800,fontSize:16,color}}>{v}</div>
+            <div style={{fontSize:10,color:T.textMuted}}>{lbl}</div>
+          </div>
+        ))}
+      </div>
+      {showForm&&(
+        <div style={{background:T.surface2,borderRadius:10,padding:12,marginBottom:12}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Nombre *</label><input value={form.nombre} onChange={e=>set("nombre",e.target.value)} placeholder="Nombre completo" style={si}/></div>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Teléfono *</label><input value={form.telefono} onChange={e=>set("telefono",e.target.value)} placeholder="04121234567" style={si}/></div>
+          </div>
+          <div style={{marginBottom:8}}>
+            <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:4}}>Habilidades</label>
+            <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+              {HABILIDADES.map(h=><button key={h} onClick={()=>toggleHab(h)} style={{padding:"3px 8px",borderRadius:12,fontSize:10,cursor:"pointer",background:form.habilidades.includes(h)?"#CF1A2F":T.border,color:form.habilidades.includes(h)?"#fff":T.textMuted,border:"none",fontWeight:600}}>{h}</button>)}
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Disponibilidad</label><select value={form.disponibilidad} onChange={e=>set("disponibilidad",e.target.value)} style={si}><option value="">Seleccionar...</option>{DISPONIBILIDADES.map(d=><option key={d} value={d}>{d}</option>)}</select></div>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Centro asignado</label><select value={form.centroAsignado} onChange={e=>set("centroAsignado",e.target.value)} style={si}><option value="">Sin asignar</option>{centros.map(c=><option key={c.id} value={c.id}>{c.nombre.slice(0,25)}</option>)}</select></div>
+          </div>
+          <button onClick={registrar} disabled={!form.nombre||!form.telefono} style={{width:"100%",marginTop:8,background:form.nombre&&form.telefono?"#CF1A2F":"#666",color:"#fff",border:"none",borderRadius:6,padding:"8px",cursor:form.nombre&&form.telefono?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>✓ Registrar Voluntario</button>
+        </div>
+      )}
+      <div style={{maxHeight:200,overflow:"auto"}}>
+        {voluntarios.length===0?<div style={{textAlign:"center",padding:16,color:T.textFaint,fontSize:12}}>No hay voluntarios registrados</div>:
+        voluntarios.map(v=>(
+          <div key={v.id} style={{display:"flex",alignItems:"center",gap:10,background:T.surface2,borderRadius:8,padding:"8px 10px",marginBottom:6,borderLeft:`3px solid ${v.activo?"#4CAF50":"#FF3B3B"}`}}>
+            <div style={{width:32,height:32,borderRadius:"50%",background:v.activo?"#E8F5E9":"#FEE2E2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>👤</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontWeight:700,fontSize:12,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{v.nombre}</div>
+              <div style={{fontSize:10,color:T.textMuted}}>📞 {v.telefono} · {v.disponibilidad||"N/D"} · ⏱️ {v.horas||0}h</div>
+            </div>
+            <div style={{display:"flex",gap:3,flexWrap:"wrap",maxWidth:120}}>
+              {v.habilidades.slice(0,2).map(h=><span key={h} style={{fontSize:8,background:T.tagBg,color:T.tagText,padding:"1px 5px",borderRadius:8}}>{h}</span>)}
+            </div>
+            <button onClick={()=>setVoluntarios(p=>p.map(x=>x.id===v.id?{...x,activo:!x.activo}:x))} style={{fontSize:10,background:v.activo?"#FEE2E2":"#E8F5E9",color:v.activo?"#DC2626":"#2E7D32",border:"none",borderRadius:4,padding:"3px 6px",cursor:"pointer",fontWeight:600}}>{v.activo?"Desactivar":"Activar"}</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InventarioPanel({inventario,setInventario,centros,T}){
+  const [showForm,setShowForm]=useState(false);
+  const [form,setForm]=useState({tipo:"entrada",insumo:"",cantidad:"",centroId:"",notas:"",fecha:new Date().toISOString().slice(0,10)});
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const registrar=()=>{if(!form.insumo||!form.cantidad)return;const m={...form,id:"M"+Date.now(),cantidad:parseInt(form.cantidad)};setInventario(p=>[...p,m]);setForm({tipo:"entrada",insumo:"",cantidad:"",centroId:"",notas:"",fecha:new Date().toISOString().slice(0,10)});setShowForm(false);};
+  const entradas=inventario.filter(m=>m.tipo==="entrada").reduce((a,m)=>a+m.cantidad,0);
+  const salidas=inventario.filter(m=>m.tipo==="salida").reduce((a,m)=>a+m.cantidad,0);
+  const insumosCrit=inventario.filter(m=>m.tipo==="salida").reduce((a,m)=>{a[m.insumo]=(a[m.insumo]||0)+m.cantidad;return a;},{});
+  const topCrit=Object.entries(insumosCrit).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const ALL_INSUMOS=Object.values(INSUMOS).flat();
+  const si={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"8px 10px",color:T.text,fontSize:12,outline:"none",boxSizing:"border-box"};
+  return(
+    <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:14,marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{fontWeight:700,fontSize:14,color:T.text}}>📦 {t("inventario")}</div>
+        <button onClick={()=>setShowForm(!showForm)} style={{background:"#1A73E8",color:"#fff",border:"none",borderRadius:6,padding:"6px 12px",cursor:"pointer",fontWeight:700,fontSize:11}}>{showForm?"✕ Cancelar":"+ Movimiento"}</button>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+        {[["📦",inventario.length,"Total","#4285F4"],["📥",entradas,"Entradas","#4CAF50"],["📤",salidas,"Salidas","#FF8C00"],["🔴",topCrit.length,"Críticos","#FF3B3B"]].map(([ic,v,lbl,color])=>(
+          <div key={lbl} style={{background:T.surface2,borderRadius:8,padding:"8px",textAlign:"center",borderBottom:`2px solid ${color}`}}>
+            <div style={{fontSize:16}}>{ic}</div>
+            <div style={{fontWeight:800,fontSize:16,color}}>{v}</div>
+            <div style={{fontSize:10,color:T.textMuted}}>{lbl}</div>
+          </div>
+        ))}
+      </div>
+      {showForm&&(
+        <div style={{background:T.surface2,borderRadius:10,padding:12,marginBottom:12}}>
+          <div style={{display:"flex",gap:6,marginBottom:8}}>
+            <button onClick={()=>set("tipo","entrada")} style={{flex:1,background:form.tipo==="entrada"?"#4CAF50":T.border,color:form.tipo==="entrada"?"#fff":T.textMuted,border:"none",borderRadius:6,padding:"7px",cursor:"pointer",fontWeight:700,fontSize:11}}>📥 Entrada</button>
+            <button onClick={()=>set("tipo","salida")} style={{flex:1,background:form.tipo==="salida"?"#FF8C00":T.border,color:form.tipo==="salida"?"#fff":T.textMuted,border:"none",borderRadius:6,padding:"7px",cursor:"pointer",fontWeight:700,fontSize:11}}>📤 Salida</button>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Insumo *</label><select value={form.insumo} onChange={e=>set("insumo",e.target.value)} style={si}><option value="">Seleccionar...</option>{ALL_INSUMOS.map(i=><option key={i} value={i}>{i}</option>)}</select></div>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Cantidad *</label><input type="number" value={form.cantidad} onChange={e=>set("cantidad",e.target.value)} placeholder="0" style={si}/></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Centro destino</label><select value={form.centroId} onChange={e=>set("centroId",e.target.value)} style={si}><option value="">Todos</option>{centros.map(c=><option key={c.id} value={c.id}>{c.nombre.slice(0,25)}</option>)}</select></div>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Fecha</label><input type="date" value={form.fecha} onChange={e=>set("fecha",e.target.value)} style={si}/></div>
+          </div>
+          <div style={{marginBottom:8}}><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Notas</label><input value={form.notas} onChange={e=>set("notas",e.target.value)} placeholder="Observaciones..." style={si}/></div>
+          <button onClick={registrar} disabled={!form.insumo||!form.cantidad} style={{width:"100%",background:form.insumo&&form.cantidad?"#1A73E8":"#666",color:"#fff",border:"none",borderRadius:6,padding:"8px",cursor:form.insumo&&form.cantidad?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>✓ Registrar Movimiento</button>
+        </div>
+      )}
+      {topCrit.length>0&&(
+        <div style={{marginBottom:10}}>
+          <div style={{fontSize:11,fontWeight:700,color:T.textMuted,marginBottom:4}}>Mayor demanda de salidas:</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+            {topCrit.map(([ins,n])=><span key={ins} style={{fontSize:10,background:"#FEE2E2",color:"#DC2626",padding:"2px 7px",borderRadius:6,fontWeight:600}}>🔴 {ins} ({n})</span>)}
+          </div>
+        </div>
+      )}
+      <div style={{maxHeight:200,overflow:"auto"}}>
+        {inventario.length===0?<div style={{textAlign:"center",padding:16,color:T.textFaint,fontSize:12}}>No hay movimientos registrados</div>:
+        inventario.slice().reverse().slice(0,10).map(m=>(
+          <div key={m.id} style={{display:"flex",alignItems:"center",gap:8,background:T.surface2,borderRadius:8,padding:"7px 10px",marginBottom:5,borderLeft:`3px solid ${m.tipo==="entrada"?"#4CAF50":"#FF8C00"}`}}>
+            <span style={{fontSize:14}}>{m.tipo==="entrada"?"📥":"📤"}</span>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:11,color:T.text}}>{m.insumo}</div>
+              <div style={{fontSize:10,color:T.textMuted}}>{m.fecha} · {centros.find(c=>c.id===m.centroId)?.nombre?.slice(0,20)||"General"}</div>
+            </div>
+            <div style={{fontWeight:800,fontSize:12,color:m.tipo==="entrada"?"#4CAF50":"#FF8C00"}}>{m.tipo==="entrada"?"+":"-"}{m.cantidad}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ExportarPanel({centros,voluntarios,inventario,T}){
+  const[exportando,setExportando]=useState(null);
+  const exportCSV=(tipo)=>{
+    setExportando(tipo);
+    let csv="",filename="";
+    if(tipo==="centros"){
+      csv="ID,Nombre,Estado,Ciudad,Tipo,Responsable,WhatsApp,Capacidad,Recibido,Verificado\n";
+      centros.forEach(c=>{csv+=`"${c.id}","${c.nombre}","${c.estado}","${c.ciudad}","${c.tipo}","${c.responsable}","${c.whatsapp}",${c.capacidad},${c.recibido},${c.verificado?"Sí":"No"}\n`;});
+      filename="centros_acopio.csv";
+    }else if(tipo==="voluntarios"){
+      csv="ID,Nombre,Teléfono,Habilidades,Disponibilidad,Centro,Activo,Fechas\n";
+      voluntarios.forEach(v=>{csv+=`"${v.id}","${v.nombre}","${v.telefono}","${v.habilidades.join("; ")}","${v.disponibilidad}","${v.centroAsignado||"N/D"}",${v.activo?"Sí":"No"},"${v.fecha}"\n`;});
+      filename="voluntarios.csv";
+    }else if(tipo==="inventario"){
+      csv="ID,Tipo,Insumo,Cantidad,Fechas,Centro,Notas\n";
+      inventario.forEach(m=>{csv+=`"${m.id}","${m.tipo}","${m.insumo}",${m.cantidad},"${m.fecha}","${m.centroId||"General"}","${m.notas||""}"\n`;});
+      filename="inventario.csv";
+    }
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+    const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download=filename;link.click();
+    setTimeout(()=>setExportando(null),1500);
+  };
+  const exportPDF=()=>{
+    setExportando("pdf");
+    const fecha=new Date().toLocaleDateString("es-VE",{day:"2-digit",month:"long",year:"numeric"});
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte Acopio</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;color:#1a1a1a}h1{color:#8B0000;font-size:18px;margin-bottom:4px}h2{color:#CF1A2F;font-size:13px;margin:14px 0 6px}p{color:#666;font-size:11px;margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:14px}th{background:#8B0000;color:#fff;padding:5px 6px;text-align:left}td{padding:4px 6px;border-bottom:1px solid #eee}footer{margin-top:20px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#aaa;text-align:center}</style></head><body><h1>🇻🇪 Reporte Red de Acopio</h1><p>${fecha} · ${centros.length} centros · ${voluntarios.length} voluntarios · ${inventario.length} movimientos</p><h2>📦 Centros</h2><table><thead><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Ciudad</th><th>Cap.</th><th>Verif.</th></tr></thead><tbody>${centros.map(c=>`<tr><td>${c.id}</td><td>${c.nombre}</td><td>${c.estado}</td><td>${c.ciudad}</td><td>${c.recibido}/${c.capacidad}</td><td>${c.verificado?"✓":"⏳"}</td></tr>`).join("")}</tbody></table><h2>👥 Voluntarios</h2><table><thead><tr><th>Nombre</th><th>Tel</th><th>Habilidades</th><th>Dispon.</th><th>Activo</th></tr></thead><tbody>${voluntarios.map(v=>`<tr><td>${v.nombre}</td><td>${v.telefono}</td><td>${v.habilidades.join(", ")}</td><td>${v.disponibilidad}</td><td>${v.activo?"✓":"No"}</td></tr>`).join("")}</tbody></table><h2>📦 Inventario</h2><table><thead><tr><th>Tipo</th><th>Insumo</th><th>Cant.</th><th>Fecha</th><th>Centro</th></tr></thead><tbody>${inventario.map(m=>`<tr><td>${m.tipo==="entrada"?"📥":"📤"}</td><td>${m.insumo}</td><td>${m.cantidad}</td><td>${m.fecha}</td><td>${m.centroId||"General"}</td></tr>`).join("")}</tbody></table><footer>Sistema Nacional de Acopio · ${fecha}</footer></body></html>`;
+    const iframe=document.createElement("iframe");iframe.style.cssText="position:fixed;top:0;left:0;width:0;height:0;border:none;";document.body.appendChild(iframe);iframe.contentWindow.document.write(html);iframe.contentWindow.document.close();
+    setTimeout(()=>{iframe.contentWindow.print();setTimeout(()=>document.body.removeChild(iframe),500);},500);
+    setTimeout(()=>setExportando(null),2000);
+  };
+  return(
+    <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:14,marginBottom:16}}>
+      <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>📥 {t("exportar")}</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:10}}>
+        {[["centros","📦 Centros"],["voluntarios","👥 Voluntarios"],["inventario","📊 Inventario"]].map(([k,lbl])=>(
+          <button key={k} onClick={()=>exportCSV(k)} style={{background:exportando===k?"#0D3D1F":T.surface2,color:exportando===k?"#4CAF50":T.text,border:`1px solid ${exportando===k?"#4CAF50":T.border}`,borderRadius:8,padding:"10px 8px",cursor:"pointer",fontWeight:700,fontSize:11,textAlign:"center"}}>{exportando===k?"✅ Descargando...":`📥 CSV ${lbl.split(" ")[1]}`}</button>
+        ))}
+      </div>
+      <button onClick={exportPDF} style={{width:"100%",background:exportando==="pdf"?"#0D3D1F":"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"10px",cursor:"pointer",fontWeight:700,fontSize:12}}>{exportando==="pdf"?"⏳ Generando...":"📄 Exportar Reporte PDF Completo"}</button>
+    </div>
+  );
+}
+
+function AnalyticsPanel({centros,refugios,voluntarios,inventario,T}){
+  const[tab,setTab]=useState("resumen");
+  const porEstado={};centros.forEach(c=>{if(!porEstado[c.estado])porEstado[c.estado]=0;porEstado[c.estado]++;});
+  const topEstados=Object.entries(porEstado).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxEstado=topEstados.length>0?topEstados[0][1]:1;
+  const porNivel={"CRÍTICO":0,"ALTO":0,"MEDIO":0,"BAJO":0};
+  centros.forEach(c=>Object.values(c.necesidades||{}).forEach(v=>{if(porNivel[v]!==undefined)porNivel[v]++;}));
+  const maxNivel=Math.max(...Object.values(porNivel),1);
+  const totalCrit=porNivel["CRÍTICO"];
+  const totalAlto=porNivel["ALTO"];
+  const totalMedio=porNivel["MEDIO"];
+  const totalBajo=porNivel["BAJO"];
+  const totalNiveles=totalCrit+totalAlto+totalMedio+totalBajo||1;
+  const porTipo={};centros.forEach(c=>{if(!porTipo[c.tipo])porTipo[c.tipo]=0;porTipo[c.tipo]++;});
+  const topTipos=Object.entries(porTipo).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxTipo=topTipos.length>0?topTipos[0][1]:1;
+  const insumosCrit={};centros.forEach(c=>Object.entries(c.necesidades||{}).forEach(([k,v])=>{if(v==="CRÍTICO"){if(!insumosCrit[k])insumosCrit[k]=0;insumosCrit[k]++;}}));
+  const topInsumos=Object.entries(insumosCrit).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxInsumo=topInsumos.length>0?topInsumos[0][1]:1;
+  return(
+    <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:14,marginBottom:16}}>
+      <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>📊 {t("analiticas")}</div>
+      <div style={{display:"flex",gap:4,marginBottom:12}}>
+        {[["resumen","Resumen"],["estados","Por Estado"],["niveles","Por Nivel"],["insumos","Insumos"]].map(([k,lbl])=><button key={k} onClick={()=>setTab(k)} style={{padding:"5px 12px",borderRadius:16,fontSize:11,cursor:"pointer",background:tab===k?"#1A73E8":T.surface2,color:tab===k?"#fff":T.textMuted,border:tab===k?"none":`1px solid ${T.border}`,fontWeight:tab===k?700:400}}>{lbl}</button>)}
+      </div>
+      {tab==="resumen"&&(
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:T.textMuted,marginBottom:6}}>📊 Distribución por estado</div>
+            {topEstados.slice(0,5).map(([est,n])=>(
+              <div key={est} style={{marginBottom:5}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:T.textMuted}}><span>{est.slice(0,15)}</span><span style={{fontWeight:700}}>{n}</span></div>
+                <div style={{height:6,background:T.border,borderRadius:3,marginTop:2}}><div style={{height:6,width:`${(n/maxEstado)*100}%`,background:"#1A73E8",borderRadius:3}}/></div>
+              </div>
+            ))}
+          </div>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:T.textMuted,marginBottom:6}}>🔴 Niveles de urgencia</div>
+            {[["CRÍTICO",totalCrit,"#FF3B3B"],["ALTO",totalAlto,"#FF8C00"],["MEDIO",totalMedio,"#F5C518"],["BAJO",totalBajo,"#4CAF50"]].map(([lv,n,clr])=>(
+              <div key={lv} style={{marginBottom:5}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:T.textMuted}}><span>{lv}</span><span style={{fontWeight:700,color:clr}}>{n}</span></div>
+                <div style={{height:6,background:T.border,borderRadius:3,marginTop:2}}><div style={{height:6,width:`${(n/maxNivel)*100}%`,background:clr,borderRadius:3}}/></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {tab==="estados"&&(
+        <div>
+          <div style={{fontSize:11,fontWeight:700,color:T.textMuted,marginBottom:8}}>🗺️ Centros por Estado</div>
+          {topEstados.map(([est,n])=>(
+            <div key={est} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span style={{fontSize:11,color:T.text,width:140,flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{est}</span>
+              <div style={{flex:1,height:8,background:T.border,borderRadius:4}}><div style={{height:8,width:`${(n/maxEstado)*100}%`,background:"#CF1A2F",borderRadius:4,transition:"width .5s"}}/></div>
+              <span style={{fontSize:11,fontWeight:800,color:T.text,width:24,textAlign:"right"}}>{n}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {tab==="niveles"&&(
+        <div>
+          <div style={{fontSize:11,fontWeight:700,color:T.textMuted,marginBottom:8}}>🚨 Distribución de Necesidades</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+            {[["🔴 CRÍTICO",totalCrit,"#FF3B3B"],["🟠 ALTO",totalAlto,"#FF8C00"],["🟡 MEDIO",totalMedio,"#F5C518"],["🟢 BAJO",totalBajo,"#4CAF50"]].map(([lb,n,clr])=>(
+              <div key={lb} style={{background:T.surface2,borderRadius:8,padding:"10px",textAlign:"center",borderTop:`3px solid ${clr}`}}>
+                <div style={{fontWeight:800,fontSize:22,color:clr}}>{n}</div>
+                <div style={{fontSize:10,color:T.textMuted}}>{lb}</div>
+                <div style={{fontSize:10,color:T.textFaint}}>{Math.round((n/totalNiveles)*100)}%</div>
+              </div>
+            ))}
+          </div>
+          <div style={{background:T.surface2,borderRadius:8,padding:10}}>
+            <div style={{height:20,display:"flex",borderRadius:4,overflow:"hidden"}}>
+              {totalNiveles>0&&(<>
+                <div style={{width:`${(totalCrit/totalNiveles)*100}%`,background:"#FF3B3B"}}/>
+                <div style={{width:`${(totalAlto/totalNiveles)*100}%`,background:"#FF8C00"}}/>
+                <div style={{width:`${(totalMedio/totalNiveles)*100}%`,background:"#F5C518"}}/>
+                <div style={{width:`${(totalBajo/totalNiveles)*100}%`,background:"#4CAF50"}}/>
+              </>)}
+            </div>
+          </div>
+        </div>
+      )}
+      {tab==="insumos"&&(
+        <div>
+          <div style={{fontSize:11,fontWeight:700,color:T.textMuted,marginBottom:8}}>🔴 Insumos más críticos</div>
+          {topInsumos.map(([ins,n])=>(
+            <div key={ins} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span style={{fontSize:11,color:T.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ins}</span>
+              <div style={{width:120,height:8,background:T.border,borderRadius:4}}><div style={{height:8,width:`${(n/maxInsumo)*100}%`,background:"#FF3B3B",borderRadius:4}}/></div>
+              <span style={{fontSize:11,fontWeight:800,color:"#FF3B3B",width:40,textAlign:"right"}}>{n} centro{n>1?"s":""}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPin){
@@ -130,8 +427,10 @@ function useLeaflet(mapRef,centros,refugios,userPos,pinActivoId,cercanoIds,onPin
       refugios.forEach(r=>{
         if(!r.lat||!r.lng)return;
         const icon=L.divIcon({className:"",html:`<div style="width:32px;height:32px;border-radius:4px;background:#4285F4;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:15px">🏕️</div>`,iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18]});
-        const popup=`<div style="font-family:Inter,sans-serif;min-width:200px;padding:4px 0"><div style="background:#1A73E8;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:5px;font-weight:700">🏕️ REFUGIO / ALBERGUE</div><div style="font-weight:800;font-size:13px;color:#111;margin-bottom:2px">${r.nombre}</div><div style="color:#555;font-size:11px;margin-bottom:5px">📍 ${r.ciudad}, ${r.estado}</div><div style="font-size:11px;color:#333">${r.direccion}</div>${r.tel?`<div style="margin-top:5px;font-size:11px;color:#1A73E8">📞 ${r.tel}</div>`:""}  </div>`;
-        mrkMap.current[`R-${r.id}`]=L.marker([r.lat,r.lng],{icon}).addTo(map).bindPopup(popup,{maxWidth:250});
+        const popup=`<div style="font-family:Inter,sans-serif;min-width:200px;padding:4px 0"><div style="background:#1A73E8;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:5px;font-weight:700">🏕️ REFUGIO / ALBERGUE</div><div style="font-weight:800;font-size:13px;color:#111;margin-bottom:2px">${r.nombre}</div><div style="color:#555;font-size:11px;margin-bottom:5px">📍 ${r.ciudad}, ${r.estado}</div><div style="font-size:11px;color:#333">${r.direccion}</div>${r.tel&&r.tel!=="N/A"?`<div style="margin-top:5px;font-size:11px;color:#1A73E8">📞 ${r.tel}</div>`:""}<div style="margin-top:9px;display:flex;gap:5px"><a href="https://www.google.com/maps?q=${r.lat},${r.lng}&z=17" target="_blank" style="flex:1;text-align:center;background:#1A73E8;color:#fff;border-radius:5px;padding:6px 4px;font-size:11px;font-weight:700;text-decoration:none">🗺️ Maps</a></div></div>`;
+        const mrk=L.marker([r.lat,r.lng],{icon}).addTo(map).bindPopup(popup,{maxWidth:250});
+        mrk.on("click",()=>{map.flyTo([r.lat,r.lng],15,{duration:1.1});});
+        mrkMap.current[`R-${r.id}`]=mrk;
       });
       centros.forEach(c=>{
         if(!c.lat||!c.lng)return;
@@ -506,11 +805,25 @@ function LoginAdmin({onLogin,onClose,T}){
 function App(){
   const [darkMode,setDarkMode]=useState(true);
   const T=darkMode?T_DARK:T_LIGHT;
+  const [lang,setLang]=useState("es");
+  currentLang=lang;
   const [centros,setCentros]=useState(()=>{
-    try{const d=localStorage.getItem("acopio_centros");return d?JSON.parse(d):CENTROS_INIT;}catch{return CENTROS_INIT;}
+    try{localStorage.removeItem("acopio_centros");}catch{}return CENTROS_INIT;
   });
   useEffect(()=>{try{localStorage.setItem("acopio_centros",JSON.stringify(centros));}catch{}},[centros]);
   const [refugios]=useState(REFUGIOS);
+  const [voluntarios,setVoluntarios]=useState(()=>{
+    try{const d=localStorage.getItem("acopio_voluntarios");return d?JSON.parse(d):[]}catch{return [];}
+  });
+  useEffect(()=>{try{localStorage.setItem("acopio_voluntarios",JSON.stringify(voluntarios));}catch{}},[voluntarios]);
+  const [inventario,setInventario]=useState(()=>{
+    try{const d=localStorage.getItem("acopio_inventario");return d?JSON.parse(d):[]}catch{return [];}
+  });
+  useEffect(()=>{try{localStorage.setItem("acopio_inventario",JSON.stringify(inventario));}catch{}},[inventario]);
+  const [showVoluntarios,setShowVoluntarios]=useState(false);
+  const [showInventario,setShowInventario]=useState(false);
+  const [showExportar,setShowExportar]=useState(false);
+  const [showAnalytics,setShowAnalytics]=useState(false);
   const [pinActivo,setPinActivo]=useState(null);
   const [busqCiudad,setBusqCiudad]=useState("");
   const [busqNombre,setBusqNombre]=useState("");
@@ -522,6 +835,8 @@ function App(){
   const [adminOk,setAdminOk]=useState(false);
   const mapaRef=useRef({flyTo:null});
 
+  useEffect(()=>{if(window.location.search.includes("admin=true")){setShowLogin(true);window.history.replaceState({},'',window.location.pathname);}},[]);
+
   const filtrados=centros.filter(c=>{
     if(busqCiudad&&!c.ciudad.toLowerCase().includes(busqCiudad.toLowerCase())&&!c.estado.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
     if(busqNombre&&!c.nombre.toLowerCase().includes(busqNombre.toLowerCase()))return false;
@@ -529,6 +844,7 @@ function App(){
   });
 
   const seleccionarCentro=(c)=>{setPinActivo(c);if(mapaRef.current?.flyTo)mapaRef.current.flyTo(c);document.getElementById("mapa-id")?.scrollIntoView({behavior:"smooth",block:"start"});};
+  const seleccionarRefugio=(r)=>{if(mapaRef.current?.flyTo)mapaRef.current.flyTo(r);document.getElementById("mapa-id")?.scrollIntoView({behavior:"smooth",block:"start"});};
   const totalCrit=centros.reduce((a,c)=>a+Object.values(c.necesidades||{}).filter(v=>v==="CRÍTICO").length,0);
   const totalRecibido=centros.reduce((a,c)=>a+c.recibido,0);
   const verificados=centros.filter(c=>c.verificado).length;
@@ -552,9 +868,13 @@ function App(){
             </div>
             <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
               <div style={{fontSize:12,background:"rgba(255,60,60,.35)",border:"1px solid rgba(255,100,100,.5)",color:"#FFB0B0",padding:"4px 12px",borderRadius:20,backdropFilter:"blur(4px)"}}>🔴 EMERGENCIA ACTIVA · {new Date().toLocaleDateString("es-VE")}</div>
-              <button onClick={()=>setDarkMode(d=>!d)} style={{background:"rgba(255,255,255,.18)",color:"#fff",border:"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 13px",cursor:"pointer",fontWeight:600,fontSize:12,backdropFilter:"blur(4px)"}}>{darkMode?"☀️ Claro":"🌙 Oscuro"}</button>
-              <button onClick={()=>{if(adminOk){setShowDash(true);}else{setShowLogin(true);}}} style={{background:"rgba(26,115,232,.85)",color:"#fff",border:"1px solid rgba(255,255,255,.3)",borderRadius:8,padding:"6px 13px",cursor:"pointer",fontWeight:700,fontSize:12,backdropFilter:"blur(4px)"}}>📊 {adminOk?"Dashboard":"Admin"}</button>
-              <button onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
+              <button title="Cambiar idioma" onClick={()=>setLang(l=>l==="es"?"en":"es")} style={{background:"rgba(255,255,255,.18)",color:"#fff",border:"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{lang==="es"?"🌐 EN":"🌐 ES"}</button>
+              <button title="Modo oscuro/claro" onClick={()=>setDarkMode(d=>!d)} style={{background:"rgba(255,255,255,.18)",color:"#fff",border:"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 13px",cursor:"pointer",fontWeight:600,fontSize:12,backdropFilter:"blur(4px)"}}>{darkMode?"☀️":"🌙"}</button>
+              <button title="Gestión de Voluntarios" onClick={()=>setShowVoluntarios(true)} style={{background:"rgba(76,175,80,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{voluntarios.length} 👥</button>
+              <button title="Control de Inventario" onClick={()=>setShowInventario(true)} style={{background:"rgba(255,140,0,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📦 {inventario.length}</button>
+              <button title="Analíticas y Gráficos" onClick={()=>setShowAnalytics(true)} style={{background:"rgba(156,39,176,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📊</button>
+              <button title="Exportar Datos" onClick={()=>setShowExportar(true)} style={{background:"rgba(33,150,243,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📥</button>
+              <button title="Registrar Centro de Acopio" onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
             </div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:12}}>
@@ -590,14 +910,14 @@ function App(){
         <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏕️ Refugios y Albergues Verificados</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
           {refugios.map(r=>(
-            <div key={r.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #1A73E8"}}>
+            <div key={r.id} onClick={()=>seleccionarRefugio(r)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #1A73E8",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#1A73E8"} onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
               <div style={{display:"flex",gap:4,marginBottom:3}}><span style={{fontSize:10,background:"#E3F2FD",color:"#0D47A1",padding:"1px 6px",borderRadius:20}}>🏕️ Refugio</span>{r.verificado&&<span style={{fontSize:10,background:"#E8F5E9",color:"#2E7D32",padding:"1px 6px",borderRadius:20}}>✓ Verificado</span>}</div>
               <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1}}>{r.nombre}</div>
               <div style={{color:T.textMuted,fontSize:11,marginBottom:5}}>📍 {r.ciudad}, {r.estado}</div>
               <div style={{color:T.textFaint,fontSize:11,marginBottom:6}}>{r.direccion}</div>
               <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-                {r.tel&&r.tel!=="Coordinación ONU"&&<a href={`tel:${r.tel.replace(/\D/g,"")}`} style={{display:"flex",alignItems:"center",gap:3,background:"#E8F5E9",color:"#1B5E20",border:"1px solid #A5D6A7",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>📞 {r.tel}</a>}
-                <a href={`https://www.google.com/maps?q=${r.lat},${r.lng}&z=17`} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:3,background:"#E3F2FD",color:"#0D47A1",border:"1px solid #90CAF9",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>🗺️ Maps</a>
+                {r.tel&&r.tel!=="N/A"&&<a href={`tel:${r.tel.replace(/\D/g,"")}`} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:3,background:"#E8F5E9",color:"#1B5E20",border:"1px solid #A5D6A7",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>📞 {r.tel}</a>}
+                <a href={`https://www.google.com/maps?q=${r.lat},${r.lng}&z=17`} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:3,background:"#E3F2FD",color:"#0D47A1",border:"1px solid #90CAF9",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>🗺️ Maps</a>
                 <span style={{fontSize:10,color:T.textMuted,marginLeft:"auto"}}>Ocup: {r.recibido}/{r.capacidad}</span>
               </div>
             </div>
@@ -607,7 +927,7 @@ function App(){
       </div>
       <div style={{borderTop:`1px solid ${T.border}`,padding:"12px 20px",background:T.surface}}>
         <div style={{maxWidth:1280,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-          <div style={{fontSize:11,color:T.textFaint}}>Red Nacional de Centros de Acopio · Emergencia Sísmica Venezuela 2026 · Mapa: OpenStreetMap</div>
+          <div style={{fontSize:10,color:T.textFaint}}>Red Nacional de Centros de Acopio · Emergencia Sísmica Venezuela 2026<br/><a href="https://responsegrid.app" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4"}}>ResponseGrid</a> by <a href="https://globalemergency.online" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4"}}>Global Emergency</a> — CC BY-SA 4.0 · Mapa: OpenStreetMap</div>
           <div style={{display:"flex",gap:12,fontSize:11}}>
             <a href="https://panitasmap.org" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4",textDecoration:"none"}}>PanitasMap</a>
             <a href="https://auxiliovenezuela.com" target="_blank" rel="noopener noreferrer" style={{color:"#4285F4",textDecoration:"none"}}>AuxilioVenezuela</a>
@@ -620,6 +940,58 @@ function App(){
       {cert&&<Certificado centro={cert} onClose={()=>setCert(null)}/>}
       {showLogin&&<LoginAdmin onLogin={()=>{setAdminOk(true);setShowLogin(false);setShowDash(true);}} onClose={()=>setShowLogin(false)} T={T}/>}
       {showDash&&adminOk&&<Dashboard centros={centros} refugios={refugios} onClose={()=>setShowDash(false)} T={T}/>}
+      {showVoluntarios&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={()=>setShowVoluntarios(false)}>
+          <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:600,maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+            <div style={{background:"linear-gradient(135deg,#2E7D32,#4CAF50)",padding:"14px 18px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontWeight:800,fontSize:15,color:"#fff"}}>👥 Gestión de Voluntarios</div>
+              <button onClick={()=>setShowVoluntarios(false)} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:6,cursor:"pointer",fontSize:16}}>×</button>
+            </div>
+            <div style={{padding:14}}>
+              <VoluntariosPanel voluntarios={voluntarios} setVoluntarios={setVoluntarios} centros={centros} T={T}/>
+            </div>
+          </div>
+        </div>
+      )}
+      {showInventario&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={()=>setShowInventario(false)}>
+          <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:600,maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+            <div style={{background:"linear-gradient(135deg,#E65100,#FF8C00)",padding:"14px 18px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontWeight:800,fontSize:15,color:"#fff"}}>📦 Control de Inventario</div>
+              <button onClick={()=>setShowInventario(false)} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:6,cursor:"pointer",fontSize:16}}>×</button>
+            </div>
+            <div style={{padding:14}}>
+              <InventarioPanel inventario={inventario} setInventario={setInventario} centros={centros} T={T}/>
+            </div>
+          </div>
+        </div>
+      )}
+      {showExportar&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={()=>setShowExportar(false)}>
+          <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:450,maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+            <div style={{background:"linear-gradient(135deg,#0D47A1,#1A73E8)",padding:"14px 18px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontWeight:800,fontSize:15,color:"#fff"}}>📥 Exportar Datos</div>
+              <button onClick={()=>setShowExportar(false)} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:6,cursor:"pointer",fontSize:16}}>×</button>
+            </div>
+            <div style={{padding:14}}>
+              <ExportarPanel centros={centros} voluntarios={voluntarios} inventario={inventario} T={T}/>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAnalytics&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={()=>setShowAnalytics(false)}>
+          <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:600,maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+            <div style={{background:"linear-gradient(135deg,#6A1B9A,#9C27B0)",padding:"14px 18px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontWeight:800,fontSize:15,color:"#fff"}}>📊 Analíticas</div>
+              <button onClick={()=>setShowAnalytics(false)} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:6,cursor:"pointer",fontSize:16}}>×</button>
+            </div>
+            <div style={{padding:14}}>
+              <AnalyticsPanel centros={centros} refugios={refugios} voluntarios={voluntarios} inventario={inventario} T={T}/>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
