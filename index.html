@@ -1060,9 +1060,9 @@ function App(){
               <button title="Registrar Centro de Acopio" onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
             </div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:12}}>
-            {[["📦",centros.length,"Centros de Acopio","#FFD100"],["🏕️",refugios.length,"Refugios activos","#4FC3F7"],["🔴",totalCrit,"Alertas críticas","#FF8080"],["✅",`${verificados}/${centros.length}`,"Verificados","#81C784"]].map(([ic,v,lbl,color])=>(
-              <div key={lbl} style={{background:"rgba(0,0,0,.35)",backdropFilter:"blur(4px)",borderRadius:10,padding:"9px 12px",borderBottom:`2px solid ${color}`}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginTop:12}}>
+            {[["📦",centros.length,"Centros de Acopio","#FFD100","seccion-centros"],["🏕️",refugios.length,"Refugios activos","#4FC3F7","seccion-refugios"],["🏥",hospitales.length,"Hospitales","#4CAF50","seccion-hospitales"],["🔴",totalCrit,"Alertas críticas","#FF8080","seccion-alertas"],["✅",`${verificados}/${centros.length}`,"Verificados","#81C784","seccion-centros"]].map(([ic,v,lbl,color,id])=>(
+              <div key={lbl} onClick={()=>{document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"})}} style={{background:"rgba(0,0,0,.35)",backdropFilter:"blur(4px)",borderRadius:10,padding:"9px 12px",borderBottom:`2px solid ${color}`,cursor:"pointer"}}>
                 <div style={{fontSize:11,color:"rgba(255,255,255,.65)",marginBottom:1}}>{ic} {lbl}</div>
                 <div style={{fontWeight:800,fontSize:20,color:"#fff",textShadow:"0 1px 4px rgba(0,0,0,.5)"}}>{v}</div>
               </div>
@@ -1072,7 +1072,7 @@ function App(){
       </div>
       <div style={{maxWidth:1280,margin:"0 auto",padding:"18px 20px"}}>
         {topCrit.length>0&&(
-          <div style={{background:T.alertBg,border:`1px solid ${T.alertBorder}`,borderRadius:12,padding:"10px 16px",marginBottom:14}}>
+          <div id="seccion-alertas" style={{background:T.alertBg,border:`1px solid ${T.alertBorder}`,borderRadius:12,padding:"10px 16px",marginBottom:14}}>
             <div style={{fontWeight:700,color:T.alertText,fontSize:13,marginBottom:6}}>📋 Insumos más urgentes en toda la red:</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:5}}>{topCrit.map(([ins,c])=><span key={ins} style={{background:T.critBg,color:T.critText,padding:"2px 9px",borderRadius:6,fontSize:12,fontWeight:600}}>{ins} <span style={{opacity:.75}}>({c.CRÍTICO} centros)</span></span>)}</div>
           </div>
@@ -1082,7 +1082,7 @@ function App(){
         <div id="mapa-id">
           <MapaPrincipal key="main-map" centros={filtrados.length>0?filtrados:centros} refugios={refugios} hospitales={hospitales} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} T={T}/>
         </div>
-        <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div id="seccion-centros" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <span>📦 Centros de Acopio Registrados</span>
           <span style={{fontSize:11,color:T.textMuted,fontWeight:400}}>Toca una tarjeta para verlo en el mapa 👆</span>
         </div>
@@ -1090,7 +1090,7 @@ function App(){
           ?<div style={{textAlign:"center",padding:"28px",color:T.textFaint,background:T.surface,borderRadius:12,marginBottom:14}}><div style={{fontSize:28,marginBottom:6}}>👤</div><div>No se encontraron centros con esos criterios.</div></div>
           :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:18}}>{filtrados.map(c=><Tarjeta key={c.id} centro={c} activo={pinActivo?.id===c.id} T={T} onSeleccionar={seleccionarCentro} onVerDetalle={setDetalle} onCert={setCert}/>)}</div>
         }
-        <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏕️ Refugios y Albergues Verificados</div>
+        <div id="seccion-refugios" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏕️ Refugios y Albergues Verificados</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
           {refugios.map(r=>(
             <div key={r.id} onClick={()=>seleccionarRefugio(r)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #1A73E8",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#1A73E8"} onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
@@ -1105,7 +1105,7 @@ function App(){
             </div>
           ))}
         </div>
-        <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏥 Hospitales</div>
+        <div id="seccion-hospitales" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏥 Hospitales</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
           {hospitales.map(h=>(
             <div key={h.id} onClick={()=>{if(h.lat&&h.lon)seleccionarCentro({lat:h.lat,lng:h.lon,id:h.id,nombre:h.name,ciudad:h.city,estado:h.state});}} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #2E7D32",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#2E7D32"} onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
