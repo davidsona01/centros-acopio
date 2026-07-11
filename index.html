@@ -45,6 +45,41 @@ const genId=(existentes)=>{let id;do{id="A"+String(Math.floor(Math.random()*9000
 
 const hashPass=async(pass)=>{const enc=new TextEncoder().encode(pass);const buf=await crypto.subtle.digest("SHA-256",enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");};
 
+const genWhatsAppMsg=(c)=>{
+  const criticos=Object.entries(c.necesidades||{}).filter(([,v])=>v==="CRÍTICO").map(([k])=>k);
+  const altos=Object.entries(c.necesidades||{}).filter(([,v])=>v==="ALTO").map(([k])=>k);
+  const pct=Math.round((c.recibido/(c.capacidad||1))*100);
+  let msg=`📋 *ESTADO CENTRO DE ACOPIO*\n`;
+  msg+=`━━━━━━━━━━━━━━━━━━\n`;
+  msg+=`📍 *${c.nombre}*\n`;
+  msg+=`🗺️ ${c.ciudad}, ${c.estado}\n`;
+  msg+=`👤 Coordinador: ${c.responsable||"N/D"}\n`;
+  msg+=`📱 WhatsApp: +58 ${fmtWA(c.whatsapp)}\n`;
+  msg+=`━━━━━━━━━━━━━━━━━━\n`;
+  msg+=`📦 Capacidad: ${c.capacidad} unidades\n`;
+  msg+=`📥 Recibido: ${c.recibido} (${pct}%)\n`;
+  msg+=`✅ Verificado: ${c.verificado?"Sí":"No"}\n`;
+  if(criticos.length>0){
+    msg+=`\n🔴 *NECESIDADES CRÍTICAS:*\n`;
+    criticos.forEach(n=>{msg+=`  ⚠️ ${n}\n`;});
+  }
+  if(altos.length>0){
+    msg+=`\n🟠 *NECESIDADES ALTAS:*\n`;
+    altos.forEach(n=>{msg+=`  ⚠️ ${n}\n`;});
+  }
+  if(c.lat&&c.lng){
+    msg+=`\n🗺️ Ver en mapa: https://www.google.com/maps?q=${c.lat},${c.lng}&z=17\n`;
+  }
+  msg+=`\n━━━━━━━━━━━━━━━━━━\n`;
+  msg+=`Red Nacional de Acopio Venezuela 2026`;
+  return msg;
+};
+const shareWhatsApp=(c)=>{
+  const msg=genWhatsAppMsg(c);
+  const url=`https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url,"_blank");
+};
+
 const HASHED_ADMIN_PASS="6051fc84a7a0d74c225fb18a496b09952da5642e60723ecae543298edd7d82d6";
 
 const T_DARK={bg:"#0D0D1A",surface:"#1C1C2E",surface2:"#13131F",border:"#2D2D44",text:"#F0F0F0",textMuted:"#888",textFaint:"#555",inputBg:"#13131F",statBg:"rgba(0,0,0,.35)",tagBg:"#2D2D44",tagText:"#aaa",critBg:"#3D0A0A",critText:"#FF6B6B",cardShadow:"0 1px 4px rgba(0,0,0,.3)",alertBg:"#1A0000",alertBorder:"#5C1A1A",alertText:"#FF6B6B"};
@@ -272,15 +307,18 @@ function CertQR({value,size=140}){
   return(<div ref={svgRef} style={{width:size,height:size,display:"flex",alignItems:"center",justifyContent:"center",background:"#fff",borderRadius:4}}/>);
 }
 
-const HABILIDADES=["Primeros auxilios","Cocina","Logística","Médico","Enfermería","Construcción","Transporte","Comunicaciones","Administración","Limpieza","Educación","Psicología"];
+const HABILIDADES=["Primeros auxilios","Cocina","Logística","Médico","Enfermería","Construcción","Transporte","Comunicaciones","Administración","Limpieza","Educación","Psicología","Búsqueda y rescate","Trabajo social","Electricidad","Plomería"];
 const DISPONIBILIDADES=["Mañana","Tarde","Noche","Completo"];
+const DIAS=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 
 function VoluntariosPanel({voluntarios,setVoluntarios,centros,T}){
   const [showForm,setShowForm]=useState(false);
-  const [form,setForm]=useState({nombre:"",telefono:"",habilidades:[],disponibilidad:"",centroAsignado:""});
+  const [form,setForm]=useState({nombre:"",telefono:"",habilidades:[],disponibilidad:"",centroAsignado:"",foto:"",experiencia:"",notas:"",dias:[]});
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
   const toggleHab=(h)=>setForm(f=>({...f,habilidades:f.habilidades.includes(h)?f.habilidades.filter(x=>x!==h):[...f.habilidades,h]}));
-  const registrar=()=>{if(!form.nombre||!form.telefono)return;const v={...form,id:"V"+Date.now(),fecha:new Date().toISOString().slice(0,10),activo:true,horas:0};setVoluntarios(p=>[...p,v]);setForm({nombre:"",telefono:"",habilidades:[],disponibilidad:"",centroAsignado:""});setShowForm(false);};
+  const toggleDia=(d)=>setForm(f=>({...f,dias:f.dias.includes(d)?f.dias.filter(x=>x!==d):[...f.dias,d]}));
+  const handleVolFoto=(e)=>{const file=e.target.files[0];if(!file)return;if(file.size>300000)return;const r=new FileReader();r.onload=(ev)=>{set("foto",ev.target.result);};r.readAsDataURL(file);};
+  const registrar=()=>{if(!form.nombre||!form.telefono)return;const v={...form,id:"V"+Date.now(),fecha:new Date().toISOString().slice(0,10),activo:true,horas:0};setVoluntarios(p=>[...p,v]);setForm({nombre:"",telefono:"",habilidades:[],disponibilidad:"",centroAsignado:"",foto:"",experiencia:"",notas:"",dias:[]});setShowForm(false);};
   const activos=voluntarios.filter(v=>v.activo).length;
   const asignados=voluntarios.filter(v=>v.centroAsignado).length;
   const totalHoras=voluntarios.reduce((a,v)=>a+(v.horas||0),0);
@@ -316,20 +354,42 @@ function VoluntariosPanel({voluntarios,setVoluntarios,centros,T}){
             <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Disponibilidad</label><select value={form.disponibilidad} onChange={e=>set("disponibilidad",e.target.value)} style={si}><option value="">Seleccionar...</option>{DISPONIBILIDADES.map(d=><option key={d} value={d}>{d}</option>)}</select></div>
             <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Centro asignado</label><select value={form.centroAsignado} onChange={e=>set("centroAsignado",e.target.value)} style={si}><option value="">Sin asignar</option>{centros.map(c=><option key={c.id} value={c.id}>{c.nombre.slice(0,25)}</option>)}</select></div>
           </div>
-          <button onClick={registrar} disabled={!form.nombre||!form.telefono} style={{width:"100%",marginTop:8,background:form.nombre&&form.telefono?"#CF1A2F":"#666",color:"#fff",border:"none",borderRadius:6,padding:"8px",cursor:form.nombre&&form.telefono?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>? Registrar Voluntario</button>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+            <div><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Experiencia / Certificaciones</label><input value={form.experiencia} onChange={e=>set("experiencia",e.target.value)} placeholder="Ej: Cruz Roja, SAMU..." style={si}/></div>
+            <div>
+              <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Foto del voluntario</label>
+              <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                <label style={{display:"flex",alignItems:"center",gap:4,background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:6,padding:"5px 8px",cursor:"pointer",fontSize:10,color:T.textMuted,flex:1}}>
+                  📸 {form.foto?"Foto cargada":"Subir foto"}
+                  <input type="file" accept="image/*" onChange={handleVolFoto} style={{display:"none"}}/>
+                </label>
+                {form.foto&&<img src={form.foto} alt="" style={{width:32,height:32,borderRadius:6,objectFit:"cover"}}/>}
+              </div>
+            </div>
+          </div>
+          <div style={{marginBottom:8}}>
+            <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Días disponibles</label>
+            <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+              {DIAS.map(d=><button key={d} onClick={()=>toggleDia(d)} style={{padding:"3px 8px",borderRadius:12,fontSize:10,cursor:"pointer",background:form.dias.includes(d)?"#4CAF50":T.border,color:form.dias.includes(d)?"#fff":T.textMuted,border:"none",fontWeight:600}}>{d}</button>)}
+            </div>
+          </div>
+          <div style={{marginBottom:8}}><label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:3}}>Notas adicionales</label><input value={form.notas} onChange={e=>set("notas",e.target.value)} placeholder="Observaciones, idiomas, etc." style={si}/></div>
+          <button onClick={registrar} disabled={!form.nombre||!form.telefono} style={{width:"100%",marginTop:8,background:form.nombre&&form.telefono?"#CF1A2F":"#666",color:"#fff",border:"none",borderRadius:6,padding:"8px",cursor:form.nombre&&form.telefono?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>✅ Registrar Voluntario</button>
         </div>
       )}
       <div style={{maxHeight:200,overflow:"auto"}}>
         {voluntarios.length===0?<div style={{textAlign:"center",padding:16,color:T.textFaint,fontSize:12}}>No hay voluntarios registrados</div>:
         voluntarios.map(v=>(
           <div key={v.id} style={{display:"flex",alignItems:"center",gap:10,background:T.surface2,borderRadius:8,padding:"8px 10px",marginBottom:6,borderLeft:`3px solid ${v.activo?"#4CAF50":"#FF3B3B"}`}}>
-            <div style={{width:32,height:32,borderRadius:"50%",background:v.activo?"#E8F5E9":"#FEE2E2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>👤</div>
+            {v.foto?<img src={v.foto} alt="" style={{width:32,height:32,borderRadius:"50%",objectFit:"cover",flexShrink:0}}/>:<div style={{width:32,height:32,borderRadius:"50%",background:v.activo?"#E8F5E9":"#FEE2E2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>👤</div>}
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontWeight:700,fontSize:12,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{v.nombre}</div>
               <div style={{fontSize:10,color:T.textMuted}}>📞 {v.telefono} · {v.disponibilidad||"N/D"} · ⏰ {v.horas||0}h</div>
+              {v.dias&&v.dias.length>0&&<div style={{fontSize:9,color:T.textFaint,marginTop:1}}>📅 {v.dias.join(", ")}</div>}
+              {v.experiencia&&<div style={{fontSize:9,color:T.textFaint}}>🏅 {v.experiencia}</div>}
             </div>
             <div style={{display:"flex",gap:3,flexWrap:"wrap",maxWidth:120}}>
-              {v.habilidades.slice(0,2).map(h=><span key={h} style={{fontSize:8,background:T.tagBg,color:T.tagText,padding:"1px 5px",borderRadius:8}}>{h}</span>)}
+              {v.habilidades.slice(0,3).map(h=><span key={h} style={{fontSize:8,background:T.tagBg,color:T.tagText,padding:"1px 5px",borderRadius:8}}>{h}</span>)}
             </div>
             <button onClick={()=>setVoluntarios(p=>p.map(x=>x.id===v.id?{...x,activo:!x.activo}:x))} style={{fontSize:10,background:v.activo?"#FEE2E2":"#E8F5E9",color:v.activo?"#DC2626":"#2E7D32",border:"none",borderRadius:4,padding:"3px 6px",cursor:"pointer",fontWeight:600}}>{v.activo?"Desactivar":"Activar"}</button>
           </div>
@@ -578,8 +638,8 @@ function AnalyticsPanel({centros,refugios,voluntarios,inventario,T}){
   );
 }
 
-function useLeaflet(mapRef,centros,refugios,hospitales,userPos,pinActivoId,cercanoIds,onPin){
-  const mapInst=useRef(null),mrkMap=useRef({}),userMrk=useRef(null),circRef=useRef(null),ready=useRef(false);
+function useLeaflet(mapRef,centros,refugios,hospitales,userPos,pinActivoId,cercanoIds,onPin,showHeatMap,heatFilter){
+  const mapInst=useRef(null),mrkMap=useRef({}),userMrk=useRef(null),circRef=useRef(null),ready=useRef(false),eqLayer=useRef(null),heatLayer=useRef(null);
   const intervals=useRef([]);
   const firstUserPos=useRef(true);
   const cleanupIntervals=()=>{intervals.current.forEach(clearInterval);intervals.current=[];};
@@ -592,15 +652,93 @@ function useLeaflet(mapRef,centros,refugios,hospitales,userPos,pinActivoId,cerca
         window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
         mapInst.current=map;ready.current=true;
         setTimeout(()=>{try{map.invalidateSize();}catch(e){}},500);
+        fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson").then(r=>r.json()).then(data=>{
+          if(!mapInst.current)return;
+          const features=data.features.filter(f=>{
+            const[lon,lat]=f.geometry.coordinates;
+            return lat>0&&lat<16&&lon>-76&&lon<-58;
+          });
+          if(eqLayer.current)eqLayer.current.clearLayers();
+          eqLayer.current=window.L.geoJSON({type:"FeatureCollection",features},{
+            pointToLayer:(feat,ll)=>{
+              const mag=feat.properties.mag||0;
+              const depth=feat.geometry.coordinates[2]||10;
+              const time=feat.properties.time||0;
+              const hrsAgo=(Date.now()-time)/3600000;
+              const size=Math.max(6,Math.min(30,mag*5));
+              const opacity=Math.max(0.3,Math.min(1,1-hrsAgo/168));
+              const col=mag>=6?"#FF1744":mag>=5?"#FF9100":mag>=4?"#FFD600":"#448AFF";
+              return window.L.circleMarker(ll,{
+                radius:size/2,color:col,fillColor:col,fillOpacity:0.25*opacity,weight:2,opacity:opacity
+              });
+            },
+            onEachFeature:(feat,lay)=>{
+              const p=feat.properties;const coords=feat.geometry.coordinates;
+              const date=new Date(p.time).toLocaleString("es-VE");
+              lay.bindPopup(`
+                <div style="font-family:Inter,sans-serif;min-width:200px">
+                  <div style="background:#FF3B3B;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:5px;font-weight:700">🌊 SISMO</div>
+                  <div style="font-weight:800;font-size:15px;color:#111;margin:4px 0">M${p.mag} · ${p.place}</div>
+                  <div style="color:#555;font-size:11px">⏱ ${date}</div>
+                  <div style="color:#888;font-size:11px">📏 Profundidad: ${coords[2]} km</div>
+                  <div style="margin-top:6px;font-size:10px;color:#999">${p.url?"<a href='"+p.url+"' target='_blank' style='color:#1A73E8'>Ver en USGS ↗</a>":""}</div>
+                </div>
+              `);
+              lay.on("click",()=>map.flyTo([coords[1],coords[0]],8,{duration:1}));
+            }
+          }).addTo(map);
+        }).catch(()=>{});
       }catch(e){console.warn("Map init error:",e);}
     };
     cleanupIntervals();
     if(window.L){setTimeout(init,100);return;}
     if(!document.getElementById("lf-css")){const l=document.createElement("link");l.id="lf-css";l.rel="stylesheet";l.href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css";document.head.appendChild(l);}
-    if(!document.getElementById("lf-js")){const s=document.createElement("script");s.id="lf-js";s.src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js";s.onload=()=>setTimeout(init,150);document.head.appendChild(s);}
+    if(!document.getElementById("lf-js")){const s=document.createElement("script");s.id="lf-js";s.src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js";s.onload=()=>{setTimeout(()=>{const h=document.createElement("script");h.src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js";h.onload=()=>setTimeout(init,150);document.head.appendChild(h);},100);};document.head.appendChild(s);}
     else{const id=setInterval(()=>{if(window.L){clearInterval(id);init();}},150);intervals.current.push(id);}
     return()=>{cleanupIntervals();if(mapInst.current){try{mapInst.current.remove();}catch(e){}mapInst.current=null;ready.current=false;}};
   },[]);
+
+  useEffect(()=>{
+    const map=mapInst.current,L=window.L;if(!map||!L||!L.heatLayer)return;
+    if(heatLayer.current){heatLayer.current.remove();heatLayer.current=null;}
+    if(showHeatMap){
+      const pts=[];
+      centros.forEach(c=>{
+        if(!c.lat||!c.lng)return;
+        let intensity=0.3;
+        if(heatFilter==="todos"){
+          const critCount=Object.values(c.necesidades||{}).filter(v=>v==="CRÍTICO").length;
+          const altCount=Object.values(c.necesidades||{}).filter(v=>v==="ALTO").length;
+          intensity=Math.min(1,(critCount*0.3+altCount*0.15+0.1));
+        }else if(heatFilter==="agua"){
+          const v=c.necesidades?.["Agua potable"]||c.necesidades?.["Agua y alimentos"]||"";
+          intensity=v==="CRÍTICO"?1:v==="ALTO"?0.7:v==="MEDIO"?0.4:0.1;
+        }else if(heatFilter==="comida"){
+          const v=c.necesidades?.["Alimentos enlatados"]||c.necesidades?.["Arroz"]||"";
+          intensity=v==="CRÍTICO"?1:v==="ALTO"?0.7:v==="MEDIO"?0.4:0.1;
+        }else if(heatFilter==="medicina"){
+          const v=c.necesidades?.["Medicamentos básicos"]||c.necesidades?.["Gasas estériles"]||"";
+          intensity=v==="CRÍTICO"?1:v==="ALTO"?0.7:v==="MEDIO"?0.4:0.1;
+        }else if(heatFilter==="refugio"){
+          const v=c.necesidades?.["Colchonetas"]||c.necesidades?.["Cobijas/frazadas"]||"";
+          intensity=v==="CRÍTICO"?1:v==="ALTO"?0.7:v==="MEDIO"?0.4:0.1;
+        }else if(heatFilter==="higiene"){
+          const v=c.necesidades?.["Jabón de baño"]||c.necesidades?.["Pañales bebé"]||"";
+          intensity=v==="CRÍTICO"?1:v==="ALTO"?0.7:v==="MEDIO"?0.4:0.1;
+        }else if(heatFilter==="cobertura"){
+          intensity=0.5;
+        }
+        pts.push([c.lat,c.lng,intensity]);
+      });
+      refugios.forEach(r=>{if(r.lat&&r.lon)pts.push([r.lat,r.lon,heatFilter==="cobertura"?0.6:0.2]);});
+      hospitales.forEach(h=>{if(h.lat&&h.lon)pts.push([h.lat,h.lon,heatFilter==="cobertura"?0.7:0.15]);});
+      if(pts.length>0){
+        const grad=heatFilter==="cobertura"?{0.2:"#4285F4",0.4:"#4CAF50",0.6:"#FFD600",0.8:"#FF9100",1.0:"#FF3B3B"}:{0.2:"#E3F2FD",0.4:"#FFEBEE",0.6:"#FFCDD2",0.8:"#EF9A9A",1.0:"#E53935"};
+        heatLayer.current=L.heatLayer(pts,{radius:35,blur:25,maxZoom:10,gradient:grad}).addTo(map);
+      }
+    }
+    return()=>{if(heatLayer.current){heatLayer.current.remove();heatLayer.current=null;}};
+  },[showHeatMap,heatFilter,centros,refugios,hospitales]);
 
   useEffect(()=>{
     const draw=()=>{
@@ -728,7 +866,7 @@ function BarraBusqueda({busqCiudad,setBusqCiudad,busqNombre,setBusqNombre,filtra
   );
 }
 
-function MapaPrincipal({centros,refugios,hospitales,pinActivoId,onPinClick,mapaRef,T}){
+function MapaPrincipal({centros,refugios,hospitales,pinActivoId,onPinClick,mapaRef,showHeatMap,setShowHeatMap,heatFilter,setHeatFilter,T}){
   const mapRef=useRef(null);
   const [userPos,setUserPos]=useState(null);
   const [cercanos,setCercanos]=useState([]);
@@ -745,7 +883,7 @@ function MapaPrincipal({centros,refugios,hospitales,pinActivoId,onPinClick,mapaR
     return()=>{o.disconnect();clearTimeout(fallback);};
   },[]);
   const cercanoIds=cercanos.map(c=>c.id);
-  const {flyTo}=useLeaflet(mapRef,centros,refugios,hospitales,userPos,pinActivoId,cercanoIds,onPinClick);
+  const {flyTo}=useLeaflet(mapRef,centros,refugios,hospitales,userPos,pinActivoId,cercanoIds,onPinClick,showHeatMap,heatFilter);
   useEffect(()=>{if(mapaRef)mapaRef.current={flyTo};},[flyTo]);
 
   const usarGPS=()=>{
@@ -762,11 +900,13 @@ function MapaPrincipal({centros,refugios,hospitales,pinActivoId,onPinClick,mapaR
     <div style={{borderRadius:14,overflow:"hidden",border:`1px solid ${T.border}`,boxShadow:"0 4px 20px rgba(0,0,0,.1)",marginBottom:22}}>
       <div style={{background:T.surface,borderBottom:`1px solid ${T.border}`,padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
         <div>
-          <span style={{fontWeight:700,fontSize:14,color:T.text}}>🗺️ Mapa de Centros, Refugios y Hospitales</span>
+          <span style={{fontWeight:700,fontSize:14,color:T.text}}>🗺️ Mapa de Centros, Refugios, Hospitales y Sismos</span>
           <div style={{fontSize:10,color:T.textMuted,marginTop:1}}>
             <span style={{marginRight:10}}>📦 {centros.length} centros</span>
             <span style={{marginRight:10}}>🏕️ {refugios.length} refugios</span>
-            <span>🏥 {hospitales.length} hospitales</span>
+            <span style={{marginRight:10}}>🏥 {hospitales.length} hospitales</span>
+            <span style={{marginRight:10}}>🌊 Sismos (USGS)</span>
+            {showHeatMap&&<span style={{color:"#FF9100",fontWeight:600}}>🔥 Mapa de calor activo</span>}
           </div>
         </div>
         <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
@@ -776,7 +916,21 @@ function MapaPrincipal({centros,refugios,hospitales,pinActivoId,onPinClick,mapaR
             ))}
             <span style={{display:"flex",alignItems:"center",gap:2}}><span style={{display:"inline-block",width:14,height:14,borderRadius:3,background:"#1A73E8",border:"1.5px solid #fff",verticalAlign:"middle"}}></span> Refugio</span>
             <span style={{display:"flex",alignItems:"center",gap:2}}><span style={{display:"inline-block",width:14,height:14,borderRadius:3,background:"#2E7D32",border:"1.5px solid #fff",verticalAlign:"middle"}}></span> Hospital</span>
+            <span style={{display:"flex",alignItems:"center",gap:2}}><span style={{display:"inline-block",width:14,height:14,borderRadius:"50%",background:"#FF9100",border:"1.5px solid #fff",verticalAlign:"middle"}}></span> Sismo M4+</span>
+            {showHeatMap&&<span style={{display:"flex",alignItems:"center",gap:2}}><span style={{display:"inline-block",width:14,height:14,borderRadius:3,background:"linear-gradient(135deg,#4285F4,#4CAF50,#FFD600,#FF3B3B)",border:"1.5px solid #fff",verticalAlign:"middle"}}></span> Mapa de calor</span>}
           </div>
+          <button onClick={()=>setShowHeatMap(!showHeatMap)} style={{background:showHeatMap?"#1A73E8":T.surface2,color:showHeatMap?"#fff":T.textMuted,border:showHeatMap?"none":`1px solid ${T.border}`,borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
+            🔥 {showHeatMap?"Ocultar calor":"Mapa de calor"}
+          </button>
+          {showHeatMap&&<select value={heatFilter} onChange={e=>setHeatFilter(e.target.value)} style={{background:T.surface2,color:T.text,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",cursor:"pointer",fontWeight:700,fontSize:11}}>
+            <option value="todos">🔴 Todas las necesidades</option>
+            <option value="agua">💧 Agua / Alimentos</option>
+            <option value="comida">🍚 Comida / Ración</option>
+            <option value="medicina">💊 Medicinas</option>
+            <option value="refugio">🏕️ Refugio / Colchonetas</option>
+            <option value="higiene">🧼 Higiene / Pañales</option>
+            <option value="cobertura">📍 Cobertura general</option>
+          </select>}
           <button onClick={usarGPS} disabled={gpsLoad} style={{background:userPos?"#0D3D1F":"#CF1A2F",color:userPos?"#4CAF50":"#fff",border:userPos?"1px solid #1A5C2A":"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
             {gpsLoad?"🔍 Buscando...":userPos?"🔄 Actualizar":"👁️ Ver centros cercanos a mí"}
           </button>
@@ -830,24 +984,33 @@ function Certificado({centro,onClose}){
 }
 
 function Detalle({centro,onClose,onCert,T}){
-  const [tab,setTab]=useState("necesidades");if(!centro)return null;
+  const [tab,setTab]=useState("necesidades");const [fotoPreview,setFotoPreview]=useState(centro?.foto||"");if(!centro)return null;
   const pct=Math.round((centro.recibido/(centro.capacidad||1))*100);
   const embed=centro.lat&&centro.lng?`https://maps.google.com/maps?q=${centro.lat},${centro.lng}&z=16&output=embed`:null;
   const gmaps=centro.lat&&centro.lng?`https://www.google.com/maps?q=${centro.lat},${centro.lng}&z=17`:"#";
   const necesidades=centro.necesidades||{};
+  const handleFoto=(e)=>{const f=e.target.files[0];if(!f)return;if(f.size>500000){alert("Foto muy grande, máx 500KB");return;}const r=new FileReader();r.onload=(ev)=>{setFotoPreview(ev.target.result);};r.readAsDataURL(f);};
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:660,maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#CF1A2F,#8B0000)",padding:"18px 22px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between"}}><div><div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginBottom:3}}>{centro.tipo} · {centro.estado}</div><div style={{fontWeight:800,fontSize:17,color:"#fff"}}>{centro.nombre}</div><div style={{fontSize:12,color:"rgba(255,255,255,.8)",marginTop:3}}>📍 {centro.ciudad} · {centro.direccion||""}</div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:30,height:30,borderRadius:7,cursor:"pointer",fontSize:17,flexShrink:0}}>×</button></div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:T.border}}>{[["Capacidad",centro.capacidad+" unid."],["Donaciones",`${centro.recibido} (${pct}%)`],["Coordinador",centro.responsable]].map(([k,v])=><div key={k} style={{background:T.surface2,padding:"9px 12px",textAlign:"center"}}><div style={{fontSize:10,color:T.textMuted,marginBottom:2}}>{k}</div><div style={{fontSize:12,fontWeight:700,color:T.text}}>{v}</div></div>)}</div><div style={{display:"flex",borderBottom:`1px solid ${T.border}`}}>{[["necesidades","📋 Insumos"],["ubicacion","📍 Ubicación"],["contacto","💬 Contacto"],["qr","📲 QR"]].map(([t,lbl])=><button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"9px 4px",background:"none",border:"none",color:tab===t?"#CF1A2F":T.textMuted,fontWeight:tab===t?700:400,fontSize:12,borderBottom:tab===t?"2px solid #CF1A2F":"2px solid transparent",cursor:"pointer"}}>{lbl}</button>)}</div><div style={{padding:16}}>{tab==="necesidades"&&<div style={{display:"grid",gap:6}}>{Object.entries(necesidades).sort((a,b)=>{const order={"CRÍTICO":0,"ALTO":1,"MEDIO":2,"BAJO":3};return(order[a[1]]||99)-(order[b[1]]||99);}).map(([ins,nv])=>{const niv=NIVEL[nv]||{bg:"#999",text:"#fff",label:nv};return(<div key={ins} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:T.surface2,borderRadius:8,padding:"9px 12px",borderLeft:`3px solid ${niv.bg}`}}><span style={{color:T.text,fontSize:13}}>{ins}</span><span style={{background:niv.bg,color:niv.text,padding:"2px 9px",borderRadius:20,fontSize:11,fontWeight:700}}>{niv.label}</span></div>);})}</div>}{tab==="ubicacion"&&<div>{embed?(<><div style={{borderRadius:10,overflow:"hidden",border:`1px solid ${T.border}`,marginBottom:10}}><iframe title="mapa" src={embed} width="100%" height="220" style={{border:"none",display:"block"}} loading="lazy" allowFullScreen/></div><a href={gmaps} target="_blank" rel="noopener noreferrer" style={{display:"block",textAlign:"center",background:"#1A73E8",color:"#fff",borderRadius:8,padding:"9px",fontWeight:700,fontSize:13,textDecoration:"none"}}>🗺️ Cómo llegar en Google Maps</a></>):(<div style={{textAlign:"center",padding:"24px",color:T.textFaint}}><div style={{fontSize:28,marginBottom:6}}>📍</div><div>Ubicación GPS no disponible.</div></div>)}</div>}{tab==="contacto"&&<div style={{textAlign:"center",padding:"8px 0"}}><div style={{fontSize:32,marginBottom:4}}>👤</div><div style={{fontWeight:700,color:T.text,fontSize:16,marginBottom:2}}>{centro.responsable}</div><div style={{color:T.textMuted,fontSize:12,marginBottom:16}}>Coordinador del Centro de Acopio</div><a href={`https://wa.me/${fmtWA(centro.whatsapp)}`} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:8,background:"#075E54",color:"#fff",borderRadius:10,padding:"11px 24px",fontWeight:700,fontSize:14,textDecoration:"none"}}><span style={{fontSize:20}}>💬</span>Contactar por WhatsApp</a><div style={{marginTop:8,fontSize:12,color:T.textMuted}}>+58 {fmtWA(centro.whatsapp)}</div></div>}{tab==="qr"&&<div style={{textAlign:"center"}}><div style={{background:"#fff",padding:12,borderRadius:12,display:"inline-block",boxShadow:"0 0 0 4px #CF1A2F",marginBottom:10}}><CertQR value={`ACOPIO-VEN-${centro.id}-${centro.nombre}`} size={150}/></div><div style={{background:T.surface2,borderRadius:8,padding:"7px 18px",display:"inline-block",marginBottom:12}}><div style={{fontSize:10,color:T.textMuted}}>Código</div><div style={{fontWeight:900,color:"#CF1A2F",fontSize:22,letterSpacing:3}}>{centro.id}</div></div><div><button onClick={()=>onCert(centro)} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"9px 20px",cursor:"pointer",fontWeight:700,fontSize:13}}>📋 Ver y Copiar Certificado</button></div></div>}</div></div></div>);
 }
 
 function Registro({centros,onClose,onGuardar,T}){
-  const [step,setStep]=useState(1);const [form,setForm]=useState({nombre:"",estado:"",ciudad:"",tipo:"",responsable:"",whatsapp:"",capacidad:"",direccion:""});const [lat,setLat]=useState(null);const [lng,setLng]=useState(null);const [niveles,setNiveles]=useState({});const [idGen,setIdGen]=useState(null);const [nuevoC,setNuevoC]=useState(null);const [copied,setCopied]=useState(false);const [errors,setErrors]=useState({});
-  const set=(k,v)=>{setForm(f=>({...f,[k]:v}));if(errors[k])setErrors(e=>({...e,[k]:null}));};const ciudades=CIUDADES[form.estado]||[];const ok1=form.nombre&&form.estado&&form.tipo&&form.responsable&&form.whatsapp;
+  const [step,setStep]=useState(1);const [form,setForm]=useState({nombre:"",estado:"",ciudad:"",tipo:"",responsable:"",whatsapp:"",capacidad:"",direccion:"",foto:""});const [lat,setLat]=useState(null);const [lng,setLng]=useState(null);const [niveles,setNiveles]=useState({});const [idGen,setIdGen]=useState(null);const [nuevoC,setNuevoC]=useState(null);const [copied,setCopied]=useState(false);const [errors,setErrors]=useState({});
+  const set=(k,v)=>{setForm(f=>({...f,[k]:v}));if(errors[k])setErrors(e=>({...e,[k]:null}));};
+  const handlePhoto=(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    if(file.size>500000){setErrors(er=>({...er,foto:"La foto debe ser menor a 500KB"}));return;}
+    const reader=new FileReader();
+    reader.onload=(ev)=>{set("foto",ev.target.result);};
+    reader.readAsDataURL(file);
+  };const ciudades=CIUDADES[form.estado]||[];const ok1=form.nombre&&form.estado&&form.tipo&&form.responsable&&form.whatsapp;
   const toggle=(ins,nv)=>setNiveles(n=>{const x={...n};x[ins]===nv?delete x[ins]:(x[ins]=nv);return x;});
   const validate=()=>{const e={};if(!form.nombre.trim())e.nombre="El nombre es obligatorio";if(!form.estado)e.estado="Selecciona un estado";if(!form.tipo)e.tipo="Selecciona un tipo";if(!form.responsable.trim())e.responsable="El coordinador es obligatorio";if(!form.whatsapp.trim())e.whatsapp="El WhatsApp es obligatorio";else if(form.whatsapp.replace(/\D/g,"").length<10)e.whatsapp="Debe tener al menos 10 dígitos";setErrors(e);return Object.keys(e).length===0;};
   const registrar=()=>{if(!validate())return;const id=genId(centros||[]);const c={...form,id,capacidad:parseInt(form.capacidad)||200,recibido:0,verificado:false,necesidades:niveles,lat:lat,lng:lng,fecha:new Date().toISOString().slice(0,10)};onGuardar(c);setIdGen(id);setNuevoC(c);setStep(3);};
   const copiarCert=()=>{if(!nuevoC)return;const t=`📋 CERTIFICADO CENTRO DE ACOPIO\nID: ${idGen}\nCentro: ${nuevoC.nombre}\nCoordinador: ${nuevoC.responsable}\nWhatsApp: +58 ${fmtWA(nuevoC.whatsapp)}\nEstado: ${nuevoC.estado} · Ciudad: ${nuevoC.ciudad}`;navigator.clipboard.writeText(t).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);});};
   const si={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
   const ss={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none"};
-  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:560,maxHeight:"92vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#CF1A2F,#8B0000)",padding:"15px 20px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:11,color:"rgba(255,255,255,.7)"}}>Paso {step} de 3</div><div style={{fontWeight:800,fontSize:15,color:"#fff"}}>{step===1?"📝 Datos del Centro":step===2?"📋 Insumos Necesarios":"? Registro Exitoso"}</div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:7,cursor:"pointer",fontSize:16}}>×</button></div><div style={{padding:16}}><div style={{height:4,background:T.border,borderRadius:4,marginBottom:16}}><div style={{height:4,width:`${(step/3)*100}%`,background:"#CF1A2F",borderRadius:4,transition:"width .4s"}}/></div>{step===1&&<div style={{display:"grid",gap:10}}>{[["Nombre del Centro","nombre","text","Ej: Acopio Iglesia San Pedro"],["Coordinador Responsable","responsable","text","Nombre completo"],["Número de WhatsApp","whatsapp","tel","Ej: 04121234567"],["Capacidad (kg/unidades)","capacidad","number","Ej: 500"]].map(([lbl,key,type,ph])=><div key={key}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>{lbl} *</label><input value={form[key]} onChange={e=>set(key,e.target.value)} type={type} placeholder={ph} style={{...si,borderColor:errors[key]?"#FF3B3B":si.borderColor,background:errors[key]?"#FFF5F5":si.background}}/>{errors[key]&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors[key]}</div>}</div>)}<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Estado</label><select value={form.estado} onChange={e=>{set("estado",e.target.value);set("ciudad","");}} style={ss}><option value="">Seleccionar...</option>{ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}</select></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Ciudad</label><select value={form.ciudad} onChange={e=>set("ciudad",e.target.value)} style={ss}><option value="">Seleccionar...</option>{ciudades.map(c=><option key={c} value={c}>{c}</option>)}</select></div></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>Tipo de Centro</label><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{TIPOS.map(t=><button key={t} onClick={()=>set("tipo",t)} style={{padding:"4px 10px",borderRadius:20,fontSize:11,cursor:"pointer",background:form.tipo===t?"#CF1A2F":T.surface2,color:form.tipo===t?"#fff":T.textMuted,border:form.tipo===t?"1px solid #CF1A2F":`1px solid ${T.border}`}}>{t}</button>)}</div></div><div style={{borderTop:`1px solid ${T.border}`,paddingTop:10}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>📍 Dirección</label><input value={form.direccion} onChange={e=>set("direccion",e.target.value)} placeholder="Ej: Av. Principal, frente a..." style={si}/></div><button onClick={()=>setStep(2)} disabled={!ok1} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:ok1?"pointer":"not-allowed",fontWeight:700,fontSize:14,opacity:ok1?1:0.4,marginTop:4}}>Continuar ? Insumos</button></div>}{step===2&&<div><p style={{color:T.textMuted,fontSize:12,marginBottom:12}}>Selecciona los insumos y el nivel de urgencia:</p><div style={{display:"grid",gap:12,maxHeight:360,overflow:"auto",paddingRight:4}}>{Object.entries(INSUMOS).map(([cat,items])=><div key={cat}><div style={{color:T.textMuted,fontSize:11,fontWeight:700,marginBottom:5,paddingBottom:3,borderBottom:`1px solid ${T.border}`}}>{cat}</div><div style={{display:"grid",gap:3}}>{items.map(ins=><div key={ins} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.surface2,borderRadius:6,padding:"6px 9px"}}><span style={{color:T.text,fontSize:12}}>{ins}</span><div style={{display:"flex",gap:2}}>{["CRÍTICO","ALTO","MEDIO","BAJO"].map(nv=><button key={nv} onClick={()=>toggle(ins,nv)} style={{padding:"2px 5px",borderRadius:4,fontSize:10,cursor:"pointer",fontWeight:600,background:niveles[ins]===nv?NIVEL[nv].bg:T.border,color:niveles[ins]===nv?NIVEL[nv].text:T.textMuted,border:"none"}}>{nv.slice(0,3)}</button>)}</div></div>)}</div></div>)}</div><div style={{display:"flex",gap:7,marginTop:12}}><button onClick={()=>setStep(1)} style={{flex:1,background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Atrás</button><button onClick={registrar} style={{flex:2,background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Registrar Centro</button></div></div>}{step===3&&nuevoC&&<div style={{textAlign:"center",padding:"6px 0"}}><div style={{fontSize:40,marginBottom:5}}>?</div><div style={{fontWeight:800,fontSize:17,color:T.text,marginBottom:3}}>¡Centro Registrado!</div><div style={{color:T.textMuted,fontSize:12,marginBottom:16}}>{form.nombre} — pendiente de verificación.</div><div style={{background:"#fff",padding:12,borderRadius:12,display:"inline-block",boxShadow:"0 0 0 4px #CF1A2F",marginBottom:10}}><CertQR value={`ACOPIO-VEN-${idGen}-${form.nombre}`} size={140}/></div><div style={{background:T.surface2,borderRadius:8,padding:"7px 18px",display:"inline-block",marginBottom:3}}><div style={{fontSize:10,color:T.textMuted}}>Código</div><div style={{fontWeight:900,color:"#CF1A2F",fontSize:24,letterSpacing:3}}>{idGen}</div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:10,marginTop:10}}><button onClick={copiarCert} style={{background:copied?"#0D3D1F":"#1C1C2E",color:copied?"#4CAF50":"#F0F0F0",border:`1px solid ${copied?"#4CAF50":"#2D2D44"}`,borderRadius:8,padding:"9px 6px",cursor:"pointer",fontWeight:700,fontSize:12}}>{copied?"? ¡Copiado!":"📋 Copiar Certificado"}</button><a href={`https://wa.me/${fmtWA(form.whatsapp)}?text=${encodeURIComponent("? Centro registrado: "+form.nombre+" · Código: "+idGen)}`} target="_blank" rel="noopener noreferrer" style={{background:"#075E54",color:"#fff",borderRadius:8,padding:"9px 6px",fontWeight:700,fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>💬 Enviar por WA</a></div><button onClick={onClose} style={{width:"100%",background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px",cursor:"pointer",fontWeight:700,fontSize:13}}>Ver Panel</button></div>}</div></div></div>);
+  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:560,maxHeight:"92vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#CF1A2F,#8B0000)",padding:"15px 20px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:11,color:"rgba(255,255,255,.7)"}}>Paso {step} de 3</div><div style={{fontWeight:800,fontSize:15,color:"#fff"}}>{step===1?"📝 Datos del Centro":step===2?"📋 Insumos Necesarios":"? Registro Exitoso"}</div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:7,cursor:"pointer",fontSize:16}}>×</button></div><div style={{padding:16}}><div style={{height:4,background:T.border,borderRadius:4,marginBottom:16}}><div style={{height:4,width:`${(step/3)*100}%`,background:"#CF1A2F",borderRadius:4,transition:"width .4s"}}/></div>{step===1&&<div style={{display:"grid",gap:10}}>{[["Nombre del Centro","nombre","text","Ej: Acopio Iglesia San Pedro"],["Coordinador Responsable","responsable","text","Nombre completo"],["Número de WhatsApp","whatsapp","tel","Ej: 04121234567"],["Capacidad (kg/unidades)","capacidad","number","Ej: 500"]].map(([lbl,key,type,ph])=><div key={key}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>{lbl} *</label><input value={form[key]} onChange={e=>set(key,e.target.value)} type={type} placeholder={ph} style={{...si,borderColor:errors[key]?"#FF3B3B":si.borderColor,background:errors[key]?"#FFF5F5":si.background}}/>{errors[key]&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors[key]}</div>}</div>)}<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Estado</label><select value={form.estado} onChange={e=>{set("estado",e.target.value);set("ciudad","");}} style={ss}><option value="">Seleccionar...</option>{ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}</select></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Ciudad</label><select value={form.ciudad} onChange={e=>set("ciudad",e.target.value)} style={ss}><option value="">Seleccionar...</option>{ciudades.map(c=><option key={c} value={c}>{c}</option>)}</select></div></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>Tipo de Centro</label><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{TIPOS.map(t=><button key={t} onClick={()=>set("tipo",t)} style={{padding:"4px 10px",borderRadius:20,fontSize:11,cursor:"pointer",background:form.tipo===t?"#CF1A2F":T.surface2,color:form.tipo===t?"#fff":T.textMuted,border:form.tipo===t?"1px solid #CF1A2F":`1px solid ${T.border}`}}>{t}</button>)}</div></div><div style={{borderTop:`1px solid ${T.border}`,paddingTop:10}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>📍 Dirección</label><input value={form.direccion} onChange={e=>set("direccion",e.target.value)} placeholder="Ej: Av. Principal, frente a..." style={si}/></div><div style={{marginBottom:8}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Foto del centro (opcional)</label><div style={{display:"flex",gap:8,alignItems:"center"}}><label style={{display:"flex",alignItems:"center",gap:4,background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,color:T.textMuted}}>📸 {form.foto?"Foto cargada":"Subir foto del centro"}<input type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/></label>{form.foto&&<img src={form.foto} alt="" style={{width:48,height:48,borderRadius:8,objectFit:"cover",border:`1px solid ${T.border}`}}/>}</div>{errors.foto&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.foto}</div>}</div><button onClick={()=>setStep(2)} disabled={!ok1} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:ok1?"pointer":"not-allowed",fontWeight:700,fontSize:14,opacity:ok1?1:0.4,marginTop:4}}>Continuar ? Insumos</button></div>}{step===2&&<div><p style={{color:T.textMuted,fontSize:12,marginBottom:12}}>Selecciona los insumos y el nivel de urgencia:</p><div style={{display:"grid",gap:12,maxHeight:360,overflow:"auto",paddingRight:4}}>{Object.entries(INSUMOS).map(([cat,items])=><div key={cat}><div style={{color:T.textMuted,fontSize:11,fontWeight:700,marginBottom:5,paddingBottom:3,borderBottom:`1px solid ${T.border}`}}>{cat}</div><div style={{display:"grid",gap:3}}>{items.map(ins=><div key={ins} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.surface2,borderRadius:6,padding:"6px 9px"}}><span style={{color:T.text,fontSize:12}}>{ins}</span><div style={{display:"flex",gap:2}}>{["CRÍTICO","ALTO","MEDIO","BAJO"].map(nv=><button key={nv} onClick={()=>toggle(ins,nv)} style={{padding:"2px 5px",borderRadius:4,fontSize:10,cursor:"pointer",fontWeight:600,background:niveles[ins]===nv?NIVEL[nv].bg:T.border,color:niveles[ins]===nv?NIVEL[nv].text:T.textMuted,border:"none"}}>{nv.slice(0,3)}</button>)}</div></div>)}</div></div>)}</div><div style={{display:"flex",gap:7,marginTop:12}}><button onClick={()=>setStep(1)} style={{flex:1,background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Atrás</button><button onClick={registrar} style={{flex:2,background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Registrar Centro</button></div></div>}{step===3&&nuevoC&&<div style={{textAlign:"center",padding:"6px 0"}}><div style={{fontSize:40,marginBottom:5}}>?</div><div style={{fontWeight:800,fontSize:17,color:T.text,marginBottom:3}}>¡Centro Registrado!</div><div style={{color:T.textMuted,fontSize:12,marginBottom:16}}>{form.nombre} — pendiente de verificación.</div><div style={{background:"#fff",padding:12,borderRadius:12,display:"inline-block",boxShadow:"0 0 0 4px #CF1A2F",marginBottom:10}}><CertQR value={`ACOPIO-VEN-${idGen}-${form.nombre}`} size={140}/></div><div style={{background:T.surface2,borderRadius:8,padding:"7px 18px",display:"inline-block",marginBottom:3}}><div style={{fontSize:10,color:T.textMuted}}>Código</div><div style={{fontWeight:900,color:"#CF1A2F",fontSize:24,letterSpacing:3}}>{idGen}</div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:10,marginTop:10}}><button onClick={copiarCert} style={{background:copied?"#0D3D1F":"#1C1C2E",color:copied?"#4CAF50":"#F0F0F0",border:`1px solid ${copied?"#4CAF50":"#2D2D44"}`,borderRadius:8,padding:"9px 6px",cursor:"pointer",fontWeight:700,fontSize:12}}>{copied?"? ¡Copiado!":"📋 Copiar Certificado"}</button><a href={`https://wa.me/${fmtWA(form.whatsapp)}?text=${encodeURIComponent("? Centro registrado: "+form.nombre+" · Código: "+idGen)}`} target="_blank" rel="noopener noreferrer" style={{background:"#075E54",color:"#fff",borderRadius:8,padding:"9px 6px",fontWeight:700,fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>💬 Enviar por WA</a></div><button onClick={onClose} style={{width:"100%",background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px",cursor:"pointer",fontWeight:700,fontSize:13}}>Ver Panel</button></div>}</div></div></div>);
 }
 
 function Tarjeta({centro,activo,onSeleccionar,onVerDetalle,onCert,T}){
@@ -858,6 +1021,7 @@ function Tarjeta({centro,activo,onSeleccionar,onVerDetalle,onCert,T}){
     onMouseEnter={e=>{if(!activo)e.currentTarget.style.borderColor="#CF1A2F";}}
     onMouseLeave={e=>{if(!activo)e.currentTarget.style.borderColor=criticos.length>0?"rgba(255,59,59,.4)":T.border;}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,marginBottom:4}}>
+      {centro.foto&&<img src={centro.foto} alt="" style={{width:44,height:44,borderRadius:8,objectFit:"cover",border:`2px solid ${T.border}`,flexShrink:0}}/>}
       <div style={{flex:1}}>
         <div style={{display:"flex",gap:4,marginBottom:3,flexWrap:"wrap"}}>
           <span style={{fontSize:10,background:T.tagBg,color:T.tagText,padding:"1px 6px",borderRadius:20}}>{centro.tipo}</span>
@@ -876,6 +1040,7 @@ function Tarjeta({centro,activo,onSeleccionar,onVerDetalle,onCert,T}){
     {criticos.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:5}}>{criticos.slice(0,3).map(([k])=><span key={k} style={{fontSize:9,background:T.critBg,color:T.critText,padding:"1px 5px",borderRadius:4,fontWeight:600}}>⚠️ {k}</span>)}{criticos.length>3&&<span style={{fontSize:9,color:T.textMuted}}>+{criticos.length-3}</span>}</div>}
     <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
       <a href={`https://wa.me/${fmtWA(centro.whatsapp)}`} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:3,background:"#E8F5E9",color:"#1B5E20",border:"1px solid #A5D6A7",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>💬 WA</a>
+      <button onClick={e=>{e.stopPropagation();shareWhatsApp(centro);}} style={{display:"flex",alignItems:"center",gap:3,background:"#E3F2FD",color:"#0D47A1",border:"1px solid #90CAF9",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,cursor:"pointer"}}>📤 Compartir</button>
       <a href={centro.lat&&centro.lng?`https://www.google.com/maps?q=${centro.lat},${centro.lng}&z=17`:`https://www.google.com/maps/search/${encodeURIComponent(centro.nombre+", Venezuela")}`} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:3,background:"#E3F2FD",color:"#0D47A1",border:"1px solid #90CAF9",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,textDecoration:"none"}}>?🗺️ Maps</a>
       <button onClick={e=>{e.stopPropagation();onCert(centro);}} style={{display:"flex",alignItems:"center",gap:3,background:"#FFF8E1",color:"#E65100",border:"1px solid #FFCC02",borderRadius:5,padding:"3px 7px",fontSize:10,fontWeight:700,cursor:"pointer"}}>📲 QR</button>
       <button onClick={e=>{e.stopPropagation();onVerDetalle(centro);}} style={{marginLeft:"auto",background:"none",color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:5,padding:"3px 7px",fontSize:10,cursor:"pointer"}}>Ver ?</button>
@@ -1064,6 +1229,9 @@ function App(){
   const [adminOk,setAdminOk]=useState(false);
   const [verMasRefugios,setVerMasRefugios]=useState(false);
   const [verMasHospitales,setVerMasHospitales]=useState(false);
+  const [verMasCentros,setVerMasCentros]=useState(false);
+  const [showHeatMap,setShowHeatMap]=useState(false);
+  const [heatFilter,setHeatFilter]=useState("todos");
   const mapaRef=useRef({flyTo:null});
 
   useEffect(()=>{if(window.location.search.includes("admin=true")){setShowLogin(true);window.history.replaceState({},'',window.location.pathname);}},[]);
@@ -1172,7 +1340,7 @@ function App(){
         <PanelEmergencias T={T}/>
         <BarraBusqueda busqCiudad={busqCiudad} setBusqCiudad={setBusqCiudad} busqNombre={busqNombre} setBusqNombre={setBusqNombre} filtrados={filtrados.length} total={centros.length} filtradosRef={filtradosRef.length} totalRef={refugios.length} filtradosHosp={filtradosHosp.length} totalHosp={hospitales.length} pinActivo={pinActivo} T={T}/>
         <div id="mapa-id">
-          <MapaPrincipal key="main-map" centros={filtrados.length>0?filtrados:centros} refugios={(busqCiudad||busqNombre)?filtradosRef:refugios} hospitales={(busqCiudad||busqNombre)?filtradosHosp:hospitales} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} T={T}/>
+          <MapaPrincipal key="main-map" centros={filtrados.length>0?filtrados:centros} refugios={(busqCiudad||busqNombre)?filtradosRef:refugios} hospitales={(busqCiudad||busqNombre)?filtradosHosp:hospitales} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} showHeatMap={showHeatMap} setShowHeatMap={setShowHeatMap} heatFilter={heatFilter} setHeatFilter={setHeatFilter} T={T}/>
         </div>
         <div id="seccion-centros" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <span>📦 Centros de Acopio Registrados</span>
@@ -1180,11 +1348,14 @@ function App(){
         </div>
         {filtrados.length===0
           ?<div style={{textAlign:"center",padding:"28px",color:T.textFaint,background:T.surface,borderRadius:12,marginBottom:14}}><div style={{fontSize:28,marginBottom:6}}>👤</div><div>No se encontraron centros con esos criterios.</div></div>
-          :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:18}}>{filtrados.map(c=><Tarjeta key={c.id} centro={c} activo={pinActivo?.id===c.id} T={T} onSeleccionar={seleccionarCentro} onVerDetalle={setDetalle} onCert={setCert}/>)}</div>
+          :<>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:8}}>{filtrados.slice(0,verMasCentros?999:4).map(c=><Tarjeta key={c.id} centro={c} activo={pinActivo?.id===c.id} T={T} onSeleccionar={seleccionarCentro} onVerDetalle={setDetalle} onCert={setCert}/>)}</div>
+          {filtrados.length>4&&!verMasCentros&&<div onClick={()=>setVerMasCentros(true)} style={{textAlign:"center",padding:"10px",background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,cursor:"pointer",marginBottom:14,fontWeight:700,fontSize:13,color:"#CF1A2F"}}>▶ Ver los {filtrados.length} centros de acopio</div>}
+          </>
         }
         <div id="seccion-refugios" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏕️ Refugios y Albergues Verificados <span style={{fontSize:11,color:T.textMuted,fontWeight:400}}>({(busqCiudad||busqNombre?filtradosRef:refugios).length})</span></div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
-          {(busqCiudad||busqNombre?filtradosRef:refugios).slice(0,verMasRefugios?999:6).map(r=>(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:8}}>
+          {(busqCiudad||busqNombre?filtradosRef:refugios).slice(0,verMasRefugios?999:4).map(r=>(
             <div key={r.id} onClick={()=>seleccionarRefugio(r)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #1A73E8",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#1A73E8"} onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
               <div style={{display:"flex",gap:4,marginBottom:3}}><span style={{fontSize:10,background:"#E3F2FD",color:"#0D47A1",padding:"1px 6px",borderRadius:20}}>🏕️ Refugio</span></div>
               <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1}}>{r.name}</div>
@@ -1197,10 +1368,10 @@ function App(){
             </div>
           ))}
         </div>
-        {(busqCiudad||busqNombre?filtradosRef:refugios).length>6&&!verMasRefugios&&<div onClick={()=>setVerMasRefugios(true)} style={{textAlign:"center",padding:"10px",background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,cursor:"pointer",marginBottom:14,fontWeight:700,fontSize:13,color:"#1A73E8"}}>▶ Ver los {(busqCiudad||busqNombre?filtradosRef:refugios).length} refugios</div>}
+        {(busqCiudad||busqNombre?filtradosRef:refugios).length>4&&!verMasRefugios&&<div onClick={()=>setVerMasRefugios(true)} style={{textAlign:"center",padding:"10px",background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,cursor:"pointer",marginBottom:14,fontWeight:700,fontSize:13,color:"#1A73E8"}}>▶ Ver los {(busqCiudad||busqNombre?filtradosRef:refugios).length} refugios</div>}
         <div id="seccion-hospitales" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏥 Hospitales <span style={{fontSize:11,color:T.textMuted,fontWeight:400}}>({(busqCiudad||busqNombre?filtradosHosp:hospitales).length})</span></div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
-          {(busqCiudad||busqNombre?filtradosHosp:hospitales).slice(0,verMasHospitales?999:6).map(h=>(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:8}}>
+          {(busqCiudad||busqNombre?filtradosHosp:hospitales).slice(0,verMasHospitales?999:4).map(h=>(
             <div key={h.id} onClick={()=>{if(h.lat&&h.lon)seleccionarCentro({lat:h.lat,lng:h.lon,id:h.id,nombre:h.name,ciudad:h.city,estado:h.state});}} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #2E7D32",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#2E7D32"} onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
               <div style={{display:"flex",gap:4,marginBottom:3}}><span style={{fontSize:10,background:"#E8F5E9",color:"#2E7D32",padding:"1px 6px",borderRadius:20}}>🏥 {h.type}</span><span style={{fontSize:10,background:"#E8F5E9",color:"#2E7D32",padding:"1px 6px",borderRadius:20}}>✅ Activo</span></div>
               <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1}}>{h.name}</div>
@@ -1213,7 +1384,7 @@ function App(){
             </div>
           ))}
         </div>
-        {(busqCiudad||busqNombre?filtradosHosp:hospitales).length>6&&!verMasHospitales&&<div onClick={()=>setVerMasHospitales(true)} style={{textAlign:"center",padding:"10px",background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,cursor:"pointer",marginBottom:14,fontWeight:700,fontSize:13,color:"#2E7D32"}}>▶ Ver los {(busqCiudad||busqNombre?filtradosHosp:hospitales).length} hospitales</div>}
+        {(busqCiudad||busqNombre?filtradosHosp:hospitales).length>4&&!verMasHospitales&&<div onClick={()=>setVerMasHospitales(true)} style={{textAlign:"center",padding:"10px",background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,cursor:"pointer",marginBottom:14,fontWeight:700,fontSize:13,color:"#2E7D32"}}>▶ Ver los {(busqCiudad||busqNombre?filtradosHosp:hospitales).length} hospitales</div>}
         <div style={{padding:"11px 14px",background:T.surface,border:`1px dashed ${T.border}`,borderRadius:12,textAlign:"center",cursor:"pointer",marginBottom:16}} onClick={()=>setRegistro(true)}><span style={{color:"#CF1A2F",fontWeight:700,fontSize:13}}>+ ¿Tu centro de acopio no aparece? Regístralo gratis ?</span></div>
       </div>
       <div style={{borderTop:`1px solid ${T.border}`,padding:"12px 20px",background:T.surface}}>
