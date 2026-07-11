@@ -186,11 +186,11 @@ const HOSPITALES=[
 ];
 
 const CENTROS_INIT=[
-  {id:"A001",nombre:"AJE Venezuela — Polideportivo Los Naranjos",estado:"Caracas",ciudad:"Caracas",tipo:"Centro de Acopio",responsable:"AJE Venezuela — Polideportivo Los Naranjos",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.4402527,lng:-66.8380498,direccion:"Polideportivo Los Naranjos Belisario Academy, Av. Este 3, Los Naranjos",fecha:"2026-06-26"},
-  {id:"A002",nombre:"Alcaldía de Chacao — Sede Desarrollo Social",estado:"Caracas",ciudad:"Caracas",tipo:"Centro de Acopio",responsable:"Alcaldía de Chacao — Sede Desarrollo Social",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.4898,lng:-66.8552,direccion:"Calle Los Ángeles, lateral al Centro Comercial Sambil Chacao, Caracas",fecha:"2026-06-26"},
-  {id:"A003",nombre:"Alcaldía Padre Pedro Chien",estado:"Ciudad Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Alcaldía Padre Pedro Chien",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.128,lng:-63.54,direccion:"Municipio Padre Pedro Chien - Sede de la Alcaldía (Dirección de Desarrollo Social)",fecha:"2026-06-26"},
-  {id:"A004",nombre:"Animales Sin Nombre · Mérida",estado:"Mérida",ciudad:"Mérida",tipo:"Centro de Acopio",responsable:"Animales Sin Nombre · Mérida",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.589886,lng:-71.1610437,direccion:"CC EL Rodeo / Contactarlos, Mérida, Venezuela",fecha:"2026-06-26"},
-  {id:"A005",nombre:"Bomberos Unexpo",estado:"Ciudad Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Bomberos Unexpo",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.128,lng:-63.54,direccion:"Caroní - Sede del Cuerpo de Bomberos de la Unexpo. Jornada continua todo el día",fecha:"2026-06-26"},
+  {id:"A001",nombre:"AJE Venezuela — Polideportivo Los Naranjos",estado:"Caracas",ciudad:"Caracas",tipo:"Centro de Acopio",responsable:"AJE Venezuela — Polideportivo Los Naranjos",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.4402527,lng:-66.8380498,direccion:"Polideportivo Los Naranjos Belisario Academy, Av. Este 3, Los Naranjos",fecha:"2026-06-26",usuario:"aje-venezuela",password:"1234",inventario:[],movimientos:[],eventos:[]},
+  {id:"A002",nombre:"Alcaldía de Chacao — Sede Desarrollo Social",estado:"Caracas",ciudad:"Caracas",tipo:"Centro de Acopio",responsable:"Alcaldía de Chacao — Sede Desarrollo Social",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.4898,lng:-66.8552,direccion:"Calle Los Ángeles, lateral al Centro Comercial Sambil Chacao, Caracas",fecha:"2026-06-26",usuario:"alcaldia-chacao",password:"1234",inventario:[],movimientos:[],eventos:[]},
+  {id:"A003",nombre:"Alcaldía Padre Pedro Chien",estado:"Ciudad Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Alcaldía Padre Pedro Chien",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.128,lng:-63.54,direccion:"Municipio Padre Pedro Chien - Sede de la Alcaldía (Dirección de Desarrollo Social)",fecha:"2026-06-26",usuario:"alcaldia-padre",password:"1234",inventario:[],movimientos:[],eventos:[]},
+  {id:"A004",nombre:"Animales Sin Nombre · Mérida",estado:"Mérida",ciudad:"Mérida",tipo:"Centro de Acopio",responsable:"Animales Sin Nombre · Mérida",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.589886,lng:-71.1610437,direccion:"CC EL Rodeo / Contactarlos, Mérida, Venezuela",fecha:"2026-06-26",usuario:"animales-merida",password:"1234",inventario:[],movimientos:[],eventos:[]},
+  {id:"A005",nombre:"Bomberos Unexpo",estado:"Ciudad Bolívar",ciudad:"Ciudad Bolívar",tipo:"Centro de Acopio",responsable:"Bomberos Unexpo",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.128,lng:-63.54,direccion:"Caroní - Sede del Cuerpo de Bomberos de la Unexpo. Jornada continua todo el día",fecha:"2026-06-26",usuario:"bomberos-unexpo",password:"1234",inventario:[],movimientos:[],eventos:[]},
   {id:"A006",nombre:"Bomberos Universidad de Carabobo",estado:"Valencia",ciudad:"Valencia",tipo:"Centro de Acopio",responsable:"Bomberos Universidad de Carabobo",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.162,lng:-67.973,direccion:"Sede del Cuerpo de Bomberos de la Universidad de Carabobo",fecha:"2026-06-26"},
   {id:"A007",nombre:"Bulevar de Las Minas",estado:"Los Teques",ciudad:"Los Teques",tipo:"Centro de Acopio",responsable:"Bulevar de Las Minas",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:10.344,lng:-67.042,direccion:"Bulevar de Las Minas, frente al Farmatodo de San Antonio de Los Altos",fecha:"2026-06-26"},
   {id:"A008",nombre:"CacaoLab - Merida",estado:"Merida",ciudad:"Merida",tipo:"Centro de Acopio",responsable:"CacaoLab - Merida",whatsapp:"00000000000",capacidad:200,recibido:0,verificado:true,necesidades:{},lat:8.572,lng:-71.148,direccion:"Urb. La Lummonty, calle Las Colinas, Edif. Oneida, Merida",fecha:"2026-06-26"},
@@ -1208,6 +1208,454 @@ function Toast({msg,type,onClose}){
   </div>);
 }
 
+function LoginCentro({onLogin,T,centros}){
+  const [user,setUser]=useState("");const [pass,setPass]=useState("");const [err,setErr]=useState("");const [loading,setLoading]=useState(false);const [showPass,setShowPass]=useState(false);
+  const intentar=()=>{
+    setLoading(true);setErr("");
+    const c=centros.find(x=>x.id.toLowerCase()===user.toLowerCase().trim());
+    if(c&&pass==="acopio2026"){onLogin(c);}
+    else if(c&&pass!=="acopio2026"){setErr("Contraseña incorrecta.");setPass("");}
+    else{setErr("No se encontró centro con ese ID.");setPass("");}
+    setLoading(false);
+  };
+  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(8px)"}}>
+    <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:380,overflow:"hidden",boxShadow:"0 8px 40px rgba(0,0,0,.3)"}}>
+      <div style={{background:"linear-gradient(135deg,#0D47A1,#1565C0)",padding:"24px 22px",textAlign:"center"}}>
+        <img src={LOGO_B64} style={{width:56,height:56,borderRadius:10,marginBottom:8}}/>
+        <div style={{fontWeight:800,fontSize:17,color:"#fff"}}>Panel del Centro</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:3}}>Ingresa con el ID del centro</div>
+      </div>
+      <div style={{padding:"22px 24px"}}>
+        <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}}>🏢 ID del Centro</label>
+        <input value={user} onChange={e=>setUser(e.target.value)} placeholder="Ej: A001" autoFocus style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12,textTransform:"uppercase"}}/>
+        <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}}>🔒 Contraseña</label>
+        <div style={{position:"relative"}}>
+          <input type={showPass?"text":"password"} value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&intentar()} placeholder="Ingresa tu contraseña" style={{width:"100%",background:T.inputBg,border:`1px solid ${err?"#FF3B3B":T.border}`,borderRadius:8,padding:"10px 36px 10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"}}/>
+          <span onClick={()=>setShowPass(!showPass)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",cursor:"pointer",fontSize:16,opacity:.6}}>{showPass?"👁️‍🗨️":"👁️"}</span>
+        </div>
+        {err&&<div style={{color:"#DC2626",fontSize:12,marginBottom:10,marginTop:6}}>⚠ {err}</div>}
+        <button onClick={intentar} disabled={loading||!user||!pass} style={{width:"100%",marginTop:10,background:loading||!user||!pass?"#999":"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:loading?"wait":"pointer",fontWeight:700,fontSize:14,transition:"background .2s"}}>{loading?"⏳ Entrando...":"🚀 Entrar al Panel"}</button>
+      </div>
+    </div>
+  </div>);
+}
+
+function DashboardCentro({centro,onClose,T,addToast,saveFirebase,darkMode,toggleTheme}){
+  const [seccion,setSeccion]=useState("inicio");
+  const [filtroCategoria,setFiltroCategoria]=useState("todos");
+  const [invLocal,setInvLocal]=useState(centro.inventario||[]);
+  const [movimientos,setMovimientos]=useState(centro.movimientos||[]);
+  const [chatMsgs,setChatMsgs]=useState([]);
+  const [chatInput,setChatInput]=useState("");
+  const [eventos,setEventos]=useState(centro.eventos||[]);
+  const [nuevoEvento,setNuevoEvento]=useState({titulo:"",fecha:"",descripcion:"",tipo:"acopio"});
+  const [showEventoForm,setShowEventoForm]=useState(false);
+  const [alertas,setAlertas]=useState([]);
+  const necesita=Object.entries(centro.necesidades||{}).filter(([,v])=>v==="CRÍTICO"||v==="ALTO");
+
+  const CATEGORIAS=["Alimentos","Agua","Medicina","Higiene","Ropa","Cobijas","Útiles","Electrónica","Otros"];
+  const coloresCat={Alimentos:"#FF9800",Agua:"#2196F3",Medicina:"#F44336",Higiene:"#9C27B0",Ropa:"#E91E63",Cobijas:"#795548",Útiles:"#607D8B",Electrónica:"#00BCD4",Otros:"#9E9E9E"};
+
+  useEffect(()=>{
+    const inv=centro.inventario||[];
+    const alerts=[];
+    inv.forEach(i=>{
+      if(i.cantidad<=i.minimo)alerts.push({tipo:"inventario",msg:`⚠️ ${i.nombre}: ${i.cantidad} ${i.unidad} (mínimo: ${i.minimo})`,ts:Date.now()});
+      if(i.vencimiento){const d=new Date(i.vencimiento);const hoy=new Date();const dias=Math.ceil((d-hoy)/(1000*60*60*24));if(dias<=30&&dias>=0)alerts.push({tipo:"vencimiento",msg:`⏰ ${i.nombre} vence en ${dias} días (${i.vencimiento})`,ts:Date.now()});if(dias<0)alerts.push({tipo:"vencido",msg:`❌ ${i.nombre} VENCIDO (${i.vencimiento})`,ts:Date.now()});}
+    });
+    necesita.forEach(([k])=>{alerts.push({tipo:"necesidad",msg:`🔴 Necesidad crítica: ${k}`,ts:Date.now()});});
+    setAlertas(alerts);
+  },[centro]);
+
+  const totalInv=invLocal.reduce((a,i)=>a+(i.cantidad||0),0);
+  const criticos=invLocal.filter(i=>i.cantidad<=i.minimo).length;
+  const recibidos=movimientos.filter(m=>m.tipo==="recepcion").reduce((a,m)=>a+m.cantidad,0);
+  const enviados=movimientos.filter(m=>m.tipo==="envio").reduce((a,m)=>a+m.cantidad,0);
+
+  const addInv=(item)=>{
+    const nuevo=[...invLocal,{id:Date.now(),...item,cantidad:Number(item.cantidad),minimo:Number(item.minimo)||0}];
+    setInvLocal(nuevo);
+    saveFirebase(`acopio/centros/${centro.id}/inventario`,nuevo);
+    addToast("Insumo agregado al inventario","success");
+  };
+  const removeInv=(id)=>{
+    const nuevo=invLocal.filter(i=>i.id!==id);
+    setInvLocal(nuevo);
+    saveFirebase(`acopio/centros/${centro.id}/inventario`,nuevo);
+    addToast("Insumo eliminado","info");
+  };
+  const addMov=(mov)=>{
+    const nuevo=[...movimientos,{id:Date.now(),...mov,fecha:new Date().toLocaleDateString("es-VE")}];
+    setMovimientos(nuevo);
+    saveFirebase(`acopio/centros/${centro.id}/movimientos`,nuevo);
+    addToast(mov.tipo==="recepcion"?"Recepción registrada":"Envío registrado","success");
+  };
+  const sendChat=()=>{
+    if(!chatInput.trim())return;
+    const msg={id:Date.now(),autor:centro.nombre,texto:chatInput,fecha:new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit"}),centroId:centro.id};
+    const nuevo=[...chatMsgs,msg];
+    setChatMsgs(nuevo);
+    setChatInput("");
+    saveFirebase("acopio/chat",nuevo);
+  };
+  const addEvento=()=>{
+    if(!nuevoEvento.titulo||!nuevoEvento.fecha)return;
+    const nuevo=[...eventos,{id:Date.now(),...nuevoEvento,creadoPor:centro.nombre}];
+    setEventos(nuevo);
+    saveFirebase(`acopio/centros/${centro.id}/eventos`,nuevo);
+    setNuevoEvento({titulo:"",fecha:"",descripcion:"",tipo:"acopio"});
+    setShowEventoForm(false);
+    addToast("Evento creado","success");
+  };
+  const removeEvento=(id)=>{
+    const nuevo=eventos.filter(e=>e.id!==id);
+    setEventos(nuevo);
+    saveFirebase(`acopio/centros/${centro.id}/eventos`,nuevo);
+  };
+
+  const exportPDF=()=>{
+    let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Inventario - ${centro.nombre}</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:30px;color:#1a1a1a}h1{color:#0D47A1;font-size:20px;margin-bottom:4px}p{color:#666;font-size:12px;margin-bottom:16px}table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px}th{background:#0D47A1;color:#fff;padding:8px;text-align:left}td{padding:6px 8px;border-bottom:1px solid #eee}footer{margin-top:30px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#aaa;text-align:center}</style></head><body><h1>📋 Inventario: ${centro.nombre}</h1><p>ID: ${centro.id} · Generado: ${new Date().toLocaleDateString("es-VE")} ${new Date().toLocaleTimeString("es-VE")}</p><table><thead><tr><th>Categoría</th><th>Insumo</th><th>Cantidad</th><th>Unidad</th><th>Mínimo</th><th>Lote</th><th>Vence</th><th>Estado</th></tr></thead><tbody>`;
+    invLocal.forEach(i=>{
+      let estado="OK";
+      if(i.cantidad<=i.minimo)estado="Crítico";
+      else if(i.vencimiento){const d=Math.ceil((new Date(i.vencimiento)-new Date())/(864e5));if(d<0)estado="Vencido";else if(d<=30)estado="Por vencer";}
+      html+=`<tr><td>${i.categoria||"-"}</td><td><b>${i.nombre}</b></td><td>${i.cantidad}</td><td>${i.unidad}</td><td>${i.minimo}</td><td>${i.lote||"-"}</td><td>${i.vencimiento||"-"}</td><td>${estado}</td></tr>`;
+    });
+    html+=`</tbody></table><h2>📊 Resumen</h2><p>Total: ${invLocal.length} insumos · ${totalInv} unidades · ${criticos} críticos</p><footer>Sistema Nacional de Acopio Venezuela</footer></body></html>`;
+    const w=window.open("","_blank");w.document.write(html);w.document.close();w.print();
+  };
+
+  const exportExcel=()=>{
+    let csv="Categoría,Insumo,Cantidad,Unidad,Mínimo,Lote,Fecha Vencimiento,Estado\n";
+    invLocal.forEach(i=>{csv+=`"${i.categoria||"Sin cat."}","${i.nombre}",${i.cantidad},"${i.unidad}",${i.minimo},"${i.lote||"-"}","${i.vencimiento||"-"}","${i.cantidad<=i.minimo?"Crítico":"OK"}"\n`;});
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`inventario_${centro.id}_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  };
+
+  const invFiltrada=filtroCategoria==="todos"?invLocal:invLocal.filter(i=>i.categoria===filtroCategoria);
+
+  const sideItems=[
+    ["inicio","📊","Inicio"],
+    ["inventario","📦","Inventario"],
+    ["movimientos","🚚","Envíos/Recepción"],
+    ["alertas","🔔",`Alertas (${alertas.length})`],
+    ["chat","💬","Chat"],
+    ["calendario","📅","Calendario"],
+    ["reportes","📄","Reportes"]
+  ];
+
+  return(<div style={{position:"fixed",inset:0,zIndex:4000,display:"flex",background:T.bg}}>
+    <div style={{width:220,background:T.surface,borderRight:`1px solid ${T.border}`,display:"flex",flexDirection:"column",flexShrink:0}}>
+      <div style={{padding:"16px",borderBottom:`1px solid ${T.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+          <img src={LOGO_B64} style={{width:32,height:32,borderRadius:6}}/>
+          <div>
+            <div style={{fontWeight:700,fontSize:12,color:T.text,lineHeight:1.2}}>Panel Centro</div>
+            <div style={{fontSize:10,color:T.textMuted}}>{centro.nombre}</div>
+          </div>
+        </div>
+        <div style={{fontSize:10,color:T.textFaint,textAlign:"center"}}>ID: {centro.id}</div>
+      </div>
+      <div style={{flex:1,overflow:"auto",padding:"8px"}}>
+        {sideItems.map(([key,icon,label])=>(
+          <div key={key} onClick={()=>setSeccion(key)} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 12px",borderRadius:8,cursor:"pointer",marginBottom:2,background:seccion===key?(T===T_DARK?"#1A73E822":"#E3F2FD"):"none",color:seccion===key?"#1A73E8":T.text,fontWeight:seccion===key?700:400,fontSize:12,transition:"all .15s"}}>
+            <span style={{fontSize:15}}>{icon}</span>{label}
+          </div>
+        ))}
+      </div>
+      <div style={{padding:"12px",borderTop:`1px solid ${T.border}`}}>
+        <button onClick={toggleTheme} style={{width:"100%",background:T.surface2,border:`1px solid ${T.border}`,color:T.text,borderRadius:8,padding:"8px",cursor:"pointer",fontSize:11,fontWeight:600,marginBottom:6}}>{darkMode?"☀️ Tema Claro":"🌙 Tema Oscuro"}</button>
+        <button onClick={()=>{onClose();window.scrollTo({top:0,behavior:"smooth"});}} style={{width:"100%",background:"#1A73E8",border:"none",color:"#fff",borderRadius:8,padding:"8px",cursor:"pointer",fontSize:11,fontWeight:600,marginBottom:6}}>🌐 Volver a la Web</button>
+        <button onClick={onClose} style={{width:"100%",background:"none",border:`1px solid ${T.border}`,color:T.textMuted,borderRadius:8,padding:"8px",cursor:"pointer",fontSize:11,fontWeight:600}}>🚪 Cerrar Panel</button>
+      </div>
+    </div>
+    <div style={{flex:1,overflow:"auto",padding:"20px"}}>
+      {seccion==="inicio"&&<div>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>📊 Panel de {centro.nombre}</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
+          {[["📦",totalInv,"Insumos","FFD100"],["🔴",criticos,"Críticos","FF8080"],["📥",recibidos,"Recibidos","4CAF50"],["📤",enviados,"Enviados","2196F3"]].map(([ic,v,lbl,col])=>(
+            <div key={lbl} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:"14px",borderTop:`3px solid ${col}`}}>
+              <div style={{fontSize:11,color:T.textMuted}}>{ic} {lbl}</div>
+              <div style={{fontWeight:800,fontSize:24,color:T.text,marginTop:4}}>{v}</div>
+            </div>
+          ))}
+        </div>
+        {alertas.length>0&&<div style={{background:T.alertBg,border:`1px solid ${T.alertBorder}`,borderRadius:10,padding:"12px 16px",marginBottom:16}}>
+          <div style={{fontWeight:700,fontSize:13,color:T.alertText,marginBottom:8}}>🔔 Alertas Activas ({alertas.length})</div>
+          {alertas.map((a,i)=><div key={i} style={{fontSize:12,color:T.alertText,padding:"4px 0"}}>{a.msg}</div>)}
+        </div>}
+        {necesita.length>0&&<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:"14px",marginBottom:16}}>
+          <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:8}}>🔴 Necesidades Críticas</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {necesita.map(([k])=><span key={k} style={{background:T.critBg,color:T.critText,padding:"4px 10px",borderRadius:6,fontSize:11,fontWeight:700}}>⚠ {k}</span>)}
+          </div>
+        </div>}
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:"14px"}}>
+          <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:8}}>📋 Últimos Movimientos</div>
+          {movimientos.slice(-5).reverse().map(m=>(
+            <div key={m.id} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${T.border}`,fontSize:12}}>
+              <span style={{color:m.tipo==="recepcion"?"#4CAF50":"#FF5722",fontWeight:700}}>{m.tipo==="recepcion"?"📥":"📤"} {m.insumo}</span>
+              <span style={{color:T.textMuted}}>{m.cantidad} uds · {m.fecha}</span>
+            </div>
+          ))}
+          {movimientos.length===0&&<div style={{color:T.textFaint,fontSize:12,textAlign:"center",padding:12}}>Sin movimientos aún</div>}
+        </div>
+      </div>}
+      {seccion==="inventario"&&<div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{fontWeight:800,fontSize:18,color:T.text}}>📦 Inventario</div>
+          <div style={{display:"flex",gap:6}}>
+            <button onClick={exportPDF} style={{background:"#F44336",color:"#fff",border:"none",borderRadius:8,padding:"8px 12px",cursor:"pointer",fontWeight:700,fontSize:11}}>📄 PDF</button>
+            <button onClick={exportExcel} style={{background:"#4CAF50",color:"#fff",border:"none",borderRadius:8,padding:"8px 12px",cursor:"pointer",fontWeight:700,fontSize:11}}>📊 Excel</button>
+            <button onClick={()=>setSeccion("addInv")} style={{background:"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Agregar</button>
+          </div>
+        </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
+          <button onClick={()=>setFiltroCategoria("todos")} style={{background:filtroCategoria==="todos"?"#1A73E8":T.surface2,color:filtroCategoria==="todos"?"#fff":T.text,border:`1px solid ${filtroCategoria==="todos"?"#1A73E8":T.border}`,borderRadius:20,padding:"5px 12px",cursor:"pointer",fontSize:11,fontWeight:600}}>Todos ({invLocal.length})</button>
+          {CATEGORIAS.map(c=>{const count=invLocal.filter(i=>i.categoria===c).length;if(count===0)return null;return<button key={c} onClick={()=>setFiltroCategoria(c)} style={{background:filtroCategoria===c?(coloresCat[c]||"#999"):T.surface2,color:filtroCategoria===c?"#fff":T.text,border:`1px solid ${filtroCategoria===c?(coloresCat[c]||"#999"):T.border}`,borderRadius:20,padding:"5px 12px",cursor:"pointer",fontSize:11,fontWeight:600}}>{c} ({count})</button>;})}
+        </div>
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,overflow:"hidden"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
+            <thead><tr style={{background:T.surface2}}>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Categoría</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Insumo</th>
+              <th style={{padding:"8px 10px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Cantidad</th>
+              <th style={{padding:"8px 10px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Mínimo</th>
+              <th style={{padding:"8px 10px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Lote</th>
+              <th style={{padding:"8px 10px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Vence</th>
+              <th style={{padding:"8px 10px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Estado</th>
+              <th style={{padding:"8px 10px",textAlign:"center",color:T.textMuted,fontWeight:700}}>🗑</th>
+            </tr></thead>
+            <tbody>
+              {invFiltrada.map(i=>(
+                <tr key={i.id} style={{borderBottom:`1px solid ${T.border}`}}>
+                  <td style={{padding:"6px 10px"}}><span style={{background:(coloresCat[i.categoria]||"#9E9E9E")+"22",color:coloresCat[i.categoria]||"#9E9E9E",padding:"2px 8px",borderRadius:4,fontSize:10,fontWeight:700}}>{i.categoria||"-"}</span></td>
+                  <td style={{padding:"6px 10px",color:T.text,fontWeight:600}}>{i.nombre}</td>
+                  <td style={{padding:"6px 10px",textAlign:"center",color:T.text}}>{i.cantidad} {i.unidad}</td>
+                  <td style={{padding:"6px 10px",textAlign:"center",color:T.textMuted}}>{i.minimo}</td>
+                  <td style={{padding:"6px 10px",textAlign:"center",color:T.textMuted,fontSize:10}}>{i.lote||"-"}</td>
+                  <td style={{padding:"6px 10px",textAlign:"center",color:i.vencimiento&&new Date(i.vencimiento)<new Date()?"#F44336":T.textMuted,fontSize:10}}>{i.vencimiento||"-"}</td>
+                  <td style={{padding:"6px 10px",textAlign:"center"}}>{i.cantidad<=i.minimo?<span style={{color:"#FF3B3B",fontWeight:700,fontSize:10}}>⚠ Crítico</span>:<span style={{color:"#4CAF50",fontSize:10}}>✓ OK</span>}</td>
+                  <td style={{padding:"6px 10px",textAlign:"center"}}><button onClick={()=>removeInv(i.id)} style={{background:"#FFEBEE",color:"#D32F2F",border:"none",borderRadius:5,padding:"3px 6px",cursor:"pointer",fontSize:10}}>🗑</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {invFiltrada.length===0&&<div style={{color:T.textFaint,fontSize:12,textAlign:"center",padding:20}}>Sin insumos en esta categoría</div>}
+        </div>
+      </div>}
+      {seccion==="addInv"&&<div>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>➕ Agregar Insumo</div>
+        <AddInvForm onAdd={addInv} onBack={()=>setSeccion("inventario")} T={T}/>
+      </div>}
+      {seccion==="movimientos"&&<div>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>🚚 Envíos y Recepciones</div>
+        <div style={{display:"flex",gap:8,marginBottom:16}}>
+          <button onClick={()=>setSeccion("addMovR")} style={{background:"#4CAF50",color:"#fff",border:"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:12}}>📥 Registrar Recepción</button>
+          <button onClick={()=>setSeccion("addMovE")} style={{background:"#FF5722",color:"#fff",border:"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:12}}>📤 Registrar Envío</button>
+        </div>
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,overflow:"hidden"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+            <thead><tr style={{background:T.surface2}}>
+              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Fecha</th>
+              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Tipo</th>
+              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Insumo</th>
+              <th style={{padding:"10px 12px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Cantidad</th>
+              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Origen/Destino</th>
+            </tr></thead>
+            <tbody>
+              {movimientos.slice().reverse().map(m=>(
+                <tr key={m.id} style={{borderBottom:`1px solid ${T.border}`}}>
+                  <td style={{padding:"8px 12px",color:T.textMuted}}>{m.fecha}</td>
+                  <td style={{padding:"8px 12px"}}><span style={{background:m.tipo==="recepcion"?"#E8F5E9":"#FBE9E7",color:m.tipo==="recepcion"?"#2E7D32":"#D84315",padding:"3px 8px",borderRadius:5,fontWeight:700,fontSize:11}}>{m.tipo==="recepcion"?"📥 Recepción":"📤 Envío"}</span></td>
+                  <td style={{padding:"8px 12px",color:T.text,fontWeight:600}}>{m.insumo}</td>
+                  <td style={{padding:"8px 12px",textAlign:"center",color:T.text}}>{m.cantidad}</td>
+                  <td style={{padding:"8px 12px",color:T.textMuted}}>{m.origenDestino||"-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {movimientos.length===0&&<div style={{color:T.textFaint,fontSize:12,textAlign:"center",padding:20}}>Sin movimientos registrados</div>}
+        </div>
+      </div>}
+      {seccion==="addMovR"&&<div>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>📥 Registrar Recepción</div>
+        <AddMovForm tipo="recepcion" onAdd={addMov} onBack={()=>setSeccion("movimientos")} T={T}/>
+      </div>}
+      {seccion==="addMovE"&&<div>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>📤 Registrar Envío</div>
+        <AddMovForm tipo="envio" onAdd={addMov} onBack={()=>setSeccion("movimientos")} T={T}/>
+      </div>}
+      {seccion==="alertas"&&<div>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>🔔 Alertas del Centro</div>
+        {alertas.length===0?<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:30,textAlign:"center"}}>
+          <div style={{fontSize:40,marginBottom:8}}>✅</div>
+          <div style={{color:T.textMuted,fontSize:13}}>Sin alertas activas</div>
+        </div>:<div style={{display:"grid",gap:8}}>
+          {alertas.map((a,i)=>(
+            <div key={i} style={{background:a.tipo==="inventario"?"#FFF3E0":"#FBE9E7",border:`1px solid ${a.tipo==="inventario"?"#FFB74D":"#FF8A65"}`,borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:20}}>{a.tipo==="inventario"?"📦":"🔴"}</span>
+              <div>
+                <div style={{fontWeight:700,fontSize:13,color:T.text}}>{a.msg}</div>
+                <div style={{fontSize:10,color:T.textFaint,marginTop:2}}>Detectado: {new Date(a.ts).toLocaleTimeString("es-VE")}</div>
+              </div>
+            </div>
+          ))}
+        </div>}
+      </div>}
+      {seccion==="chat"&&<div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 40px)"}}>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:12}}>💬 Chat entre Centros</div>
+        <div style={{flex:1,background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+          <div style={{flex:1,overflow:"auto",padding:12}}>
+            {chatMsgs.map(m=>(
+              <div key={m.id} style={{marginBottom:10,display:m.centroId===centro.id?"flex-end":"flex"}}>
+                <div style={{maxWidth:"75%",background:m.centroId===centro.id?"#1A73E8":T.surface2,color:m.centroId===centro.id?"#fff":T.text,padding:"8px 12px",borderRadius:10,borderTopRightRadius:m.centroId===centro.id?2:10,borderTopLeftRadius:m.centroId===centro.id?10:2}}>
+                  {m.centroId!==centro.id&&<div style={{fontSize:10,fontWeight:700,marginBottom:2,color:T.accent}}>{m.autor}</div>}
+                  <div style={{fontSize:13}}>{m.texto}</div>
+                  <div style={{fontSize:9,opacity:.6,textAlign:"right",marginTop:3}}>{m.fecha}</div>
+                </div>
+              </div>
+            ))}
+            {chatMsgs.length===0&&<div style={{color:T.textFaint,fontSize:12,textAlign:"center",padding:40}}>💬 Inicia la conversación con otros centros</div>}
+          </div>
+          <div style={{display:"flex",gap:8,padding:10,borderTop:`1px solid ${T.border}`}}>
+            <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sendChat()} placeholder="Escribe un mensaje..." style={{flex:1,background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"8px 12px",color:T.text,fontSize:13,outline:"none"}}/>
+            <button onClick={sendChat} disabled={!chatInput.trim()} style={{background:chatInput.trim()?"#1A73E8":"#999",color:"#fff",border:"none",borderRadius:8,padding:"8px 14px",cursor:chatInput.trim()?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>Enviar</button>
+          </div>
+        </div>
+      </div>}
+      {seccion==="calendario"&&<div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div style={{fontWeight:800,fontSize:18,color:T.text}}>📅 Calendario de Eventos</div>
+          <button onClick={()=>setShowEventoForm(!showEventoForm)} style={{background:"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:12}}>{showEventoForm?"✕ Cancelar":"+ Nuevo Evento"}</button>
+        </div>
+        {showEventoForm&&<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:"16px",marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            <div><label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:3,fontWeight:600}}>Título *</label><input value={nuevoEvento.titulo} onChange={e=>setNuevoEvento({...nuevoEvento,titulo:e.target.value})} placeholder="Ej: Jornada de acopio" style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:6,padding:"7px 10px",color:T.text,fontSize:12,outline:"none",boxSizing:"border-box"}}/></div>
+            <div><label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:3,fontWeight:600}}>Fecha *</label><input type="date" value={nuevoEvento.fecha} onChange={e=>setNuevoEvento({...nuevoEvento,fecha:e.target.value})} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:6,padding:"7px 10px",color:T.text,fontSize:12,outline:"none",boxSizing:"border-box"}}/></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10}}>
+            <div><label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:3,fontWeight:600}}>Descripción</label><input value={nuevoEvento.descripcion} onChange={e=>setNuevoEvento({...nuevoEvento,descripcion:e.target.value})} placeholder="Detalles del evento" style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:6,padding:"7px 10px",color:T.text,fontSize:12,outline:"none",boxSizing:"border-box"}}/></div>
+            <div><label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:3,fontWeight:600}}>Tipo</label><select value={nuevoEvento.tipo} onChange={e=>setNuevoEvento({...nuevoEvento,tipo:e.target.value})} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:6,padding:"7px 10px",color:T.text,fontSize:12,outline:"none"}}><option value="acopio">📦 Acopio</option><option value="distribucion">📤 Distribución</option><option value="jornada">👷 Jornada</option><option value="reunion">🤝 Reunión</option></select></div>
+          </div>
+          <button onClick={addEvento} disabled={!nuevoEvento.titulo||!nuevoEvento.fecha} style={{width:"100%",marginTop:10,background:nuevoEvento.titulo&&nuevoEvento.fecha?"#1A73E8":"#999",color:"#fff",border:"none",borderRadius:8,padding:"8px",cursor:nuevoEvento.titulo&&nuevoEvento.fecha?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>✅ Crear Evento</button>
+        </div>}
+        <div style={{display:"grid",gap:8}}>
+          {eventos.sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(ev=>{
+            const tipoCol={acopio:"#1A73E8",distribucion:"#FF5722",jornada:"#FF9800",reunion:"#9C27B0"};
+            return(
+              <div key={ev.id} style={{background:T.surface,border:`1px solid ${T.border}`,borderLeft:`4px solid ${tipoCol[ev.tipo]||"#999"}`,borderRadius:10,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{fontWeight:700,fontSize:13,color:T.text}}>{ev.titulo}</div>
+                  <div style={{fontSize:11,color:T.textMuted,marginTop:2}}>📅 {ev.fecha} {ev.descripcion&&`· ${ev.descripcion}`}</div>
+                  <div style={{fontSize:10,color:T.textFaint,marginTop:2}}>Por: {ev.creadoPor}</div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{background:tipoCol[ev.tipo]+"22",color:tipoCol[ev.tipo],padding:"3px 8px",borderRadius:5,fontSize:10,fontWeight:700}}>{ev.tipo}</span>
+                  <button onClick={()=>removeEvento(ev.id)} style={{background:"#FFEBEE",color:"#D32F2F",border:"none",borderRadius:5,padding:"4px 8px",cursor:"pointer",fontSize:11}}>🗑</button>
+                </div>
+              </div>
+            );
+          })}
+          {eventos.length===0&&<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:30,textAlign:"center"}}>
+            <div style={{fontSize:40,marginBottom:8}}>📅</div>
+            <div style={{color:T.textMuted,fontSize:13}}>Sin eventos programados</div>
+          </div>}
+        </div>
+      </div>}
+      {seccion==="reportes"&&<div>
+        <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>📄 Reportes e Informes</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <div onClick={exportPDF} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"20px",cursor:"pointer",textAlign:"center",transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.borderColor="#F44336"} onMouseOut={e=>e.currentTarget.style.borderColor=T.border}>
+            <div style={{fontSize:40,marginBottom:8}}>📄</div>
+            <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:4}}>Exportar PDF</div>
+            <div style={{fontSize:11,color:T.textMuted}}>Inventario completo en formato PDF listo para imprimir</div>
+          </div>
+          <div onClick={exportExcel} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"20px",cursor:"pointer",textAlign:"center",transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.borderColor="#4CAF50"} onMouseOut={e=>e.currentTarget.style.borderColor=T.border}>
+            <div style={{fontSize:40,marginBottom:8}}>📊</div>
+            <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:4}}>Exportar Excel</div>
+            <div style={{fontSize:11,color:T.textMuted}}>Archivo CSV para abrir en Excel o Google Sheets</div>
+          </div>
+        </div>
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:"16px",marginTop:16}}>
+          <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:10}}>📊 Resumen del Inventario</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+            <div style={{background:T.surface2,borderRadius:8,padding:"10px",textAlign:"center"}}>
+              <div style={{fontSize:10,color:T.textMuted}}>Total Insumos</div>
+              <div style={{fontWeight:800,fontSize:20,color:T.text}}>{invLocal.length}</div>
+            </div>
+            <div style={{background:T.surface2,borderRadius:8,padding:"10px",textAlign:"center"}}>
+              <div style={{fontSize:10,color:T.textMuted}}>Total Unidades</div>
+              <div style={{fontWeight:800,fontSize:20,color:T.text}}>{totalInv}</div>
+            </div>
+            <div style={{background:T.surface2,borderRadius:8,padding:"10px",textAlign:"center"}}>
+              <div style={{fontSize:10,color:T.textMuted}}>Críticos</div>
+              <div style={{fontWeight:800,fontSize:20,color:"#FF3B3B"}}>{criticos}</div>
+            </div>
+          </div>
+          <div style={{marginTop:12}}>
+            <div style={{fontWeight:600,fontSize:12,color:T.text,marginBottom:6}}>Por Categoría:</div>
+            {CATEGORIAS.map(c=>{const items=invLocal.filter(i=>i.categoria===c);if(items.length===0)return null;const total=items.reduce((a,i)=>a+i.cantidad,0);return<div key={c} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:`1px solid ${T.border}`,fontSize:12}}>
+              <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:3,background:coloresCat[c]||"#999",display:"inline-block"}}></span>{c}</span>
+              <span style={{color:T.textMuted}}>{items.length} insumos · {total} uds</span>
+            </div>;})}
+          </div>
+        </div>
+      </div>}
+    </div>
+  </div>);
+}
+
+function AddInvForm({onAdd,onBack,T}){
+  const CATEGORIAS=["Alimentos","Agua","Medicina","Higiene","Ropa","Cobijas","Útiles","Electrónica","Otros"];
+  const [form,setForm]=useState({nombre:"",cantidad:"",unidad:"kg",minimo:"",categoria:"Alimentos",lote:"",vencimiento:""});
+  const s={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
+  return(<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"20px",maxWidth:440}}>
+    <div style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:14}}>📝 Datos del Insumo</div>
+    {[["Nombre del insumo","nombre","text","Ej: Agua potable"],["Cantidad","cantidad","number","0"],["Mínimo alerta","minimo","number","0"],["Nro. Lote","lote","text","Ej: LOTE-2026-001"],["Fecha Vencimiento","vencimiento","date",""]].map(([lbl,key,type,ph])=>(
+      <div key={key} style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:4,fontWeight:600}}>{lbl}{key==="nombre"||key==="cantidad"?" *":""}</label>
+        {type==="date"?<input type="date" value={form[key]} onChange={e=>setForm({...form,[key]:e.target.value})} style={s}/>:
+        <input type={type} value={form[key]} onChange={e=>setForm({...form,[key]:e.target.value})} placeholder={`Ingresa ${lbl.toLowerCase()}`} style={s}/>}
+      </div>
+    ))}
+    <div style={{marginBottom:10}}>
+      <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:4,fontWeight:600}}>Categoría</label>
+      <select value={form.categoria} onChange={e=>setForm({...form,categoria:e.target.value})} style={s}>{CATEGORIAS.map(c=><option key={c} value={c}>{c}</option>)}</select>
+    </div>
+    <div style={{marginBottom:10}}>
+      <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:4,fontWeight:600}}>Unidad</label>
+      <select value={form.unidad} onChange={e=>setForm({...form,unidad:e.target.value})} style={s}><option value="kg">Kilogramos</option><option value="unidades">Unidades</option><option value="litros">Litros</option><option value="cajas">Cajas</option><option value="bolsas">Bolsas</option><option value="paquetes">Paquetes</option></select>
+    </div>
+    <div style={{display:"flex",gap:8,marginTop:14}}>
+      <button onClick={()=>onAdd(form)} disabled={!form.nombre||!form.cantidad} style={{flex:1,background:form.nombre&&form.cantidad?"#1A73E8":"#999",color:"#fff",border:"none",borderRadius:8,padding:"9px",cursor:form.nombre&&form.cantidad?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>✅ Agregar</button>
+      <button onClick={onBack} style={{flex:1,background:"none",border:`1px solid ${T.border}`,color:T.textMuted,borderRadius:8,padding:"9px",cursor:"pointer",fontSize:12}}>← Volver</button>
+    </div>
+  </div>);
+}
+
+function AddMovForm({tipo,onAdd,onBack,T}){
+  const [form,setForm]=useState({insumo:"",cantidad:"",origenDestino:""});
+  const s={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
+  const col=tipo==="recepcion"?"#4CAF50":"#FF5722";
+  return(<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"20px",maxWidth:400}}>
+    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+      <span style={{fontSize:24}}>{tipo==="recepcion"?"📥":"📤"}</span>
+      <span style={{fontWeight:700,fontSize:14,color:col}}>{tipo==="recepcion"?"Recepción de Ayuda":"Envío de Ayuda"}</span>
+    </div>
+    {[["Insumo","insumo","text","Ej: Agua, medicinas"],["Cantidad","cantidad","number","0"],[tipo==="recepcion"?"Origen (quién envía)":"Destino (a quién)","origenDestino","text",tipo==="recepcion"?"Ej: Cruz Roja, Alcaldía":"Ej: Centro X, Hospital Y"]].map(([lbl,key,type,ph])=>(
+      <div key={key} style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:4,fontWeight:600}}>{lbl} *</label>
+        <input type={type} value={form[key]} onChange={e=>setForm({...form,[key]:e.target.value})} placeholder={ph} style={{...s,borderColor:!form[key]?T.border:col}}/>
+      </div>
+    ))}
+    <div style={{display:"flex",gap:8,marginTop:14}}>
+      <button onClick={()=>onAdd({...form,tipo})} disabled={!form.insumo||!form.cantidad} style={{flex:1,background:form.insumo&&form.cantidad?col:"#999",color:"#fff",border:"none",borderRadius:8,padding:"9px",cursor:form.insumo&&form.cantidad?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>✅ Registrar</button>
+      <button onClick={onBack} style={{flex:1,background:"none",border:`1px solid ${T.border}`,color:T.textMuted,borderRadius:8,padding:"9px",cursor:"pointer",fontSize:12}}>← Volver</button>
+    </div>
+  </div>);
+}
+
 function App(){
   const [themeMode,setThemeMode]=useState(()=>{try{return localStorage.getItem("acopio_theme")||"light";}catch{return "light";}});
   const [systemDark,setSystemDark]=useState(()=>window.matchMedia?.("(prefers-color-scheme:dark)").matches);
@@ -1243,6 +1691,8 @@ function App(){
   const [showLogin,setShowLogin]=useState(false);
   const [showDash,setShowDash]=useState(false);
   const [adminOk,setAdminOk]=useState(false);
+  const [showLoginCentro,setShowLoginCentro]=useState(false);
+  const [dashCentro,setDashCentro]=useState(null);
   const [verMasRefugios,setVerMasRefugios]=useState(false);
   const [verMasHospitales,setVerMasHospitales]=useState(false);
   const [verMasCentros,setVerMasCentros]=useState(false);
@@ -1372,6 +1822,7 @@ function App(){
               <button title="Gestión de Voluntarios" onClick={()=>setShowVoluntarios(true)} style={{background:"rgba(76,175,80,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{voluntarios.length} 👥</button>
               <button title="Control de Inventario" onClick={()=>setShowInventario(true)} style={{background:"rgba(255,140,0,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📦 {inventario.length}</button>
               <button title="Analíticas y Gráficos" onClick={()=>setShowAnalytics(true)} style={{background:"rgba(156,39,176,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📊</button>
+              <button title="Panel del Centro" onClick={()=>setShowLoginCentro(true)} style={{background:"rgba(33,150,243,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>🏢 Panel</button>
               <button title={forceOffline?"Volver online":"Simular offline"} onClick={()=>setForceOffline(!forceOffline)} style={{background:forceOffline?"rgba(255,140,0,.9)":"rgba(255,255,255,.18)",color:"#fff",border:forceOffline?"none":"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{forceOffline?"🟢 Online":"📴 Offline"}</button>
               <button title="Registrar Centro de Acopio" onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
             </div>
@@ -1541,6 +1992,8 @@ function App(){
           </div>
         </div>
       )}
+      {showLoginCentro&&!dashCentro&&<LoginCentro T={T} centros={centros} onLogin={(c)=>{setDashCentro(c);setShowLoginCentro(false);}}/>}
+      {dashCentro&&<DashboardCentro centro={dashCentro} onClose={()=>setDashCentro(null)} T={T} addToast={addToast} saveFirebase={(path,data)=>{const ok=firebaseSave(path,data);if(!ok)queueSync(path,data);}} darkMode={darkMode} toggleTheme={()=>setThemeMode(m=>m==="dark"?"light":"dark")}/>}
     </div>
   );
 }
