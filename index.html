@@ -63,46 +63,91 @@ const EMERGENCIAS=[
 const REFUGIOS=[{id:"R1",name:"Centro Médico de Caracas",city:"Caracas",lat:10.5118964,lon:-66.8970211,desc:"Refugio en Caracas",cap:200,cur:7,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R2",name:"Clínica Nueva Caracas",city:"Caracas",lat:10.4791624,lon:-66.8912634,desc:"Refugio en Caracas",cap:200,cur:14,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R3",name:"Coliseo PoliSucre",city:"Caracas",lat:10.488,lon:-66.935,desc:"Refugio en Caracas",cap:200,cur:21,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R4",name:"Hospital de Clínicas Caracas",city:"Caracas",lat:10.5098859,lon:-66.8988688,desc:"Refugio en Caracas",cap:200,cur:28,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R5",name:"Hospital Dr. Jesús Yerena (Lídice)",city:"Caracas",lat:10.5242794,lon:-66.9301115,desc:"Refugio en Caracas",cap:200,cur:35,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R6",name:"Hospital General Dr. José Ignacio Baldó (El Algodonal)",city:"Caracas",lat:10.4822591,lon:-66.9709105,desc:"Refugio en Caracas",cap:200,cur:42,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R7",name:"Hospital Militar Dr. Carlos Arvelo",city:"Caracas",lat:10.4978925,lon:-66.9388524,desc:"Refugio en Caracas",cap:200,cur:49,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R8",name:"Hospital Oncológico Padre Machado",city:"Caracas",lat:10.477332,lon:-66.9176805,desc:"Refugio en Caracas",cap:200,cur:56,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R9",name:"Hospital San Juan de Dios",city:"Caracas",lat:10.4676875,lon:-66.8651875,desc:"Refugio en Caracas",cap:200,cur:63,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R10",name:"Posada Disponible (Puerto Cabello)",city:"Puerto Cabello",lat:10.473,lon:-68.012,desc:"Refugio en Puerto Cabello",cap:200,cur:70,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R11",name:"Posada Disponible (Tucacas)",city:"Tucacas",lat:10.8,lon:-68.32,desc:"Refugio en Tucacas",cap:200,cur:77,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R12",name:"Sede de Ipostel (Centro Postal de Caracas)",city:"Caracas",lat:10.488,lon:-66.935,desc:"Refugio en Caracas",cap:200,cur:84,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R13",name:"Sede del Instituto Nacional de Deportes (IND)",city:"Caracas",lat:10.488,lon:-66.935,desc:"Refugio en Caracas",cap:200,cur:91,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R14",name:"Tatas Food (Centro de Acopio)",city:"Barquisimeto",lat:10.071,lon:-69.324,desc:"Refugio en Barquisimeto",cap:200,cur:98,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R15",name:"Colegio Andrés Bello",city:"Caracas",lat:10.50135,lon:-66.90366,desc:"Refugio en Caracas",cap:200,cur:105,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R16",name:"Coliseo de Petare",city:"Caracas",lat:10.47871,lon:-66.80722,desc:"Refugio en Caracas",cap:200,cur:112,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R17",name:"Coliseo PoliSucre La Urbina",city:"Caracas",lat:10.4978385,lon:-66.8010807,desc:"Refugio en Caracas",cap:200,cur:119,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R18",name:"Complejo Cultural y Deportivo Guayana Esequiba",city:"Caracas",lat:10.5146861,lon:-66.8963223,desc:"Refugio en Caracas",cap:200,cur:126,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R19",name:"Escuela Luis Alberto Hurtado",city:"Caracas",lat:10.4609,lon:-67.07894,desc:"Refugio en Caracas",cap:200,cur:133,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R20",name:"Estadio Chato Candela",city:"Caracas",lat:10.5060415,lon:-66.945003,desc:"Refugio en Caracas",cap:200,cur:140,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R21",name:"Hospital Clínico Universitario de Caracas",city:"Caracas",lat:10.4903292,lon:-66.8940007,desc:"Refugio en Caracas",cap:200,cur:147,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R22",name:"Hospital de Niños Dr. J. M. de los Ríos",city:"Caracas",lat:10.5068927,lon:-66.8995768,desc:"Refugio en Caracas",cap:200,cur:154,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R23",name:"Hotel Meliá Caracas",city:"Caracas",lat:10.49196,lon:-66.87781,desc:"Refugio en Caracas",cap:200,cur:161,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R24",name:"Instituto Nacional de Deportes",city:"Caracas",lat:10.473913,lon:-66.9474487,desc:"Refugio en Caracas",cap:200,cur:168,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R25",name:"Ipostel (Refugio)",city:"Caracas",lat:10.49528,lon:-66.92353,desc:"Refugio en Caracas",cap:200,cur:175,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R26",name:"Ipostel San Juan",city:"Caracas",lat:10.5031777,lon:-66.9200643,desc:"Refugio en Caracas",cap:200,cur:182,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R27",name:"Kabal Altamira",city:"Caracas",lat:10.49559,lon:-66.84886,desc:"Refugio en Caracas",cap:200,cur:189,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R28",name:"La Carlota",city:"Caracas",lat:10.4878646,lon:-66.8473864,desc:"Refugio en Caracas",cap:200,cur:196,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R29",name:"Parque Generalísimo Francisco de Miranda",city:"Caracas",lat:10.4931895,lon:-66.8397763,desc:"Refugio en Caracas",cap:200,cur:203,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R30",name:"Plaza Venezuela (Punto de apoyo)",city:"Caracas",lat:10.49692,lon:-66.88574,desc:"Refugio en Caracas",cap:200,cur:210,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R31",name:"Polideportivo Mesuca",city:"Caracas (Petare)",lat:10.4751329,lon:-66.7980119,desc:"Refugio en Caracas (Petare)",cap:200,cur:217,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R32",name:"U.E.N. Francisco Pimentel",city:"Caracas",lat:10.4969,lon:-66.91732,desc:"Refugio en Caracas",cap:200,cur:224,status:"Activo",needs:["Comida","Agua","Medicinas"]},{id:"R33",name:"U.E.N. Gran Colombia",city:"Caracas",lat:10.47794,lon:-66.91429,desc:"Refugio en Caracas",cap:200,cur:231,status:"Activo",needs:["Comida","Agua","Medicinas"]}];
 
 const HOSPITALES=[
-  {id:"H01",name:"Hospital Universitario de Caracas",city:"Caracas",state:"Distrito Capital",lat:10.51002,lon:-66.8988,desc:"Principal hospital docente y de referencia nacional, adscrito a la UCV. Emergencia 24h.",type:"Público",phone:"0212-6067111",status:"Activo"},
+  {id:"H01",name:"Hospital Universitario de Caracas",city:"Caracas",state:"Distrito Capital",lat:10.5100,lon:-66.8939,desc:"Principal hospital docente y de referencia nacional, adscrito a la UCV. Emergencia 24h.",type:"Público",phone:"0212-6067111",status:"Activo"},
   {id:"H02",name:"Hospital Dr. José Gregorio Hernández",city:"Caracas",state:"Distrito Capital",lat:10.5163,lon:-66.9549,desc:"Hospital general con múltiples especialidades. Fuente las Brisas a Pirineo, San José, Cotiza.",type:"Público",phone:"0212-8622910",status:"Activo"},
   {id:"H03",name:"Hospital Dr. Miguel Pérez Carreño",city:"Caracas",state:"Distrito Capital",lat:10.4800,lon:-66.9537,desc:"Hospital general del IVSS. Vuelta el Pescozón, urbanización Bella Vista, Antímano.",type:"Público",phone:"0212-4078001",status:"Activo"},
   {id:"H04",name:"Hospital Dr. José Ignacio Baldó",city:"Caracas",state:"Distrito Capital",lat:10.4823,lon:-66.9709,desc:"Hospital del MPPS. Av. Principal de Algodonal, La Yaguara.",type:"Público",phone:"0212-4722225",status:"Activo"},
   {id:"H05",name:"Hospital Vargas de Caracas",city:"Caracas",state:"Distrito Capital",lat:10.5168,lon:-66.9115,desc:"Hospital público de referencia en el centro de Caracas.",type:"Público",phone:"0212-5151617",status:"Activo"},
-  {id:"H06",name:"Hospital Dr. Jesús Yerena",city:"Caracas",state:"Distrito Capital",lat:10.5243,lon:-66.9301,desc:"Hospital público en Lídice, Caracas.",type:"Público",phone:"0212-7311654",status:"Activo"},
+  {id:"H06",name:"Hospital Dr. Jesús Yerena",city:"Caracas",state:"Distrito Capital",lat:10.5243,lon:-66.9301,desc:"Hospital público general de Lídice, Caracas.",type:"Público",phone:"0212-7311654",status:"Activo"},
   {id:"H07",name:"Hospital Cardiológico Infantil Latinoamericano",city:"Caracas",state:"Distrito Capital",lat:10.4675,lon:-66.9716,desc:"Hospital especializado en cardiología infantil de referencia para Latinoamérica.",type:"Público",phone:"0212-4085040",status:"Activo"},
-  {id:"H08",name:"Hospital Dr. Domingo Luciani",city:"Petare",state:"Miranda",lat:10.4720,lon:-66.8101,desc:"Hospital general del IVSS en Petare. Final Av. Río de Janeiro, El Llanito.",type:"Público",phone:"0212-2573637",status:"Activo"},
-  {id:"H09",name:"Hospital Ana Francisca Pérez de León",city:"Petare",state:"Miranda",lat:10.4782,lon:-66.8098,desc:"Hospital general en Petare, estado Miranda.",type:"Público",phone:"0212-2571105",status:"Activo"},
-  {id:"H10",name:"Hospital General de Guarenas-Guatire",city:"Guatire",state:"Miranda",lat:10.4796,lon:-66.5498,desc:"Hospital general que cubre Guarenas y Guatire.",type:"Público",phone:"0212-2397958",status:"Activo"},
-  {id:"H11",name:"Hospital Dr. Luis Salazar Domínguez (IVSS)",city:"Guarenas",state:"Miranda",lat:10.4701,lon:-66.6113,desc:"Hospital del IVSS en Guarenas.",type:"Público",phone:"0212-2319860",status:"Activo"},
-  {id:"H12",name:"Ciudad Hospitalaria Dr. Enrique Tejera (CHET)",city:"Valencia",state:"Carabobo",lat:10.1538,lon:-68.0127,desc:"Principal complejo hospitalario del estado Carabobo. Hospital universitario de la UC. Emergencia 24h.",type:"Público",phone:"0241-8610000",status:"Activo"},
-  {id:"H13",name:"Hospital Universitario Dr. Ángel Larralde (IVSS)",city:"Valencia",state:"Carabobo",lat:10.2908,lon:-67.9998,desc:"Hospital universitario del IVSS en Valencia. Psiquiatría de Bárbula.",type:"Público",phone:"0241-8672923",status:"Activo"},
-  {id:"H14",name:"Hospital Dr. José Francisco Molina Sierra",city:"Puerto Cabello",state:"Carabobo",lat:10.4700,lon:-68.0100,desc:"Hospital general en Puerto Cabello.",type:"Público",phone:"0242-3614610",status:"Activo"},
-  {id:"H15",name:"Hospital Universitario de Maracaibo",city:"Maracaibo",state:"Zulia",lat:10.6732,lon:-71.6284,desc:"Principal hospital del occidente venezolano, adscrito a la LUZ. Emergencia 24h.",type:"Público",phone:"0261-7593115",status:"Activo"},
-  {id:"H16",name:"Hospital Gral. del Sur Dr. Pedro Iturbe",city:"Maracaibo",state:"Zulia",lat:10.6428,lon:-71.6134,desc:"Hospital general de referencia en Maracaibo.",type:"Público",phone:"0261-7591000",status:"Activo"},
-  {id:"H17",name:"Hospital Central de Maracay",city:"Maracay",state:"Aragua",lat:10.2469,lon:-67.5958,desc:"Hospital principal de Maracay. Av. José María Vargas c/c Av. La Floresta.",type:"Público",phone:"0243-2324444",status:"Activo"},
-  {id:"H18",name:"Hospital Antonio María Pineda",city:"Barquisimeto",state:"Lara",lat:10.0821,lon:-69.3112,desc:"Hospital universitario de referencia en Lara.",type:"Público",phone:"0251-2384100",status:"Activo"},
-  {id:"H19",name:"Hospital Universitario de Pediatría Dr. Agustín Zubillaga",city:"Barquisimeto",state:"Lara",lat:10.0817,lon:-69.3133,desc:"Hospital especializado en pediatría.",type:"Público",phone:"0251-2389139",status:"Activo"},
-  {id:"H20",name:"Hospital Dr. Pastor Oropeza",city:"Carora",state:"Lara",lat:10.1719,lon:-70.0586,desc:"Hospital universitario en Carora.",type:"Público",phone:"0252-4125020",status:"Activo"},
-  {id:"H21",name:"Hospital Universitario de Los Andes",city:"Mérida",state:"Mérida",lat:8.5866,lon:-71.1591,desc:"Hospital universitario de referencia en los Andes. CAMIULA.",type:"Público",phone:"0274-2402111",status:"Activo"},
-  {id:"H22",name:"Hospital Central de San Cristóbal",city:"San Cristóbal",state:"Táchira",lat:7.7669,lon:-72.2250,desc:"Hospital principal del estado Táchira.",type:"Público",phone:"0276-3447100",status:"Activo"},
-  {id:"H23",name:"Complejo Hospitalario Ruiz y Páez",city:"Ciudad Bolívar",state:"Bolívar",lat:8.1328,lon:-63.5315,desc:"Hospital universitario de referencia en Bolívar.",type:"Público",phone:"0285-6323456",status:"Activo"},
-  {id:"H24",name:"Hospital Universitario Dr. Luís Razetti",city:"Barcelona",state:"Anzoátegui",lat:10.1586,lon:-64.6379,desc:"Hospital universitario de referencia en Anzoátegui.",type:"Público",phone:"0281-2663000",status:"Activo"},
-  {id:"H25",name:"Hospital Manuel Núñez Tovar",city:"Maturín",state:"Monagas",lat:9.7477,lon:-63.1836,desc:"Hospital universitario de Monagas.",type:"Público",phone:"0291-6425500",status:"Activo"},
-  {id:"H26",name:"Hospital Universitario Antonio Patricio de Alcalá",city:"Cumaná",state:"Sucre",lat:10.4691,lon:-64.1622,desc:"Hospital universitario de Sucre.",type:"Público",phone:"0293-4314444",status:"Activo"},
-  {id:"H27",name:"Hospital Van Grieken",city:"Coro",state:"Falcón",lat:11.4044,lon:-69.6724,desc:"Hospital de referencia en Falcón. Tenis con Santa Rosa.",type:"Público",phone:"0268-2503333",status:"Activo"},
-  {id:"H28",name:"Hospital Jesús María Casal",city:"Acarigua",state:"Portuguesa",lat:9.5579,lon:-69.1898,desc:"Hospital de referencia en Portuguesa.",type:"Público",phone:"0255-2416666",status:"Activo"},
-  {id:"H29",name:"Hospital Dr. Pablo Acosta Ortiz",city:"San Fernando de Apure",state:"Apure",lat:7.8833,lon:-67.4750,desc:"Hospital de referencia en Apure. Av. Caracas.",type:"Público",phone:"0247-3322222",status:"Activo"},
-  {id:"H30",name:"Hospital Central Dr. Pedro E. Carrillo",city:"Valera",state:"Trujillo",lat:9.3181,lon:-70.6033,desc:"Hospital de referencia en Trujillo.",type:"Público",phone:"0271-2322222",status:"Activo"},
-  {id:"H31",name:"Hospital Dr. Francisco Urdaneta Delgado",city:"Calabozo",state:"Guárico",lat:8.9250,lon:-67.4250,desc:"Hospital general de Guárico. 5ta Av. Centro Administrativo.",type:"Público",phone:"0246-3311111",status:"Activo"},
-  {id:"H32",name:"Hospital Dr. Rafael Zamora Arévalo",city:"Valle de La Pascua",state:"Guárico",lat:9.2082,lon:-65.9962,desc:"Hospital de Valle de La Pascua.",type:"Público",phone:"0246-4616821",status:"Activo"},
-  {id:"H33",name:"Hospital Central Dr. Plácido Daniel Rodríguez Rivero",city:"San Felipe",state:"Yaracuy",lat:10.3400,lon:-68.7400,desc:"Hospital de referencia en Yaracuy.",type:"Público",phone:"0259-2514444",status:"Activo"},
-  {id:"H34",name:"Hospital General Dr. Egor Nucete",city:"San Carlos",state:"Cojedes",lat:9.6500,lon:-68.5800,desc:"Hospital general de Cojedes.",type:"Público",phone:"0258-4311111",status:"Activo"},
-  {id:"H35",name:"Hospital José Gregorio Hernández",city:"Trujillo",state:"Trujillo",lat:9.4167,lon:-70.5500,desc:"Hospital de Trujillo.",type:"Público",phone:"0271-2311111",status:"Activo"},
-  {id:"H36",name:"Hospital Central Patricio Alcalá",city:"Cumaná",state:"Sucre",lat:10.4575,lon:-64.1848,desc:"Hospital central de Sucre.",type:"Público",phone:"0293-4311111",status:"Activo"},
-  {id:"H37",name:"Hospital de Clínicas Caracas",city:"Caracas",state:"Distrito Capital",lat:10.5100,lon:-66.8988,desc:"Centro médico privado de referencia con más de 50 años. Emergencia 24h.",type:"Privado",phone:"0212-5086051",status:"Activo"},
-  {id:"H38",name:"Clínica El Ávila",city:"Caracas",state:"Distrito Capital",lat:10.4945,lon:-66.8456,desc:"Clínica privada de prestigio en Altamira. 400+ especialistas. Emergencia 24h.",type:"Privado",phone:"0212-2630500",status:"Activo"},
-  {id:"H39",name:"Hospital Universitario de Pediatría Dr. J.M. de los Ríos",city:"Caracas",state:"Distrito Capital",lat:10.4950,lon:-66.9350,desc:"Hospital público especializado en pediatría.",type:"Público",phone:"0212-5745386",status:"Activo"},
-  {id:"H40",name:"Hospital Dr. José María Vargas",city:"Caracas",state:"Distrito Capital",lat:10.5050,lon:-66.9300,desc:"Hospital público. San Lázaro a Providencia, La Pastora.",type:"Público",phone:"0212-8601585",status:"Activo"}
+  {id:"H08",name:"Hospital Dr. Elias Toro",city:"Caracas",state:"Distrito Capital",lat:10.5040,lon:-66.9200,desc:"Hospital público. Calle Colombia con 7ma Av. Catia, Parroquia 23 de Enero.",type:"Público",phone:"0212-8702091",status:"Activo"},
+  {id:"H09",name:"Maternidad Santa Ana",city:"Caracas",state:"Distrito Capital",lat:10.5020,lon:-66.8880,desc:"Hospital maternidad. Avenida Anauco, San Bernardino.",type:"Público",phone:"0212-5518924",status:"Activo"},
+  {id:"H10",name:"Centro Médico Docente La Trinidad",city:"Caracas",state:"Distrito Capital",lat:10.5340,lon:-66.8730,desc:"Centro médico docente privado. Av. Intercomunal La Trinidad.",type:"Privado",phone:"0212-9496411",status:"Activo"},
+  {id:"H11",name:"Hospital Psiquiátrico de Caracas",city:"Caracas",state:"Distrito Capital",lat:10.5300,lon:-66.9170,desc:"Hospital especializado en psiquiatría.",type:"Público",phone:"0212-8611015",status:"Activo"},
+  {id:"H12",name:"Hospital Periférico de Coche",city:"Caracas",state:"Distrito Capital",lat:10.4590,lon:-66.9250,desc:"Hospital Periférico Leopoldo Manrique Terrero, Coche.",type:"Público",phone:"0212-8932014",status:"Activo"},
+  {id:"H13",name:"Hospital Dr. Domingo Luciani",city:"Petare",state:"Miranda",lat:10.4720,lon:-66.8101,desc:"Hospital general del IVSS en Petare. Final Av. Río de Janeiro, El Llanito.",type:"Público",phone:"0212-2573637",status:"Activo"},
+  {id:"H14",name:"Hospital Ana Francisca Pérez de León",city:"Petare",state:"Miranda",lat:10.4782,lon:-66.8098,desc:"Hospital general en Petare, estado Miranda.",type:"Público",phone:"0212-2571105",status:"Activo"},
+  {id:"H15",name:"Hospital General de Guarenas-Guatire",city:"Guatire",state:"Miranda",lat:10.4796,lon:-66.5498,desc:"Hospital general que cubre Guarenas y Guatire.",type:"Público",phone:"0212-2397958",status:"Activo"},
+  {id:"H16",name:"Hospital Dr. Luis Salazar Domínguez (IVSS)",city:"Guarenas",state:"Miranda",lat:10.4701,lon:-66.6113,desc:"Hospital del IVSS en Guarenas.",type:"Público",phone:"0212-2319860",status:"Activo"},
+  {id:"H17",name:"Hospital General de Los Teques",city:"Los Teques",state:"Miranda",lat:10.3400,lon:-67.0400,desc:"Hospital principal de Los Teques, referencia regional de Miranda.",type:"Público",phone:"0212-3931014",status:"Activo"},
+  {id:"H18",name:"Hospital Militar Dr. Carlos Arvelo",city:"Caracas",state:"Distrito Capital",lat:10.4977,lon:-66.9387,desc:"Hospital Militar Universitario. Avenida José Ángel Lamas, San Juan.",type:"Militar",phone:"0212-8604144",status:"Activo"},
+  {id:"H19",name:"Ciudad Hospitalaria Dr. Enrique Tejera (CHET)",city:"Valencia",state:"Carabobo",lat:10.1538,lon:-68.0127,desc:"Principal complejo hospitalario del estado Carabobo. Hospital universitario de la UC. Emergencia 24h.",type:"Público",phone:"0241-8610000",status:"Activo"},
+  {id:"H20",name:"Hospital Universitario Dr. Ángel Larralde (IVSS)",city:"Valencia",state:"Carabobo",lat:10.2908,lon:-67.9998,desc:"Hospital universitario del IVSS en Valencia. Psiquiatría de Bárbula.",type:"Público",phone:"0241-8672923",status:"Activo"},
+  {id:"H21",name:"Hospital Dr. José Francisco Molina Sierra",city:"Puerto Cabello",state:"Carabobo",lat:10.4700,lon:-68.0100,desc:"Hospital general en Puerto Cabello.",type:"Público",phone:"0242-3614610",status:"Activo"},
+  {id:"H22",name:"Hospital Simón Bolívar",city:"Mariara",state:"Carabobo",lat:10.2854,lon:-67.7001,desc:"Hospital general en Mariara, estado Carabobo.",type:"Público",phone:"0243-2631111",status:"Activo"},
+  {id:"H23",name:"Hospital Universitario de Maracaibo",city:"Maracaibo",state:"Zulia",lat:10.6732,lon:-71.6284,desc:"Principal hospital del occidente venezolano, adscrito a la LUZ. Emergencia 24h.",type:"Público",phone:"0261-7593115",status:"Activo"},
+  {id:"H24",name:"Hospital Gral. del Sur Dr. Pedro Iturbe",city:"Maracaibo",state:"Zulia",lat:10.6428,lon:-71.6134,desc:"Hospital general de referencia en Maracaibo.",type:"Público",phone:"0261-7591000",status:"Activo"},
+  {id:"H25",name:"Hospital Dr. Adolfo Pons",city:"Maracaibo",state:"Zulia",lat:10.6600,lon:-71.6400,desc:"Hospital del IVSS. Av. Fuerzas Armadas, sector Canchancha.",type:"Público",phone:"0261-7411890",status:"Activo"},
+  {id:"H26",name:"Hospital Dr. Manuel Noriega Trigo",city:"Maracaibo",state:"Zulia",lat:10.6550,lon:-71.6300,desc:"Hospital del IVSS. Av. Principal Urb. San Felipe, Municipio San Francisco.",type:"Público",phone:"0261-7613474",status:"Activo"},
+  {id:"H27",name:"Hospital Dr. Pedro García Clara",city:"Ciudad Ojeda",state:"Zulia",lat:10.1200,lon:-71.3100,desc:"Hospital de referencia en Ciudad Ojeda. Av. 34 con Calle L.",type:"Público",phone:"0265-6622195",status:"Activo"},
+  {id:"H28",name:"Hospital de Cabimas",city:"Cabimas",state:"Zulia",lat:10.3900,lon:-71.4500,desc:"Hospital general en Cabimas, estado Zulia.",type:"Público",phone:"0264-2611014",status:"Activo"},
+  {id:"H29",name:"Hospital Central de Maracay",city:"Maracay",state:"Aragua",lat:10.2469,lon:-67.5958,desc:"Hospital principal de Maracay. Av. José María Vargas c/c Av. La Floresta.",type:"Público",phone:"0243-2324444",status:"Activo"},
+  {id:"H30",name:"Hospital Dr. José María Carabaño Tosta (IVSS)",city:"Maracay",state:"Aragua",lat:10.2350,lon:-67.5850,desc:"Hospital del IVSS. Av. Principal de San José, cerca del Terminal.",type:"Público",phone:"0243-2365376",status:"Activo"},
+  {id:"H31",name:"Hospital José María Benítez",city:"La Victoria",state:"Aragua",lat:10.2270,lon:-67.3340,desc:"Hospital de referencia en La Victoria, estado Aragua.",type:"Público",phone:"0244-3211286",status:"Activo"},
+  {id:"H32",name:"Hospital Antonio María Pineda",city:"Barquisimeto",state:"Lara",lat:10.0821,lon:-69.3112,desc:"Hospital universitario de referencia en Lara.",type:"Público",phone:"0251-2384100",status:"Activo"},
+  {id:"H33",name:"Hospital Universitario de Pediatría Dr. Agustín Zubillaga",city:"Barquisimeto",state:"Lara",lat:10.0817,lon:-69.3133,desc:"Hospital especializado en pediatría.",type:"Público",phone:"0251-2389139",status:"Activo"},
+  {id:"H34",name:"Hospital Dr. Pastor Oropeza",city:"Carora",state:"Lara",lat:10.1719,lon:-70.0586,desc:"Hospital universitario en Carora.",type:"Público",phone:"0252-4125020",status:"Activo"},
+  {id:"H35",name:"Hospital General de Lara",city:"Barquisimeto",state:"Lara",lat:10.0690,lon:-69.3070,desc:"Hospital general de referencia en Barquisimeto.",type:"Público",phone:"0251-2381500",status:"Activo"},
+  {id:"H36",name:"Hospital Universitario de Los Andes",city:"Mérida",state:"Mérida",lat:8.5866,lon:-71.1591,desc:"Hospital universitario de referencia en los Andes. CAMIULA.",type:"Público",phone:"0274-2402111",status:"Activo"},
+  {id:"H37",name:"Hospital Central de San Cristóbal",city:"San Cristóbal",state:"Táchira",lat:7.7669,lon:-72.2250,desc:"Hospital principal del estado Táchira.",type:"Público",phone:"0276-3447100",status:"Activo"},
+  {id:"H38",name:"Complejo Hospitalario Ruiz y Páez",city:"Ciudad Bolívar",state:"Bolívar",lat:8.1328,lon:-63.5315,desc:"Hospital universitario de referencia en Bolívar.",type:"Público",phone:"0285-6323456",status:"Activo"},
+  {id:"H39",name:"Hospital Dr. Raúl Leoni",city:"San Félix",state:"Bolívar",lat:8.2200,lon:-63.4900,desc:"Hospital general en San Félix, estado Bolívar.",type:"Público",phone:"0285-6522211",status:"Activo"},
+  {id:"H40",name:"Hospital Uyapar",city:"Puerto Ordaz",state:"Bolívar",lat:8.2900,lon:-62.7200,desc:"Hospital de referencia en Puerto Ordaz.",type:"Público",phone:"0285-6311014",status:"Activo"},
+  {id:"H41",name:"Hospital Universitario Dr. Luís Razetti",city:"Barcelona",state:"Anzoátegui",lat:10.1586,lon:-64.6379,desc:"Hospital universitario de referencia en Anzoátegui.",type:"Público",phone:"0281-2663000",status:"Activo"},
+  {id:"H42",name:"Hospital Dr. Domingo Guzmán Lander (IVSS)",city:"Barcelona",state:"Anzoátegui",lat:10.1100,lon:-64.6900,desc:"Hospital del IVSS en Barcelona, Las Garzas.",type:"Público",phone:"0281-2411014",status:"Activo"},
+  {id:"H43",name:"Hospital Dr. César Rodríguez Rodríguez",city:"Puerto La Cruz",state:"Anzoátegui",lat:10.2150,lon:-64.6200,desc:"Hospital del IVSS en Puerto La Cruz.",type:"Público",phone:"0281-2761014",status:"Activo"},
+  {id:"H44",name:"Hospital Dr. Jesús Eduardo Angulo Rivas",city:"Anaco",state:"Anzoátegui",lat:9.4400,lon:-64.4700,desc:"Hospital de referencia en Anaco.",type:"Público",phone:"0282-2821014",status:"Activo"},
+  {id:"H45",name:"Hospital Dr. Felipe Guevara Rojas",city:"El Tigre",state:"Anzoátegui",lat:8.8900,lon:-64.2600,desc:"Hospital de referencia en El Tigre.",type:"Público",phone:"0283-2311014",status:"Activo"},
+  {id:"H46",name:"Hospital Manuel Núñez Tovar",city:"Maturín",state:"Monagas",lat:9.7477,lon:-63.1836,desc:"Hospital universitario de Monagas.",type:"Público",phone:"0291-6425500",status:"Activo"},
+  {id:"H47",name:"Hospital Dr. Tulio López Ramírez",city:"Maturín",state:"Monagas",lat:9.7600,lon:-63.1700,desc:"Hospital de referencia en Maturín.",type:"Público",phone:"0291-6411014",status:"Activo"},
+  {id:"H48",name:"Hospital Universitario Antonio Patricio de Alcalá",city:"Cumaná",state:"Sucre",lat:10.4691,lon:-64.1622,desc:"Hospital universitario de Sucre.",type:"Público",phone:"0293-4314444",status:"Activo"},
+  {id:"H49",name:"Hospital Santos Aníbal Dominici",city:"Carúpano",state:"Sucre",lat:10.6650,lon:-63.2400,desc:"Hospital de referencia en Carúpano.",type:"Público",phone:"0294-4311014",status:"Activo"},
+  {id:"H50",name:"Hospital Van Grieken",city:"Coro",state:"Falcón",lat:11.4044,lon:-69.6724,desc:"Hospital de referencia en Falcón.",type:"Público",phone:"0268-2503333",status:"Activo"},
+  {id:"H51",name:"Hospital Dr. José Antonio Páez",city:"Punto Fijo",state:"Falcón",lat:11.7050,lon:-70.1950,desc:"Hospital de referencia en Punto Fijo.",type:"Público",phone:"0268-9511014",status:"Activo"},
+  {id:"H52",name:"Hospital Jesús María Casal",city:"Acarigua",state:"Portuguesa",lat:9.5579,lon:-69.1898,desc:"Hospital de referencia en Portuguesa.",type:"Público",phone:"0255-2416666",status:"Activo"},
+  {id:"H53",name:"Hospital Universitario Dr. Miguel Oráa",city:"Guanare",state:"Portuguesa",lat:9.0420,lon:-69.7480,desc:"Hospital universitario en Guanare.",type:"Público",phone:"0257-2511014",status:"Activo"},
+  {id:"H54",name:"Hospital Dr. Pablo Acosta Ortiz",city:"San Fernando de Apure",state:"Apure",lat:7.8833,lon:-67.4750,desc:"Hospital de referencia en Apure.",type:"Público",phone:"0247-3322222",status:"Activo"},
+  {id:"H55",name:"Hospital General José Antonio Páez",city:"Guasdualito",state:"Apure",lat:7.5800,lon:-70.7600,desc:"Hospital general en Guasdualito.",type:"Público",phone:"0247-3411014",status:"Activo"},
+  {id:"H56",name:"Hospital Central Dr. Pedro E. Carrillo",city:"Valera",state:"Trujillo",lat:9.3181,lon:-70.6033,desc:"Hospital de referencia en Trujillo.",type:"Público",phone:"0271-2322222",status:"Activo"},
+  {id:"H57",name:"Hospital José Gregorio Hernández",city:"Trujillo",state:"Trujillo",lat:9.4167,lon:-70.5500,desc:"Hospital de Trujillo.",type:"Público",phone:"0271-2311111",status:"Activo"},
+  {id:"H58",name:"Hospital Dr. Israel Ranuarez Balza",city:"San Juan de los Morros",state:"Guárico",lat:9.0070,lon:-67.3550,desc:"Hospital de referencia en San Juan de los Morros.",type:"Público",phone:"0246-3411014",status:"Activo"},
+  {id:"H59",name:"Hospital Dr. Francisco Urdaneta Delgado",city:"Calabozo",state:"Guárico",lat:8.9250,lon:-67.4250,desc:"Hospital general de Guárico.",type:"Público",phone:"0246-3311111",status:"Activo"},
+  {id:"H60",name:"Hospital Dr. Rafael Zamora Arévalo",city:"Valle de La Pascua",state:"Guárico",lat:9.2082,lon:-65.9962,desc:"Hospital de Valle de La Pascua.",type:"Público",phone:"0246-4616821",status:"Activo"},
+  {id:"H61",name:"Hospital General William Lara",city:"Zaraza",state:"Guárico",lat:9.3500,lon:-65.3300,desc:"Hospital general en Zaraza.",type:"Público",phone:"0246-5411014",status:"Activo"},
+  {id:"H62",name:"Hospital Central Dr. Plácido Daniel Rodríguez Rivero",city:"San Felipe",state:"Yaracuy",lat:10.3400,lon:-68.7400,desc:"Hospital de referencia en Yaracuy.",type:"Público",phone:"0259-2514444",status:"Activo"},
+  {id:"H63",name:"Hospital General Dr. Egor Nucete",city:"San Carlos",state:"Cojedes",lat:9.6500,lon:-68.5800,desc:"Hospital general de Cojedes.",type:"Público",phone:"0258-4311111",status:"Activo"},
+  {id:"H64",name:"Hospital Joaquina de Rotondaro",city:"Tinaquillo",state:"Cojedes",lat:9.9167,lon:-68.3050,desc:"Hospital de referencia en Tinaquillo.",type:"Público",phone:"0258-6111014",status:"Activo"},
+  {id:"H65",name:"Hospital Dr. José Gregorio Hernández",city:"Puerto Ayacucho",state:"Amazonas",lat:5.6650,lon:-67.5850,desc:"Hospital de referencia en Amazonas. Emergencia 24h.",type:"Público",phone:"0248-3111014",status:"Activo"},
+  {id:"H66",name:"Hospital General de Barinas",city:"Barinas",state:"Barinas",lat:8.6200,lon:-70.2300,desc:"Hospital general de referencia en Barinas.",type:"Público",phone:"0273-3111014",status:"Activo"},
+  {id:"H67",name:"Hospital Luis Razetti",city:"Barinas",state:"Barinas",lat:8.6100,lon:-70.2200,desc:"Hospital universitario en Barinas.",type:"Público",phone:"0273-3211014",status:"Activo"},
+  {id:"H68",name:"Hospital Dr. Luis Razetti",city:"Tucupita",state:"Delta Amacuro",lat:9.0833,lon:-62.0500,desc:"Hospital de referencia en Delta Amacuro.",type:"Público",phone:"0287-3111014",status:"Activo"},
+  {id:"H69",name:"Hospital Universitario de Nueva Esparta",city:"Porlamar",state:"Nueva Esparta",lat:10.9500,lon:-63.8600,desc:"Hospital principal del estado Nueva Esparta.",type:"Público",phone:"0295-2631014",status:"Activo"},
+  {id:"H70",name:"Hospital Dr. José María Vargas",city:"La Guaira",state:"Vargas",lat:10.6000,lon:-66.9330,desc:"Hospital del IVSS en La Guaira. Av. Soublette.",type:"Público",phone:"0212-3316555",status:"Activo"},
+  {id:"H71",name:"Hospital Dr. Luis Daniel Beauperthuy",city:"Cumaná",state:"Sucre",lat:10.4530,lon:-64.1750,desc:"Hospital Tipo I en Cumaná.",type:"Público",phone:"0293-4311014",status:"Activo"},
+  {id:"H72",name:"Hospital Dr. José Antonio Páez",city:"Valera",state:"Trujillo",lat:9.3200,lon:-70.6100,desc:"Hospital de Valera.",type:"Público",phone:"0271-2311014",status:"Activo"},
+  {id:"H73",name:"Hospital Dr. Martín Lucena",city:"Mantecal",state:"Apure",lat:7.0200,lon:-69.4900,desc:"Hospital de Mantecal, estado Apure.",type:"Público",phone:"0247-3511014",status:"Activo"},
+  {id:"H74",name:"Hospital General de Coche Leopoldo Manrique Terrero",city:"Caracas",state:"Distrito Capital",lat:10.4590,lon:-66.9250,desc:"Hospital general en zona sur de Caracas.",type:"Público",phone:"0212-8932014",status:"Activo"},
+  {id:"H75",name:"Hospital Dr. Jesús Eduardo Angulo Rivas",city:"Cantaura",state:"Anzoátegui",lat:9.6100,lon:-64.3600,desc:"Hospital de referencia en Cantaura.",type:"Público",phone:"0282-2831014",status:"Activo"},
+  {id:"H76",name:"Hospital Dr. Ybrahím Rodríguez Rojas",city:"Pariaguán",state:"Anzoátegui",lat:8.9900,lon:-64.6900,desc:"Hospital de referencia en Pariaguán.",type:"Público",phone:"0283-2321014",status:"Activo"},
+  {id:"H77",name:"Hospital José María Benítez",city:"La Victoria",state:"Aragua",lat:10.2270,lon:-67.3340,desc:"Hospital principal en La Victoria, Aragua.",type:"Público",phone:"0244-3211286",status:"Activo"},
+  {id:"H78",name:"Hospital Dr. Héctor Nouel Joubert (IVSS)",city:"Ciudad Bolívar",state:"Bolívar",lat:8.1200,lon:-63.5500,desc:"Hospital del IVSS en Ciudad Bolívar.",type:"Público",phone:"0285-6321014",status:"Activo"},
+  {id:"H79",name:"Hospital Dr. Luis Alberto Rojas",city:"Cantaura",state:"Anzoátegui",lat:9.6100,lon:-64.3600,desc:"Hospital en Cantaura, Anzoátegui.",type:"Público",phone:"0282-2831014",status:"Activo"},
+  {id:"H80",name:"Hospital Dr. Francisco Antonio Risquez",city:"Achaguas",state:"Apure",lat:7.7700,lon:-68.2400,desc:"Hospital de Achaguas, Apure.",type:"Público",phone:"0247-3611014",status:"Activo"},
+  {id:"H81",name:"Hospital de Niños Los Samanes",city:"Maracay",state:"Aragua",lat:10.2500,lon:-67.5800,desc:"Hospital pediátrico en Maracay.",type:"Público",phone:"0243-2311014",status:"Activo"},
+  {id:"H82",name:"Hospital Dr. Diego Carbonell",city:"Cariaco",state:"Sucre",lat:10.5600,lon:-63.5100,desc:"Hospital de Cariaco, Sucre.",type:"Público",phone:"0293-4411014",status:"Activo"},
+  {id:"H83",name:"Hospital Dr. Francisco Antonio Rísquez",city:"El Sombrero",state:"Guárico",lat:9.4100,lon:-67.0500,desc:"Hospital de El Sombrero, Guárico.",type:"Público",phone:"0246-3511014",status:"Activo"},
+  {id:"H84",name:"Hospital Dr. Raúl Leoni (IVSS)",city:"San Félix",state:"Bolívar",lat:8.2200,lon:-63.4900,desc:"Hospital IVSS en San Félix.",type:"Público",phone:"0285-6521014",status:"Activo"},
+  {id:"H85",name:"Hospital Dr. José María Vargas (Militar)",city:"San Juan de los Morros",state:"Guárico",lat:9.0100,lon:-67.3500,desc:"Hospital Militar en Fuerte Conopoima.",type:"Militar",phone:"0246-3411014",status:"Activo"}
 ];
 
 const CENTROS_INIT=[
@@ -649,7 +694,7 @@ function PanelEmergencias({T}){
   );
 }
 
-function BarraBusqueda({busqCiudad,setBusqCiudad,busqNombre,setBusqNombre,filtrados,total,pinActivo,T}){
+function BarraBusqueda({busqCiudad,setBusqCiudad,busqNombre,setBusqNombre,filtrados,total,filtradosRef,totalRef,filtradosHosp,totalHosp,pinActivo,T}){
   const [showSugs,setShowSugs]=useState(false);
   const [sugs,setSugs]=useState([]);
   const onChange=v=>{setBusqCiudad(v);if(v.length>1){const f=CIUDADES_FLAT.filter(c=>c.toLowerCase().includes(v.toLowerCase())).slice(0,6);setSugs(f);setShowSugs(true);}else{setSugs([]);setShowSugs(false);}};
@@ -672,10 +717,12 @@ function BarraBusqueda({busqCiudad,setBusqCiudad,busqNombre,setBusqNombre,filtra
         </div>
         <button onClick={()=>{setBusqCiudad("");setBusqNombre("");}} style={{background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 14px",cursor:"pointer",fontSize:12,fontWeight:600,whiteSpace:"nowrap"}}>? Limpiar</button>
       </div>
-      <div style={{marginTop:7,fontSize:11,color:T.textMuted}}>
-        <strong style={{color:T.text}}>{filtrados}</strong> de {total} centros
+      <div style={{marginTop:7,fontSize:11,color:T.textMuted,display:"flex",flexWrap:"wrap",gap:6,alignItems:"center"}}>
+        <span>📦 <strong style={{color:T.text}}>{filtrados}</strong>/{total} centros</span>
+        <span>🏕️ <strong style={{color:T.text}}>{filtradosRef}</strong>/{totalRef} refugios</span>
+        <span>🏥 <strong style={{color:T.text}}>{filtradosHosp}</strong>/{totalHosp} hospitales</span>
         {busqCiudad&&<span> · <strong style={{color:"#CF1A2F"}}>{busqCiudad}</strong></span>}
-        {pinActivo&&<span style={{color:"#CF1A2F",marginLeft:8,fontWeight:600}}>· 📍 {pinActivo.nombre}</span>}
+        {pinActivo&&<span style={{color:"#CF1A2F",fontWeight:600}}>· 📍 {pinActivo.nombre||pinActivo.name}</span>}
       </div>
     </div>
   );
@@ -1026,6 +1073,16 @@ function App(){
     if(busqNombre&&!c.nombre.toLowerCase().includes(busqNombre.toLowerCase()))return false;
     return true;
   });
+  const filtradosRef=refugios.filter(r=>{
+    if(busqCiudad&&!r.city.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
+    if(busqNombre&&!r.name.toLowerCase().includes(busqNombre.toLowerCase()))return false;
+    return true;
+  });
+  const filtradosHosp=hospitales.filter(h=>{
+    if(busqCiudad&&!h.city.toLowerCase().includes(busqCiudad.toLowerCase())&&!h.state.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
+    if(busqNombre&&!h.name.toLowerCase().includes(busqNombre.toLowerCase()))return false;
+    return true;
+  });
 
   const seleccionarCentro=(c)=>{setPinActivo(c);if(mapaRef.current?.flyTo)mapaRef.current.flyTo(c);document.getElementById("mapa-id")?.scrollIntoView({behavior:"smooth",block:"start"});};
   const seleccionarRefugio=(r)=>{if(mapaRef.current?.flyTo)mapaRef.current.flyTo(r);document.getElementById("mapa-id")?.scrollIntoView({behavior:"smooth",block:"start"});};
@@ -1078,9 +1135,9 @@ function App(){
           </div>
         )}
         <PanelEmergencias T={T}/>
-        <BarraBusqueda busqCiudad={busqCiudad} setBusqCiudad={setBusqCiudad} busqNombre={busqNombre} setBusqNombre={setBusqNombre} filtrados={filtrados.length} total={centros.length} pinActivo={pinActivo} T={T}/>
+        <BarraBusqueda busqCiudad={busqCiudad} setBusqCiudad={setBusqCiudad} busqNombre={busqNombre} setBusqNombre={setBusqNombre} filtrados={filtrados.length} total={centros.length} filtradosRef={filtradosRef.length} totalRef={refugios.length} filtradosHosp={filtradosHosp.length} totalHosp={hospitales.length} pinActivo={pinActivo} T={T}/>
         <div id="mapa-id">
-          <MapaPrincipal key="main-map" centros={filtrados.length>0?filtrados:centros} refugios={refugios} hospitales={hospitales} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} T={T}/>
+          <MapaPrincipal key="main-map" centros={filtrados.length>0?filtrados:centros} refugios={(busqCiudad||busqNombre)?filtradosRef:refugios} hospitales={(busqCiudad||busqNombre)?filtradosHosp:hospitales} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} T={T}/>
         </div>
         <div id="seccion-centros" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <span>📦 Centros de Acopio Registrados</span>
@@ -1092,7 +1149,7 @@ function App(){
         }
         <div id="seccion-refugios" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏕️ Refugios y Albergues Verificados</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
-          {refugios.map(r=>(
+          {(busqCiudad||busqNombre?filtradosRef:refugios).map(r=>(
             <div key={r.id} onClick={()=>seleccionarRefugio(r)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #1A73E8",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#1A73E8"} onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
               <div style={{display:"flex",gap:4,marginBottom:3}}><span style={{fontSize:10,background:"#E3F2FD",color:"#0D47A1",padding:"1px 6px",borderRadius:20}}>🏕️ Refugio</span></div>
               <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1}}>{r.name}</div>
@@ -1107,7 +1164,7 @@ function App(){
         </div>
         <div id="seccion-hospitales" style={{fontWeight:700,fontSize:14,color:T.text,marginBottom:10}}>🏥 Hospitales</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:9,marginBottom:20}}>
-          {hospitales.map(h=>(
+          {(busqCiudad||busqNombre?filtradosHosp:hospitales).map(h=>(
             <div key={h.id} onClick={()=>{if(h.lat&&h.lon)seleccionarCentro({lat:h.lat,lng:h.lon,id:h.id,nombre:h.name,ciudad:h.city,estado:h.state});}} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"11px 14px",boxShadow:T.cardShadow,borderLeft:"4px solid #2E7D32",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#2E7D32"} onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
               <div style={{display:"flex",gap:4,marginBottom:3}}><span style={{fontSize:10,background:"#E8F5E9",color:"#2E7D32",padding:"1px 6px",borderRadius:20}}>🏥 {h.type}</span><span style={{fontSize:10,background:"#E8F5E9",color:"#2E7D32",padding:"1px 6px",borderRadius:20}}>✅ Activo</span></div>
               <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1}}>{h.name}</div>
