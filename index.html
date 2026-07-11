@@ -1185,6 +1185,14 @@ function firebaseListen(path, callback) {
   db.ref(path).on("value", snap => callback(snap.val()));
 }
 
+const LOCAL_KEY="acopio_offline_data";
+const saveLocal=(key,data)=>{try{const d=JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}");d[key]=data;d._lastSync=Date.now();localStorage.setItem(LOCAL_KEY,JSON.stringify(d));}catch(e){}};
+const loadLocal=(key)=>{try{const d=JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}");return d[key]||null;}catch(e){return null;}};
+const getLocalSyncTime=()=>{try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}")._lastSync||null;}catch(e){return null;}};
+const PendingSync={};
+const queueSync=(key,data)=>{PendingSync[key]={data,ts:Date.now()};};
+const processPendingSync=async()=>{for(const[key,val]of Object.entries(PendingSync)){try{await db.ref(key).set(val.data);delete PendingSync[key];}catch(e){}}};
+
 function LoginAdmin({onLogin,onClose,T}){
   const [pass,setPass]=useState("");const [err,setErr]=useState("");const [loading,setLoading]=useState(false);
   const intentar=async()=>{setLoading(true);setErr("");try{const h=await hashPass(pass);if(h===HASHED_ADMIN_PASS){onLogin();}else{setErr("Contraseña incorrecta.");setPass("");}}catch{setErr("Error de verificación.");}setLoading(false);};
@@ -1205,16 +1213,19 @@ function App(){
   const T=darkMode?T_DARK:T_LIGHT;
   const [lang,setLang]=useState("es");
   currentLang=lang;
-  const [centros,setCentros]=useState(CENTROS_INIT);
+  const [centros,setCentros]=useState(()=>loadLocal("centros")||CENTROS_INIT);
   const [refugios]=useState(REFUGIOS);
   const [hospitales]=useState(HOSPITALES);
-  const [voluntarios,setVoluntarios]=useState([]);
-  const [inventario,setInventario]=useState([]);
+  const [voluntarios,setVoluntarios]=useState(()=>loadLocal("voluntarios")||[]);
+  const [inventario,setInventario]=useState(()=>loadLocal("inventario")||[]);
   const [cargando,setCargando]=useState(true);
   const [loadError,setLoadError]=useState(null);
   const [toasts,setToasts]=useState([]);
   const addToast=(msg,type="info")=>{const id=Date.now();setToasts(p=>[...p,{id,msg,type}]);};
   const removeToast=(id)=>setToasts(p=>p.filter(t=>t.id!==id));
+  const [isOnline,setIsOnline]=useState(navigator.onLine);
+  const [forceOffline,setForceOffline]=useState(false);
+  const effectiveOnline=isOnline&&!forceOffline;
   const [showVoluntarios,setShowVoluntarios]=useState(false);
   const [showInventario,setShowInventario]=useState(false);
   const [showAnalytics,setShowAnalytics]=useState(false);
@@ -1232,39 +1243,73 @@ function App(){
   const [verMasCentros,setVerMasCentros]=useState(false);
   const [showHeatMap,setShowHeatMap]=useState(false);
   const [heatFilter,setHeatFilter]=useState("todos");
+  const [filtroEstado,setFiltroEstado]=useState("");
+  const [filtroNivel,setFiltroNivel]=useState("");
+  const [filtroInsumo,setFiltroInsumo]=useState("");
+  const [showFiltrosAvanzados,setShowFiltrosAvanzados]=useState(false);
   const mapaRef=useRef({flyTo:null});
 
   useEffect(()=>{if(window.location.search.includes("admin=true")){setShowLogin(true);window.history.replaceState({},'',window.location.pathname);}},[]);
 
   useEffect(()=>{
+    const handleOnline=()=>{setIsOnline(true);addToast("Conexión restaurada. Sincronizando...","success");processPendingSync();};
+    const handleOffline=()=>{setIsOnline(false);addToast("Sin conexión. Modo offline activado.","warning");};
+    window.addEventListener("online",handleOnline);
+    window.addEventListener("offline",handleOffline);
+    return()=>{window.removeEventListener("online",handleOnline);window.removeEventListener("offline",handleOffline);};
+  },[]);
+
+  useEffect(()=>{
     const loadAll=async()=>{
+      if(!effectiveOnline){
+        const localCentros=loadLocal("centros");
+        const localVol=loadLocal("voluntarios");
+        const localInv=loadLocal("inventario");
+        if(localCentros)setCentros(localCentros);
+        if(localVol)setVoluntarios(localVol);
+        if(localInv)setInventario(localInv);
+        setLoadError("Modo offline. Usando datos locales guardados.");
+        setCargando(false);
+        return;
+      }
       try{
         const centrosData=await firebaseLoad("acopio/centros");
-        if(centrosData&&Array.isArray(centrosData)&&centrosData.length>0)setCentros(centrosData);
-      }catch(e){setLoadError("No se pudieron cargar los centros. Usando datos locales.");addToast("Error cargando centros de Firebase","error");}
+        if(centrosData&&Array.isArray(centrosData)&&centrosData.length>0){setCentros(centrosData);saveLocal("centros",centrosData);}
+      }catch(e){setLoadError("Error de conexión. Usando datos locales.");addToast("Error cargando centros","error");}
       try{
         const volData=await firebaseLoad("acopio/voluntarios");
-        if(volData)setVoluntarios(volData);
-      }catch(e){addToast("Error cargando voluntarios","error");}
+        if(volData){setVoluntarios(volData);saveLocal("voluntarios",volData);}
+      }catch(e){}
       try{
         const invData=await firebaseLoad("acopio/inventario");
-        if(invData)setInventario(invData);
-      }catch(e){addToast("Error cargando inventario","error");}
+        if(invData){setInventario(invData);saveLocal("inventario",invData);}
+      }catch(e){}
       setCargando(false);
     };
     loadAll();
-    firebaseListen("acopio/centros",data=>{if(data&&Array.isArray(data))setCentros(data);});
-    firebaseListen("acopio/voluntarios",data=>{if(data)setVoluntarios(data);});
-    firebaseListen("acopio/inventario",data=>{if(data)setInventario(data);});
-  },[]);
+    firebaseListen("acopio/centros",data=>{if(data&&Array.isArray(data)){setCentros(data);saveLocal("centros",data);}});
+    firebaseListen("acopio/voluntarios",data=>{if(data){setVoluntarios(data);saveLocal("voluntarios",data);}});
+    firebaseListen("acopio/inventario",data=>{if(data){setInventario(data);saveLocal("inventario",data);}});
+  },[effectiveOnline]);
 
-  useEffect(()=>{if(!cargando){const ok=firebaseSave("acopio/centros",centros);if(!ok)addToast("Error guardando centros","error");}},[centros,cargando]);
-  useEffect(()=>{if(!cargando){const ok=firebaseSave("acopio/voluntarios",voluntarios);if(!ok)addToast("Error guardando voluntarios","error");}},[voluntarios,cargando]);
-  useEffect(()=>{if(!cargando){const ok=firebaseSave("acopio/inventario",inventario);if(!ok)addToast("Error guardando inventario","error");}},[inventario,cargando]);
+  useEffect(()=>{if(!cargando){saveLocal("centros",centros);if(effectiveOnline){const ok=firebaseSave("acopio/centros",centros);if(!ok)queueSync("acopio/centros",centros);}else{queueSync("acopio/centros",centros);}}},[centros,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("voluntarios",voluntarios);if(effectiveOnline){const ok=firebaseSave("acopio/voluntarios",voluntarios);if(!ok)queueSync("acopio/voluntarios",voluntarios);}else{queueSync("acopio/voluntarios",voluntarios);}}},[voluntarios,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("inventario",inventario);if(effectiveOnline){const ok=firebaseSave("acopio/inventario",inventario);if(!ok)queueSync("acopio/inventario",inventario);}else{queueSync("acopio/inventario",inventario);}}},[inventario,cargando,effectiveOnline]);
 
   const filtrados=centros.filter(c=>{
     if(busqCiudad&&!c.ciudad.toLowerCase().includes(busqCiudad.toLowerCase())&&!c.estado.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
     if(busqNombre&&!c.nombre.toLowerCase().includes(busqNombre.toLowerCase()))return false;
+    if(filtroEstado&&c.estado!==filtroEstado)return false;
+    if(filtroNivel){
+      const vals=Object.values(c.necesidades||{});
+      if(filtroNivel==="CRÍTICO"&&!vals.includes("CRÍTICO"))return false;
+      if(filtroNivel==="ALTO"&&!vals.includes("ALTO")&&!vals.includes("CRÍTICO"))return false;
+      if(filtroNivel==="SIN_CRITICOS"&&vals.includes("CRÍTICO"))return false;
+    }
+    if(filtroInsumo){
+      const keys=Object.keys(c.necesidades||{});
+      if(!keys.some(k=>k.toLowerCase().includes(filtroInsumo.toLowerCase())))return false;
+    }
     return true;
   });
   const filtradosRef=refugios.filter(r=>{
@@ -1292,6 +1337,11 @@ function App(){
         <img src={LOGO_B64} style={{width:100,height:100,borderRadius:12,boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}/>
         <div style={{color:"rgba(255,255,255,.8)",fontSize:12,marginTop:8}}>Cargando datos...</div>
       </div>}
+      {!effectiveOnline&&!cargando&&<div style={{position:"fixed",top:0,left:0,right:0,zIndex:4000,background:"linear-gradient(135deg,#E65100,#FF8C00)",color:"#fff",padding:"8px 20px",fontSize:12,fontWeight:700,textAlign:"center",boxShadow:"0 2px 8px rgba(0,0,0,.3)",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        <span style={{fontSize:16}}>📴</span>
+        <span>Modo offline — Los cambios se guardarán localmente</span>
+        {getLocalSyncTime()&&<span style={{opacity:.7,fontSize:10,marginLeft:8}}>Última sync: {new Date(getLocalSyncTime()).toLocaleString("es-VE")}</span>}
+      </div>}
       {loadError&&!cargando&&<div style={{background:"#FFF3E0",border:"1px solid #FFB74D",borderRadius:10,padding:"10px 16px",margin:"12px 20px 0",maxWidth:1280,marginLeft:"auto",marginRight:"auto",display:"flex",alignItems:"center",gap:8}}>
         <span style={{fontSize:16}}>⚠️</span>
         <span style={{color:"#E65100",fontSize:12,fontWeight:600}}>{loadError}</span>
@@ -1317,6 +1367,7 @@ function App(){
               <button title="Gestión de Voluntarios" onClick={()=>setShowVoluntarios(true)} style={{background:"rgba(76,175,80,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{voluntarios.length} 👥</button>
               <button title="Control de Inventario" onClick={()=>setShowInventario(true)} style={{background:"rgba(255,140,0,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📦 {inventario.length}</button>
               <button title="Analíticas y Gráficos" onClick={()=>setShowAnalytics(true)} style={{background:"rgba(156,39,176,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📊</button>
+              <button title={forceOffline?"Volver online":"Simular offline"} onClick={()=>setForceOffline(!forceOffline)} style={{background:forceOffline?"rgba(255,140,0,.9)":"rgba(255,255,255,.18)",color:"#fff",border:forceOffline?"none":"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{forceOffline?"🟢 Online":"📴 Offline"}</button>
               <button title="Registrar Centro de Acopio" onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
             </div>
           </div>
@@ -1339,6 +1390,50 @@ function App(){
         )}
         <PanelEmergencias T={T}/>
         <BarraBusqueda busqCiudad={busqCiudad} setBusqCiudad={setBusqCiudad} busqNombre={busqNombre} setBusqNombre={setBusqNombre} filtrados={filtrados.length} total={centros.length} filtradosRef={filtradosRef.length} totalRef={refugios.length} filtradosHosp={filtradosHosp.length} totalHosp={hospitales.length} pinActivo={pinActivo} T={T}/>
+        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",marginBottom:14,boxShadow:T.cardShadow}}>
+          <div onClick={()=>setShowFiltrosAvanzados(!showFiltrosAvanzados)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}>
+            <span style={{fontWeight:700,fontSize:13,color:T.text}}>🔍 Filtros avanzados {(filtroEstado||filtroNivel||filtroInsumo)?<span style={{background:"#CF1A2F",color:"#fff",fontSize:10,padding:"1px 7px",borderRadius:10,marginLeft:5}}>Activos</span>:""}</span>
+            <span style={{fontSize:12,color:T.textMuted}}>{showFiltrosAvanzados?"▲ Ocultar":"▼ Mostrar"}</span>
+          </div>
+          {showFiltrosAvanzados&&(
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginTop:10,paddingTop:10,borderTop:`1px solid ${T.border}`}}>
+              <div>
+                <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:4,fontWeight:600}}>🗺️ Estado</label>
+                <select value={filtroEstado} onChange={e=>setFiltroEstado(e.target.value)} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:12}}>
+                  <option value="">Todos los estados</option>
+                  {ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:4,fontWeight:600}}>🔴 Nivel de urgencia</label>
+                <select value={filtroNivel} onChange={e=>setFiltroNivel(e.target.value)} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:12}}>
+                  <option value="">Todos los niveles</option>
+                  <option value="CRÍTICO">🔴 Con críticos</option>
+                  <option value="ALTO">🟠 Con altos o críticos</option>
+                  <option value="SIN_CRITICOS">🟢 Sin críticos</option>
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:4,fontWeight:600}}>📦 Tipo de insumo</label>
+                <select value={filtroInsumo} onChange={e=>setFiltroInsumo(e.target.value)} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:12}}>
+                  <option value="">Todos los insumos</option>
+                  <option value="Agua">💧 Agua</option>
+                  <option value="Alimento">🍚 Alimentos</option>
+                  <option value="Medicina">💊 Medicinas</option>
+                  <option value="Colchoneta">🏕️ Colchonetas</option>
+                  <option value="Pañal">👶 Pañales</option>
+                  <option value="Ropa">👕 Ropa</option>
+                  <option value="Herramienta">🔧 Herramientas</option>
+                </select>
+              </div>
+              {(filtroEstado||filtroNivel||filtroInsumo)&&(
+                <div style={{gridColumn:"1/4",textAlign:"center"}}>
+                  <button onClick={()=>{setFiltroEstado("");setFiltroNivel("");setFiltroInsumo("");}} style={{background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 16px",cursor:"pointer",fontSize:11,fontWeight:600}}>✕ Limpiar filtros</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div id="mapa-id">
           <MapaPrincipal key="main-map" centros={filtrados.length>0?filtrados:centros} refugios={(busqCiudad||busqNombre)?filtradosRef:refugios} hospitales={(busqCiudad||busqNombre)?filtradosHosp:hospitales} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} showHeatMap={showHeatMap} setShowHeatMap={setShowHeatMap} heatFilter={heatFilter} setHeatFilter={setHeatFilter} T={T}/>
         </div>
