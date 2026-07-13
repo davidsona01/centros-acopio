@@ -994,7 +994,7 @@ function Detalle({centro,onClose,onCert,T}){
 }
 
 function Registro({centros,onClose,onGuardar,T}){
-  const [step,setStep]=useState(1);const [form,setForm]=useState({nombre:"",estado:"",ciudad:"",tipo:"",responsable:"",whatsapp:"",capacidad:"",direccion:"",foto:""});const [lat,setLat]=useState(null);const [lng,setLng]=useState(null);const [niveles,setNiveles]=useState({});const [idGen,setIdGen]=useState(null);const [nuevoC,setNuevoC]=useState(null);const [copied,setCopied]=useState(false);const [errors,setErrors]=useState({});
+  const [step,setStep]=useState(1);const [form,setForm]=useState({nombre:"",estado:"",ciudad:"",tipo:"",responsable:"",whatsapp:"",capacidad:"",direccion:"",foto:"",usuario:"",password:"",passwordConfirm:"",preguntaSecreta:"",respuestaSecreta:""});const [lat,setLat]=useState(null);const [lng,setLng]=useState(null);const [niveles,setNiveles]=useState({});const [idGen,setIdGen]=useState(null);const [nuevoC,setNuevoC]=useState(null);const [copied,setCopied]=useState(false);const [errors,setErrors]=useState({});const [showPass,setShowPass]=useState(false);
   const set=(k,v)=>{setForm(f=>({...f,[k]:v}));if(errors[k])setErrors(e=>({...e,[k]:null}));};
   const handlePhoto=(e)=>{
     const file=e.target.files[0];
@@ -1003,14 +1003,14 @@ function Registro({centros,onClose,onGuardar,T}){
     const reader=new FileReader();
     reader.onload=(ev)=>{set("foto",ev.target.result);};
     reader.readAsDataURL(file);
-  };const ciudades=CIUDADES[form.estado]||[];const ok1=form.nombre&&form.estado&&form.tipo&&form.responsable&&form.whatsapp;
+  };const ciudades=CIUDADES[form.estado]||[];const ok1=form.nombre&&form.estado&&form.tipo&&form.responsable&&form.whatsapp&&form.usuario&&form.password&&form.password===form.passwordConfirm&&form.preguntaSecreta&&form.respuestaSecreta;
   const toggle=(ins,nv)=>setNiveles(n=>{const x={...n};x[ins]===nv?delete x[ins]:(x[ins]=nv);return x;});
-  const validate=()=>{const e={};if(!form.nombre.trim())e.nombre="El nombre es obligatorio";if(!form.estado)e.estado="Selecciona un estado";if(!form.tipo)e.tipo="Selecciona un tipo";if(!form.responsable.trim())e.responsable="El coordinador es obligatorio";if(!form.whatsapp.trim())e.whatsapp="El WhatsApp es obligatorio";else if(form.whatsapp.replace(/\D/g,"").length<10)e.whatsapp="Debe tener al menos 10 dígitos";setErrors(e);return Object.keys(e).length===0;};
-  const registrar=()=>{if(!validate())return;const id=genId(centros||[]);const c={...form,id,capacidad:parseInt(form.capacidad)||200,recibido:0,verificado:false,necesidades:niveles,lat:lat,lng:lng,fecha:new Date().toISOString().slice(0,10)};onGuardar(c);setIdGen(id);setNuevoC(c);setStep(3);};
+  const validate=()=>{const e={};if(!form.nombre.trim())e.nombre="El nombre es obligatorio";if(!form.estado)e.estado="Selecciona un estado";if(!form.tipo)e.tipo="Selecciona un tipo";if(!form.responsable.trim())e.responsable="El coordinador es obligatorio";if(!form.whatsapp.trim())e.whatsapp="El WhatsApp es obligatorio";else if(form.whatsapp.replace(/\D/g,"").length<10)e.whatsapp="Debe tener al menos 10 dígitos";if(!form.usuario.trim())e.usuario="El usuario es obligatorio";if(!form.password.trim())e.password="La contraseña es obligatoria";else if(form.password.length<6)e.password="Mínimo 6 caracteres";if(form.password!==form.passwordConfirm)e.passwordConfirm="Las contraseñas no coinciden";if(!form.preguntaSecreta.trim())e.preguntaSecreta="La pregunta secreta es obligatoria";if(!form.respuestaSecreta.trim())e.respuestaSecreta="La respuesta es obligatoria";setErrors(e);return Object.keys(e).length===0;};
+  const registrar=()=>{if(!validate())return;const id=genId(centros||[]);const c={...form,id,capacidad:parseInt(form.capacidad)||200,recibido:0,verificado:false,necesidades:niveles,lat:lat,lng:lng,fecha:new Date().toISOString().slice(0,10),usuario:form.usuario.trim(),password:form.password,preguntaSecreta:form.preguntaSecreta.trim(),respuestaSecreta:form.respuestaSecreta.trim().toLowerCase()};delete c.passwordConfirm;onGuardar(c);setIdGen(id);setNuevoC(c);setStep(3);};
   const copiarCert=()=>{if(!nuevoC)return;const t=`📋 CERTIFICADO CENTRO DE ACOPIO\nID: ${idGen}\nCentro: ${nuevoC.nombre}\nCoordinador: ${nuevoC.responsable}\nWhatsApp: +58 ${fmtWA(nuevoC.whatsapp)}\nEstado: ${nuevoC.estado} · Ciudad: ${nuevoC.ciudad}`;navigator.clipboard.writeText(t).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);});};
   const si={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
   const ss={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none"};
-  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:560,maxHeight:"92vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#CF1A2F,#8B0000)",padding:"15px 20px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:11,color:"rgba(255,255,255,.7)"}}>Paso {step} de 3</div><div style={{fontWeight:800,fontSize:15,color:"#fff"}}>{step===1?"📝 Datos del Centro":step===2?"📋 Insumos Necesarios":"? Registro Exitoso"}</div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:7,cursor:"pointer",fontSize:16}}>×</button></div><div style={{padding:16}}><div style={{height:4,background:T.border,borderRadius:4,marginBottom:16}}><div style={{height:4,width:`${(step/3)*100}%`,background:"#CF1A2F",borderRadius:4,transition:"width .4s"}}/></div>{step===1&&<div style={{display:"grid",gap:10}}>{[["Nombre del Centro","nombre","text","Ej: Acopio Iglesia San Pedro"],["Coordinador Responsable","responsable","text","Nombre completo"],["Número de WhatsApp","whatsapp","tel","Ej: 04121234567"],["Capacidad (kg/unidades)","capacidad","number","Ej: 500"]].map(([lbl,key,type,ph])=><div key={key}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>{lbl} *</label><input value={form[key]} onChange={e=>set(key,e.target.value)} type={type} placeholder={ph} style={{...si,borderColor:errors[key]?"#FF3B3B":si.borderColor,background:errors[key]?"#FFF5F5":si.background}}/>{errors[key]&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors[key]}</div>}</div>)}<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Estado</label><select value={form.estado} onChange={e=>{set("estado",e.target.value);set("ciudad","");}} style={ss}><option value="">Seleccionar...</option>{ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}</select></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Ciudad</label><select value={form.ciudad} onChange={e=>set("ciudad",e.target.value)} style={ss}><option value="">Seleccionar...</option>{ciudades.map(c=><option key={c} value={c}>{c}</option>)}</select></div></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>Tipo de Centro</label><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{TIPOS.map(t=><button key={t} onClick={()=>set("tipo",t)} style={{padding:"4px 10px",borderRadius:20,fontSize:11,cursor:"pointer",background:form.tipo===t?"#CF1A2F":T.surface2,color:form.tipo===t?"#fff":T.textMuted,border:form.tipo===t?"1px solid #CF1A2F":`1px solid ${T.border}`}}>{t}</button>)}</div></div><div style={{borderTop:`1px solid ${T.border}`,paddingTop:10}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>📍 Dirección</label><input value={form.direccion} onChange={e=>set("direccion",e.target.value)} placeholder="Ej: Av. Principal, frente a..." style={si}/></div><div style={{marginBottom:8}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Foto del centro (opcional)</label><div style={{display:"flex",gap:8,alignItems:"center"}}><label style={{display:"flex",alignItems:"center",gap:4,background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,color:T.textMuted}}>📸 {form.foto?"Foto cargada":"Subir foto del centro"}<input type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/></label>{form.foto&&<img src={form.foto} alt="" style={{width:48,height:48,borderRadius:8,objectFit:"cover",border:`1px solid ${T.border}`}}/>}</div>{errors.foto&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.foto}</div>}</div><button onClick={()=>setStep(2)} disabled={!ok1} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:ok1?"pointer":"not-allowed",fontWeight:700,fontSize:14,opacity:ok1?1:0.4,marginTop:4}}>Continuar ? Insumos</button></div>}{step===2&&<div><p style={{color:T.textMuted,fontSize:12,marginBottom:12}}>Selecciona los insumos y el nivel de urgencia:</p><div style={{display:"grid",gap:12,maxHeight:360,overflow:"auto",paddingRight:4}}>{Object.entries(INSUMOS).map(([cat,items])=><div key={cat}><div style={{color:T.textMuted,fontSize:11,fontWeight:700,marginBottom:5,paddingBottom:3,borderBottom:`1px solid ${T.border}`}}>{cat}</div><div style={{display:"grid",gap:3}}>{items.map(ins=><div key={ins} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.surface2,borderRadius:6,padding:"6px 9px"}}><span style={{color:T.text,fontSize:12}}>{ins}</span><div style={{display:"flex",gap:2}}>{["CRÍTICO","ALTO","MEDIO","BAJO"].map(nv=><button key={nv} onClick={()=>toggle(ins,nv)} style={{padding:"2px 5px",borderRadius:4,fontSize:10,cursor:"pointer",fontWeight:600,background:niveles[ins]===nv?NIVEL[nv].bg:T.border,color:niveles[ins]===nv?NIVEL[nv].text:T.textMuted,border:"none"}}>{nv.slice(0,3)}</button>)}</div></div>)}</div></div>)}</div><div style={{display:"flex",gap:7,marginTop:12}}><button onClick={()=>setStep(1)} style={{flex:1,background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Atrás</button><button onClick={registrar} style={{flex:2,background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Registrar Centro</button></div></div>}{step===3&&nuevoC&&<div style={{textAlign:"center",padding:"6px 0"}}><div style={{fontSize:40,marginBottom:5}}>?</div><div style={{fontWeight:800,fontSize:17,color:T.text,marginBottom:3}}>¡Centro Registrado!</div><div style={{color:T.textMuted,fontSize:12,marginBottom:16}}>{form.nombre} — pendiente de verificación.</div><div style={{background:"#fff",padding:12,borderRadius:12,display:"inline-block",boxShadow:"0 0 0 4px #CF1A2F",marginBottom:10}}><CertQR value={`ACOPIO-VEN-${idGen}-${form.nombre}`} size={140}/></div><div style={{background:T.surface2,borderRadius:8,padding:"7px 18px",display:"inline-block",marginBottom:3}}><div style={{fontSize:10,color:T.textMuted}}>Código</div><div style={{fontWeight:900,color:"#CF1A2F",fontSize:24,letterSpacing:3}}>{idGen}</div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:10,marginTop:10}}><button onClick={copiarCert} style={{background:copied?"#0D3D1F":"#1C1C2E",color:copied?"#4CAF50":"#F0F0F0",border:`1px solid ${copied?"#4CAF50":"#2D2D44"}`,borderRadius:8,padding:"9px 6px",cursor:"pointer",fontWeight:700,fontSize:12}}>{copied?"? ¡Copiado!":"📋 Copiar Certificado"}</button><a href={`https://wa.me/${fmtWA(form.whatsapp)}?text=${encodeURIComponent("? Centro registrado: "+form.nombre+" · Código: "+idGen)}`} target="_blank" rel="noopener noreferrer" style={{background:"#075E54",color:"#fff",borderRadius:8,padding:"9px 6px",fontWeight:700,fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>💬 Enviar por WA</a></div><button onClick={onClose} style={{width:"100%",background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px",cursor:"pointer",fontWeight:700,fontSize:13}}>Ver Panel</button></div>}</div></div></div>);
+  return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}><div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:560,maxHeight:"92vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}><div style={{background:"linear-gradient(135deg,#CF1A2F,#8B0000)",padding:"15px 20px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:11,color:"rgba(255,255,255,.7)"}}>Paso {step} de 3</div><div style={{fontWeight:800,fontSize:15,color:"#fff"}}>{step===1?"📝 Datos del Centro":step===2?"📋 Insumos Necesarios":"? Registro Exitoso"}</div></div><button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:7,cursor:"pointer",fontSize:16}}>×</button></div><div style={{padding:16}}><div style={{height:4,background:T.border,borderRadius:4,marginBottom:16}}><div style={{height:4,width:`${(step/3)*100}%`,background:"#CF1A2F",borderRadius:4,transition:"width .4s"}}/></div>{step===1&&<div style={{display:"grid",gap:10}}>{[["Nombre del Centro","nombre","text","Ej: Acopio Iglesia San Pedro"],["Coordinador Responsable","responsable","text","Nombre completo"],["Número de WhatsApp","whatsapp","tel","Ej: 04121234567"],["Capacidad (kg/unidades)","capacidad","number","Ej: 500"]].map(([lbl,key,type,ph])=><div key={key}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>{lbl} *</label><input value={form[key]} onChange={e=>set(key,e.target.value)} type={type} placeholder={ph} style={{...si,borderColor:errors[key]?"#FF3B3B":si.borderColor,background:errors[key]?"#FFF5F5":si.background}}/>{errors[key]&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors[key]}</div>}</div>)}<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Estado</label><select value={form.estado} onChange={e=>{set("estado",e.target.value);set("ciudad","");}} style={ss}><option value="">Seleccionar...</option>{ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}</select></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Ciudad</label><select value={form.ciudad} onChange={e=>set("ciudad",e.target.value)} style={ss}><option value="">Seleccionar...</option>{ciudades.map(c=><option key={c} value={c}>{c}</option>)}</select></div></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>Tipo de Centro</label><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{TIPOS.map(t=><button key={t} onClick={()=>set("tipo",t)} style={{padding:"4px 10px",borderRadius:20,fontSize:11,cursor:"pointer",background:form.tipo===t?"#CF1A2F":T.surface2,color:form.tipo===t?"#fff":T.textMuted,border:form.tipo===t?"1px solid #CF1A2F":`1px solid ${T.border}`}}>{t}</button>)}</div></div><div style={{borderTop:`1px solid ${T.border}`,paddingTop:10}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5}}>📍 Dirección</label><input value={form.direccion} onChange={e=>set("direccion",e.target.value)} placeholder="Ej: Av. Principal, frente a..." style={si}/></div><div style={{marginBottom:8}}><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Foto del centro (opcional)</label><div style={{display:"flex",gap:8,alignItems:"center"}}><label style={{display:"flex",alignItems:"center",gap:4,background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,color:T.textMuted}}>📸 {form.foto?"Foto cargada":"Subir foto del centro"}<input type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/></label>{form.foto&&<img src={form.foto} alt="" style={{width:48,height:48,borderRadius:8,objectFit:"cover",border:`1px solid ${T.border}`}}/>}</div>{errors.foto&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.foto}</div>}</div><div style={{fontWeight:700,fontSize:12,color:T.text,marginBottom:4,marginTop:8,borderBottom:`1px solid ${T.border}`,paddingBottom:4}}>🔐 Credenciales de Acceso</div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Usuario *</label><input value={form.usuario} onChange={e=>set("usuario",e.target.value)} placeholder="Ej: mi-centro" style={{...si,borderColor:errors.usuario?"#FF3B3B":si.borderColor,background:errors.usuario?"#FFF5F5":si.background,textTransform:"lowercase"}}/>{errors.usuario&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.usuario}</div>}</div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Contraseña *</label><div style={{position:"relative"}}><input type={showPass?"text":"password"} value={form.password} onChange={e=>set("password",e.target.value)} placeholder="Mínimo 6 caracteres" style={{...si,borderColor:errors.password?"#FF3B3B":si.borderColor,background:errors.password?"#FFF5F5":si.background,paddingRight:36}}/><span onClick={()=>setShowPass(!showPass)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",cursor:"pointer",fontSize:16,opacity:.6}}>{showPass?"👁️‍🗨️":"👁️"}</span></div>{errors.password&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.password}</div>}</div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Confirmar Contraseña *</label><input type={showPass?"text":"password"} value={form.passwordConfirm} onChange={e=>set("passwordConfirm",e.target.value)} placeholder="Repite la contraseña" style={{...si,borderColor:errors.passwordConfirm?"#FF3B3B":si.borderColor,background:errors.passwordConfirm?"#FFF5F5":si.background}}/>{errors.passwordConfirm&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.passwordConfirm}</div>}</div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Pregunta de Seguridad *</label><input value={form.preguntaSecreta} onChange={e=>set("preguntaSecreta",e.target.value)} placeholder="Ej: ¿Nombre de tu mascota?" style={{...si,borderColor:errors.preguntaSecreta?"#FF3B3B":si.borderColor,background:errors.preguntaSecreta?"#FFF5F5":si.background}}/>{errors.preguntaSecreta&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.preguntaSecreta}</div>}<div style={{fontSize:10,color:T.textFaint,marginTop:2}}>Úsala para recuperar tu contraseña si la olvidas</div></div><div><label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:3}}>Respuesta Secreta *</label><input value={form.respuestaSecreta} onChange={e=>set("respuestaSecreta",e.target.value)} placeholder="Tu respuesta" style={{...si,borderColor:errors.respuestaSecreta?"#FF3B3B":si.borderColor,background:errors.respuestaSecreta?"#FFF5F5":si.background}}/>{errors.respuestaSecreta&&<div style={{color:"#DC2626",fontSize:11,marginTop:3,fontWeight:600}}>⚠ {errors.respuestaSecreta}</div>}</div><button onClick={()=>setStep(2)} disabled={!ok1} style={{background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:ok1?"pointer":"not-allowed",fontWeight:700,fontSize:14,opacity:ok1?1:0.4,marginTop:4}}>Continuar ? Insumos</button></div>}{step===2&&<div><p style={{color:T.textMuted,fontSize:12,marginBottom:12}}>Selecciona los insumos y el nivel de urgencia:</p><div style={{display:"grid",gap:12,maxHeight:360,overflow:"auto",paddingRight:4}}>{Object.entries(INSUMOS).map(([cat,items])=><div key={cat}><div style={{color:T.textMuted,fontSize:11,fontWeight:700,marginBottom:5,paddingBottom:3,borderBottom:`1px solid ${T.border}`}}>{cat}</div><div style={{display:"grid",gap:3}}>{items.map(ins=><div key={ins} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.surface2,borderRadius:6,padding:"6px 9px"}}><span style={{color:T.text,fontSize:12}}>{ins}</span><div style={{display:"flex",gap:2}}>{["CRÍTICO","ALTO","MEDIO","BAJO"].map(nv=><button key={nv} onClick={()=>toggle(ins,nv)} style={{padding:"2px 5px",borderRadius:4,fontSize:10,cursor:"pointer",fontWeight:600,background:niveles[ins]===nv?NIVEL[nv].bg:T.border,color:niveles[ins]===nv?NIVEL[nv].text:T.textMuted,border:"none"}}>{nv.slice(0,3)}</button>)}</div></div>)}</div></div>)}</div><div style={{display:"flex",gap:7,marginTop:12}}><button onClick={()=>setStep(1)} style={{flex:1,background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Atrás</button><button onClick={registrar} style={{flex:2,background:"#CF1A2F",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:14}}>? Registrar Centro</button></div></div>}{step===3&&nuevoC&&<div style={{textAlign:"center",padding:"6px 0"}}><div style={{fontSize:40,marginBottom:5}}>?</div><div style={{fontWeight:800,fontSize:17,color:T.text,marginBottom:3}}>¡Centro Registrado!</div><div style={{color:T.textMuted,fontSize:12,marginBottom:16}}>{form.nombre} — pendiente de verificación.</div><div style={{background:"#fff",padding:12,borderRadius:12,display:"inline-block",boxShadow:"0 0 0 4px #CF1A2F",marginBottom:10}}><CertQR value={`ACOPIO-VEN-${idGen}-${form.nombre}`} size={140}/></div><div style={{background:T.surface2,borderRadius:8,padding:"7px 18px",display:"inline-block",marginBottom:3}}><div style={{fontSize:10,color:T.textMuted}}>Código</div><div style={{fontWeight:900,color:"#CF1A2F",fontSize:24,letterSpacing:3}}>{idGen}</div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:10,marginTop:10}}><button onClick={copiarCert} style={{background:copied?"#0D3D1F":"#1C1C2E",color:copied?"#4CAF50":"#F0F0F0",border:`1px solid ${copied?"#4CAF50":"#2D2D44"}`,borderRadius:8,padding:"9px 6px",cursor:"pointer",fontWeight:700,fontSize:12}}>{copied?"? ¡Copiado!":"📋 Copiar Certificado"}</button><a href={`https://wa.me/${fmtWA(form.whatsapp)}?text=${encodeURIComponent("? Centro registrado: "+form.nombre+" · Código: "+idGen)}`} target="_blank" rel="noopener noreferrer" style={{background:"#075E54",color:"#fff",borderRadius:8,padding:"9px 6px",fontWeight:700,fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>💬 Enviar por WA</a></div><button onClick={onClose} style={{width:"100%",background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px",cursor:"pointer",fontWeight:700,fontSize:13}}>Ver Panel</button></div>}</div></div></div>);
 }
 
 function Tarjeta({centro,activo,onSeleccionar,onVerDetalle,onCert,T}){
@@ -1212,32 +1212,124 @@ function Toast({msg,type,onClose}){
 }
 
 function LoginCentro({onLogin,T,centros}){
-  const [user,setUser]=useState("");const [pass,setPass]=useState("");const [err,setErr]=useState("");const [loading,setLoading]=useState(false);const [showPass,setShowPass]=useState(false);
+  const [user,setUser]=useState("");
+  const [pass,setPass]=useState("");
+  const [err,setErr]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [showPass,setShowPass]=useState(false);
+  const [view,setView]=useState("login");
+  const [recUser,setRecUser]=useState("");
+  const [recPregunta,setRecPregunta]=useState("");
+  const [recRespuesta,setRecRespuesta]=useState("");
+  const [recNewPass,setRecNewPass]=useState("");
+  const [recNewPass2,setRecNewPass2]=useState("");
+  const [recErr,setRecErr]=useState("");
+  const [recOk,setRecOk]=useState(false);
+  const [recCentro,setRecCentro]=useState(null);
+
   const intentar=()=>{
     setLoading(true);setErr("");
-    const c=centros.find(x=>x.id.toLowerCase()===user.toLowerCase().trim());
-    if(c&&pass==="acopio2026"){onLogin(c);}
-    else if(c&&pass!=="acopio2026"){setErr("Contraseña incorrecta.");setPass("");}
-    else{setErr("No se encontró centro con ese ID.");setPass("");}
+    const q=user.toLowerCase().trim();
+    const cById=centros.find(x=>x.id.toLowerCase()===q);
+    const cByUser=centros.find(x=>x.usuario&&x.usuario.toLowerCase()===q);
+    const centro=cById||cByUser;
+    if(!centro){setErr("No se encontro centro con ese ID o usuario.");setPass("");setLoading(false);return;}
+    if(pass==="acopio2026"){onLogin(centro);setLoading(false);return;}
+    if(centro.password&&pass===centro.password){onLogin(centro);setLoading(false);return;}
+    setErr("Contrasena incorrecta.");setPass("");
     setLoading(false);
   };
+
+  const buscarCentro=()=>{
+    setRecErr("");
+    const q=recUser.toLowerCase().trim();
+    const c=centros.find(x=>x.id.toLowerCase()===q||(x.usuario&&x.usuario.toLowerCase()===q));
+    if(!c){setRecErr("No se encontró centro con ese ID o usuario.");return;}
+    if(!c.preguntaSecreta){setRecErr("Este centro no tiene pregunta secreta configurada.");return;}
+    setRecCentro(c);
+    setRecPregunta(c.preguntaSecreta);
+  };
+
+  const recuperarClave=()=>{
+    setRecErr("");
+    if(!recCentro)return;
+    const r=recRespuesta.trim().toLowerCase();
+    if(r!==recCentro.respuestaSecreta){setRecErr("La respuesta es incorrecta.");return;}
+    if(recNewPass.length<6){setRecErr("La nueva contraseña debe tener al menos 6 caracteres.");return;}
+    if(recNewPass!==recNewPass2){setRecErr("Las contraseñas no coinciden.");return;}
+    recCentro.password=recNewPass;
+    setRecOk(true);
+  };
+
+  if(view==="recuperar"){
+    return React.createElement("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(8px)"}},
+      React.createElement("div",{style:{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:400,overflow:"hidden",boxShadow:"0 8px 40px rgba(0,0,0,.3)"}},
+        React.createElement("div",{style:{background:"linear-gradient(135deg,#FF6F00,#E65100)",padding:"20px 22px",textAlign:"center",display:"flex",justifyContent:"space-between",alignItems:"center"}},
+          React.createElement("div",null,
+            React.createElement("div",{style:{fontWeight:800,fontSize:15,color:"#fff"}},"Recuperar Contraseña"),
+            React.createElement("div",{style:{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:2}},"Responde tu pregunta secreta")
+          ),
+          React.createElement("button",{onClick:()=>setView("login"),style:{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:7,cursor:"pointer",fontSize:16}},"\u00d7")
+        ),
+        React.createElement("div",{style:{padding:"22px 24px"}},
+          !recOk?
+            !recCentro?
+              React.createElement("div",null,
+                React.createElement("label",{style:{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}},"ID o Usuario del Centro"),
+                React.createElement("input",{value:recUser,onChange:e=>setRecUser(e.target.value),placeholder:"Ej: A001 o mi-usuario",autoFocus:true,style:{width:"100%",background:T.inputBg,border:`1px solid ${recErr?"#FF3B3B":T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12}}),
+                recErr?React.createElement("div",{style:{color:"#DC2626",fontSize:12,marginBottom:10}},"\u26a0 "+recErr):null,
+                React.createElement("button",{onClick:buscarCentro,disabled:!recUser,style:{width:"100%",background:!recUser?"#999":"#FF6F00",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:!recUser?"not-allowed":"pointer",fontWeight:700,fontSize:13}},"Buscar Centro")
+              )
+            :
+              React.createElement("div",null,
+                React.createElement("div",{style:{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:8,padding:12,marginBottom:14}},
+                  React.createElement("div",{style:{fontSize:11,color:T.textMuted,marginBottom:4}},"Pregunta secreta:"),
+                  React.createElement("div",{style:{fontSize:13,color:T.text,fontWeight:700}},recPregunta)
+                ),
+                React.createElement("label",{style:{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}},"Tu respuesta *"),
+                React.createElement("input",{value:recRespuesta,onChange:e=>setRecRespuesta(e.target.value),placeholder:"Escribe tu respuesta",autoFocus:true,style:{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12}}),
+                React.createElement("label",{style:{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}},"Nueva contraseña * (min 6 caracteres)"),
+                React.createElement("input",{type:"password",value:recNewPass,onChange:e=>setRecNewPass(e.target.value),placeholder:"Nueva contraseña",style:{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12}}),
+                React.createElement("label",{style:{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}},"Confirmar contraseña *"),
+                React.createElement("input",{type:"password",value:recNewPass2,onChange:e=>setRecNewPass2(e.target.value),placeholder:"Confirmar contraseña",style:{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12}}),
+                recErr?React.createElement("div",{style:{color:"#DC2626",fontSize:12,marginBottom:10}},"\u26a0 "+recErr):null,
+                React.createElement("button",{onClick:recuperarClave,disabled:!recRespuesta||!recNewPass||!recNewPass2,style:{width:"100%",background:!recRespuesta||!recNewPass||!recNewPass2?"#999":"#FF6F00",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:!recRespuesta||!recNewPass||!recNewPass2?"not-allowed":"pointer",fontWeight:700,fontSize:13}},"Establecer Nueva Contraseña")
+              )
+          :
+            React.createElement("div",{style:{textAlign:"center",padding:"10px 0"}},
+              React.createElement("div",{style:{fontSize:36,marginBottom:10}},"\u2705"),
+              React.createElement("div",{style:{fontSize:15,fontWeight:700,color:T.text,marginBottom:6}},"Contraseña actualizada"),
+              React.createElement("div",{style:{fontSize:12,color:T.textMuted,marginBottom:16}},"Ahora puedes iniciar sesión con tu nueva contraseña."),
+              React.createElement("button",{onClick:()=>{setView("login");setRecUser("");setRecPregunta("");setRecRespuesta("");setRecNewPass("");setRecNewPass2("");setRecOk(false);setRecCentro(null);setRecErr("");},style:{width:"100%",background:"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:"pointer",fontWeight:700,fontSize:13}},"Volver al Login")
+            )
+        )
+      )
+    );
+  }
+
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(8px)"}}>
     <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:380,overflow:"hidden",boxShadow:"0 8px 40px rgba(0,0,0,.3)"}}>
       <div style={{background:"linear-gradient(135deg,#0D47A1,#1565C0)",padding:"24px 22px",textAlign:"center"}}>
         <img src={LOGO_B64} style={{width:56,height:56,borderRadius:10,marginBottom:8}}/>
         <div style={{fontWeight:800,fontSize:17,color:"#fff"}}>Panel del Centro</div>
-        <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:3}}>Ingresa con el ID del centro</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginTop:3}}>Ingresa con tu ID de centro o usuario</div>
       </div>
       <div style={{padding:"22px 24px"}}>
-        <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}}>🏢 ID del Centro</label>
-        <input value={user} onChange={e=>setUser(e.target.value)} placeholder="Ej: A001" autoFocus style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12,textTransform:"uppercase"}}/>
+        <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}}>🏢 ID del Centro o Usuario</label>
+        <input value={user} onChange={e=>setUser(e.target.value)} placeholder="Ej: A001 o mi-usuario" autoFocus style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12}}/>
         <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:5,fontWeight:600}}>🔒 Contraseña</label>
         <div style={{position:"relative"}}>
           <input type={showPass?"text":"password"} value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&intentar()} placeholder="Ingresa tu contraseña" style={{width:"100%",background:T.inputBg,border:`1px solid ${err?"#FF3B3B":T.border}`,borderRadius:8,padding:"10px 36px 10px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"}}/>
-          <span onClick={()=>setShowPass(!showPass)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",cursor:"pointer",fontSize:16,opacity:.6}}>{showPass?"👁️‍🗨️":"👁️"}</span>
+          <span onClick={()=>setShowPass(!showPass)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",cursor:"pointer",fontSize:16,opacity:.6}}>{showPass?"\ud83d\udc41\ufe0f\u200d\ud83d\udde3\ufe0f":"\ud83d\udc41\ufe0f"}</span>
         </div>
-        {err&&<div style={{color:"#DC2626",fontSize:12,marginBottom:10,marginTop:6}}>⚠ {err}</div>}
-        <button onClick={intentar} disabled={loading||!user||!pass} style={{width:"100%",marginTop:10,background:loading||!user||!pass?"#999":"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:loading?"wait":"pointer",fontWeight:700,fontSize:14,transition:"background .2s"}}>{loading?"⏳ Entrando...":"🚀 Entrar al Panel"}</button>
+        {err&&<div style={{color:"#DC2626",fontSize:12,marginBottom:10,marginTop:6}}>{"\u26a0 "+err}</div>}
+        <button onClick={intentar} disabled={loading||!user||!pass} style={{width:"100%",marginTop:10,background:loading||!user||!pass?"#999":"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:loading?"wait":"pointer",fontWeight:700,fontSize:14,transition:"background .2s"}}>{loading?"\u23f3 Entrando...":"\ud83d\ude80 Entrar al Panel"}</button>
+        <div style={{textAlign:"center",marginTop:14}}>
+          <span onClick={()=>setView("recuperar")} style={{color:"#1A73E8",fontSize:12,cursor:"pointer",fontWeight:600,textDecoration:"underline"}}>{"\ud83d\udd10"} Olvidé mi contraseña</span>
+        </div>
+        <div style={{textAlign:"center",marginTop:10,paddingTop:12,borderTop:`1px solid ${T.border}`}}>
+          <div style={{fontSize:10,color:T.textFaint}}>Clave universal: <strong>acopio2026</strong></div>
+        </div>
       </div>
     </div>
   </div>);
@@ -1858,13 +1950,25 @@ function App(){
   const [verMasCentros,setVerMasCentros]=useState(false);
   const [showHeatMap,setShowHeatMap]=useState(false);
   const [heatFilter,setHeatFilter]=useState("todos");
-  const [filtroEstado,setFiltroEstado]=useState("");
-  const [filtroNivel,setFiltroNivel]=useState("");
-  const [filtroInsumo,setFiltroInsumo]=useState("");
-  const [showFiltrosAvanzados,setShowFiltrosAvanzados]=useState(false);
   const mapaRef=useRef({flyTo:null});
 
   useEffect(()=>{if(window.location.search.includes("admin=true")){setShowLogin(true);window.history.replaceState({},'',window.location.pathname);}},[]);
+
+  useEffect(()=>{
+    const onPop=()=>{
+      if(dashCentro){setDashCentro(null);return;}
+      if(showLoginCentro){setShowLoginCentro(false);return;}
+      if(showDash){setShowDash(false);setAdminOk(false);return;}
+      if(showLogin){setShowLogin(false);return;}
+    };
+    window.addEventListener("popstate",onPop);
+    return()=>window.removeEventListener("popstate",onPop);
+  },[dashCentro,showLoginCentro,showDash,showLogin]);
+
+  const openLoginCentro=()=>{setShowLoginCentro(true);window.history.pushState({loginCentro:true},"");};
+  const openDash=(c)=>{setDashCentro(c);setShowLoginCentro(false);window.history.pushState({dashCentro:true},"");};
+  const closeDash=()=>{setDashCentro(null);window.history.back();};
+  const closeLoginCentro=()=>{setShowLoginCentro(false);window.history.back();};
 
   useEffect(()=>{
     const handleOnline=()=>{setIsOnline(true);addToast("Conexión restaurada. Sincronizando...","success");processPendingSync();};
@@ -1914,17 +2018,6 @@ function App(){
   const filtrados=centros.filter(c=>{
     if(busqCiudad&&!c.ciudad.toLowerCase().includes(busqCiudad.toLowerCase())&&!c.estado.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
     if(busqNombre&&!c.nombre.toLowerCase().includes(busqNombre.toLowerCase()))return false;
-    if(filtroEstado&&c.estado!==filtroEstado)return false;
-    if(filtroNivel){
-      const vals=Object.values(c.necesidades||{});
-      if(filtroNivel==="CRÍTICO"&&!vals.includes("CRÍTICO"))return false;
-      if(filtroNivel==="ALTO"&&!vals.includes("ALTO")&&!vals.includes("CRÍTICO"))return false;
-      if(filtroNivel==="SIN_CRITICOS"&&vals.includes("CRÍTICO"))return false;
-    }
-    if(filtroInsumo){
-      const keys=Object.keys(c.necesidades||{});
-      if(!keys.some(k=>k.toLowerCase().includes(filtroInsumo.toLowerCase())))return false;
-    }
     return true;
   });
   const filtradosRef=refugios.filter(r=>{
@@ -1982,7 +2075,7 @@ function App(){
               <button title="Gestión de Voluntarios" onClick={()=>setShowVoluntarios(true)} style={{background:"rgba(76,175,80,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{voluntarios.length} 👥</button>
               <button title="Control de Inventario" onClick={()=>setShowInventario(true)} style={{background:"rgba(255,140,0,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📦 {inventario.length}</button>
               <button title="Analíticas y Gráficos" onClick={()=>setShowAnalytics(true)} style={{background:"rgba(156,39,176,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📊</button>
-              <button title="Gestión de Centros" onClick={()=>setShowLoginCentro(true)} style={{background:"rgba(33,150,243,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>🏢 Gestión</button>
+              <button title="Gestión de Centros" onClick={openLoginCentro} style={{background:"rgba(33,150,243,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>🏢 Gestión</button>
               <button title={forceOffline?"Volver online":"Simular offline"} onClick={()=>setForceOffline(!forceOffline)} style={{background:forceOffline?"rgba(255,140,0,.9)":"rgba(255,255,255,.18)",color:"#fff",border:forceOffline?"none":"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{forceOffline?"🟢 Online":"📴 Offline"}</button>
               <button title="Registrar Centro de Acopio" onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
             </div>
@@ -2006,50 +2099,6 @@ function App(){
         )}
         <PanelEmergencias T={T}/>
         <BarraBusqueda busqCiudad={busqCiudad} setBusqCiudad={setBusqCiudad} busqNombre={busqNombre} setBusqNombre={setBusqNombre} filtrados={filtrados.length} total={centros.length} filtradosRef={filtradosRef.length} totalRef={refugios.length} filtradosHosp={filtradosHosp.length} totalHosp={hospitales.length} pinActivo={pinActivo} T={T}/>
-        <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",marginBottom:14,boxShadow:T.cardShadow}}>
-          <div onClick={()=>setShowFiltrosAvanzados(!showFiltrosAvanzados)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}>
-            <span style={{fontWeight:700,fontSize:13,color:T.text}}>🔍 Filtros avanzados {(filtroEstado||filtroNivel||filtroInsumo)?<span style={{background:"#CF1A2F",color:"#fff",fontSize:10,padding:"1px 7px",borderRadius:10,marginLeft:5}}>Activos</span>:""}</span>
-            <span style={{fontSize:12,color:T.textMuted}}>{showFiltrosAvanzados?"▲ Ocultar":"▼ Mostrar"}</span>
-          </div>
-          {showFiltrosAvanzados&&(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginTop:10,paddingTop:10,borderTop:`1px solid ${T.border}`}}>
-              <div>
-                <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:4,fontWeight:600}}>🗺️ Estado</label>
-                <select value={filtroEstado} onChange={e=>setFiltroEstado(e.target.value)} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:12}}>
-                  <option value="">Todos los estados</option>
-                  {ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:4,fontWeight:600}}>🔴 Nivel de urgencia</label>
-                <select value={filtroNivel} onChange={e=>setFiltroNivel(e.target.value)} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:12}}>
-                  <option value="">Todos los niveles</option>
-                  <option value="CRÍTICO">🔴 Con críticos</option>
-                  <option value="ALTO">🟠 Con altos o críticos</option>
-                  <option value="SIN_CRITICOS">🟢 Sin críticos</option>
-                </select>
-              </div>
-              <div>
-                <label style={{fontSize:10,color:T.textMuted,display:"block",marginBottom:4,fontWeight:600}}>📦 Tipo de insumo</label>
-                <select value={filtroInsumo} onChange={e=>setFiltroInsumo(e.target.value)} style={{width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",color:T.text,fontSize:12}}>
-                  <option value="">Todos los insumos</option>
-                  <option value="Agua">💧 Agua</option>
-                  <option value="Alimento">🍚 Alimentos</option>
-                  <option value="Medicina">💊 Medicinas</option>
-                  <option value="Colchoneta">🏕️ Colchonetas</option>
-                  <option value="Pañal">👶 Pañales</option>
-                  <option value="Ropa">👕 Ropa</option>
-                  <option value="Herramienta">🔧 Herramientas</option>
-                </select>
-              </div>
-              {(filtroEstado||filtroNivel||filtroInsumo)&&(
-                <div style={{gridColumn:"1/4",textAlign:"center"}}>
-                  <button onClick={()=>{setFiltroEstado("");setFiltroNivel("");setFiltroInsumo("");}} style={{background:T.surface2,color:T.textMuted,border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 16px",cursor:"pointer",fontSize:11,fontWeight:600}}>✕ Limpiar filtros</button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
         <div id="mapa-id">
           <MapaPrincipal key="main-map" centros={filtrados.length>0?filtrados:centros} refugios={(busqCiudad||busqNombre)?filtradosRef:refugios} hospitales={(busqCiudad||busqNombre)?filtradosHosp:hospitales} pinActivoId={pinActivo?.id} onPinClick={c=>setPinActivo(c)} mapaRef={mapaRef} showHeatMap={showHeatMap} setShowHeatMap={setShowHeatMap} heatFilter={heatFilter} setHeatFilter={setHeatFilter} T={T}/>
         </div>
@@ -2152,8 +2201,8 @@ function App(){
           </div>
         </div>
       )}
-      {showLoginCentro&&!dashCentro&&<LoginCentro T={T} centros={centros} onLogin={(c)=>{setDashCentro(c);setShowLoginCentro(false);}}/>}
-      {dashCentro&&<DashboardCentro centro={dashCentro} onClose={()=>setDashCentro(null)} T={T} addToast={addToast} saveFirebase={(path,data)=>{const ok=firebaseSave(path,data);if(!ok)queueSync(path,data);}} darkMode={darkMode} toggleTheme={()=>setThemeMode(m=>m==="dark"?"light":"dark")}/>}
+      {showLoginCentro&&!dashCentro&&<LoginCentro T={T} centros={centros} onLogin={openDash}/>}
+      {dashCentro&&<DashboardCentro centro={dashCentro} onClose={closeDash} T={T} addToast={addToast} saveFirebase={(path,data)=>{const ok=firebaseSave(path,data);if(!ok)queueSync(path,data);}} darkMode={darkMode} toggleTheme={()=>setThemeMode(m=>m==="dark"?"light":"dark")}/>}
     </div>
   );
 }
