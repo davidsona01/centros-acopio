@@ -1017,6 +1017,7 @@ function Tarjeta({centro,activo,onSeleccionar,onVerDetalle,onCert,T}){
   const criticos=Object.entries(centro.necesidades||{}).filter(([,v])=>v==="CRÍTICO");
   const pct=Math.round((centro.recibido/centro.capacidad)*100);
   const barColor=pct>90?"#FF3B3B":pct>70?"#FF8C00":"#4CAF50";
+  const pctColor=pct>90?"#FF3B3B":pct>70?"#FF8C00":T.text;
   return(<div onClick={()=>onSeleccionar(centro)} style={{background:activo?(T===T_DARK?"#2A0A0F":"#FFF5F5"):T.surface,border:`1.5px solid ${activo?"#CF1A2F":criticos.length>0?"rgba(255,59,59,.4)":T.border}`,borderRadius:12,padding:"11px 14px",cursor:"pointer",borderLeft:`4px solid ${activo?"#CF1A2F":criticos.length>0?"#FF3B3B":"#4CAF50"}`,boxShadow:activo?"0 0 0 2px rgba(207,26,47,.15)":T.cardShadow,transition:"all .15s"}}
     onMouseEnter={e=>{if(!activo)e.currentTarget.style.borderColor="#CF1A2F";}}
     onMouseLeave={e=>{if(!activo)e.currentTarget.style.borderColor=criticos.length>0?"rgba(255,59,59,.4)":T.border;}}>
@@ -1031,9 +1032,9 @@ function Tarjeta({centro,activo,onSeleccionar,onVerDetalle,onCert,T}){
         <div style={{fontWeight:700,color:T.text,fontSize:13,marginBottom:1,lineHeight:1.3}}>{centro.nombre}</div>
         <div style={{color:T.textMuted,fontSize:11}}>📍 {centro.ciudad}, {centro.estado}</div>
       </div>
-      <div style={{textAlign:"right",flexShrink:0}}>
+        <div style={{textAlign:"right",flexShrink:0}}>
         <div style={{fontSize:9,color:T.textMuted}}>Capac.</div>
-        <div style={{fontWeight:800,fontSize:15,color:pct>90?"#FF3B3B":pct>70?"#FF8C00":T.text}}>{pct}%</div>
+        <div style={{fontWeight:800,fontSize:15,color:pctColor}}>{pct}%</div>
       </div>
     </div>
     <div style={{height:3,background:T.border,borderRadius:4,margin:"5px 0"}}><div style={{height:3,width:`${Math.min(pct,100)}%`,background:barColor,borderRadius:4}}/></div>
@@ -1058,6 +1059,8 @@ function Dashboard({centros,refugios,onClose,T}){
   const insumosCrit={};centros.forEach(c=>Object.entries(c.necesidades||{}).forEach(([k,v])=>{if(v==="CRÍTICO"){if(!insumosCrit[k])insumosCrit[k]=0;insumosCrit[k]++;}}));
   const topInsumos=Object.entries(insumosCrit).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const pctGeneral=totalCapacidad>0?Math.round((totalRecibido/totalCapacidad)*100):0;
+  const pctGenColor=pctGeneral>85?"#FF3B3B":pctGeneral>60?"#FF8C00":"#4CAF50";
+  const pctGenLabel=pctGeneral>85?"#FF3B3B":"#4CAF50";
 
   const imprimirPDF=()=>{
     const fecha=new Date().toLocaleDateString("es-VE",{day:"2-digit",month:"long",year:"numeric"});
@@ -1093,12 +1096,12 @@ function Dashboard({centros,refugios,onClose,T}){
             <div style={{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,padding:14}}>
               <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:10}}>📊 Uso de capacidad general</div>
               <div style={{height:8,background:T.border,borderRadius:4,marginBottom:8}}>
-                <div style={{height:8,width:`${pctGeneral}%`,background:pctGeneral>85?"#FF3B3B":pctGeneral>60?"#FF8C00":"#4CAF50",borderRadius:4}}/>
+                <div style={{height:8,width:`${pctGeneral}%`,background:pctGenColor,borderRadius:4}}/>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:T.textMuted}}>
                 <span>Donaciones: <strong style={{color:T.text}}>{totalRecibido.toLocaleString()}</strong></span>
                 <span>Capacidad: <strong style={{color:T.text}}>{totalCapacidad.toLocaleString()}</strong></span>
-                <span style={{fontWeight:700,color:pctGeneral>85?"#FF3B3B":"#4CAF50"}}>{pctGeneral}%</span>
+                <span style={{fontWeight:700,color:pctGenLabel}}>{pctGeneral}%</span>
               </div>
             </div>
             <div style={{background:T.surface2,border:`1px solid ${T.border}`,borderRadius:10,padding:14}}>
@@ -1255,6 +1258,7 @@ function DashboardCentro({centro,onClose,T,addToast,saveFirebase,darkMode,toggle
 
   const CATEGORIAS=["Alimentos","Agua","Medicina","Higiene","Ropa","Cobijas","Útiles","Electrónica","Otros"];
   const coloresCat={Alimentos:"#FF9800",Agua:"#2196F3",Medicina:"#F44336",Higiene:"#9C27B0",Ropa:"#E91E63",Cobijas:"#795548",Útiles:"#607D8B",Electrónica:"#00BCD4",Otros:"#9E9E9E"};
+  const TRANSPORT_ICONS={camion:"🚚",furgoneta:"🚐",moto:"🏍️",automovil:"🚗",pie:"🚶",otro:"📦"};
 
   useEffect(()=>{
     const inv=centro.inventario||[];
@@ -1284,8 +1288,13 @@ function DashboardCentro({centro,onClose,T,addToast,saveFirebase,darkMode,toggle
     saveFirebase(`acopio/centros/${centro.id}/inventario`,nuevo);
     addToast("Insumo eliminado","info");
   };
+  const updateInv=(id,newCant)=>{
+    const nuevo=invLocal.map(i=>i.id===id?{...i,cantidad:Math.max(0,newCant)}:i);
+    setInvLocal(nuevo);
+    saveFirebase(`acopio/centros/${centro.id}/inventario`,nuevo);
+  };
   const addMov=(mov)=>{
-    const nuevo=[...movimientos,{id:Date.now(),...mov,fecha:new Date().toLocaleDateString("es-VE")}];
+    const nuevo=[...movimientos,{id:Date.now(),...mov,fecha:new Date().toLocaleDateString("es-VE"),hora:new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit"})}];
     setMovimientos(nuevo);
     saveFirebase(`acopio/centros/${centro.id}/movimientos`,nuevo);
     addToast(mov.tipo==="recepcion"?"Recepción registrada":"Envío registrado","success");
@@ -1457,20 +1466,26 @@ function DashboardCentro({centro,onClose,T,addToast,saveFirebase,darkMode,toggle
         <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,overflow:"hidden"}}>
           <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
             <thead><tr style={{background:T.surface2}}>
-              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Fecha</th>
-              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Tipo</th>
-              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Insumo</th>
-              <th style={{padding:"10px 12px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Cantidad</th>
-              <th style={{padding:"10px 12px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Origen/Destino</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Fecha</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Tipo</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Cat.</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Insumo</th>
+              <th style={{padding:"8px 10px",textAlign:"center",color:T.textMuted,fontWeight:700}}>Cant.</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>{movimientos.length>0&&movimientos[0].tipo==="recepcion"?"Remitente":"Destino"}</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Recibido/Entregado</th>
+              <th style={{padding:"8px 10px",textAlign:"left",color:T.textMuted,fontWeight:700}}>Transporte</th>
             </tr></thead>
             <tbody>
               {movimientos.slice().reverse().map(m=>(
                 <tr key={m.id} style={{borderBottom:`1px solid ${T.border}`}}>
-                  <td style={{padding:"8px 12px",color:T.textMuted}}>{m.fecha}</td>
-                  <td style={{padding:"8px 12px"}}><span style={{background:m.tipo==="recepcion"?"#E8F5E9":"#FBE9E7",color:m.tipo==="recepcion"?"#2E7D32":"#D84315",padding:"3px 8px",borderRadius:5,fontWeight:700,fontSize:11}}>{m.tipo==="recepcion"?"📥 Recepción":"📤 Envío"}</span></td>
-                  <td style={{padding:"8px 12px",color:T.text,fontWeight:600}}>{m.insumo}</td>
-                  <td style={{padding:"8px 12px",textAlign:"center",color:T.text}}>{m.cantidad}</td>
-                  <td style={{padding:"8px 12px",color:T.textMuted}}>{m.origenDestino||"-"}</td>
+                  <td style={{padding:"6px 10px",color:T.textMuted,fontSize:11}}>{m.fecha}<br/><span style={{fontSize:9}}>{m.hora||""}</span></td>
+                  <td style={{padding:"6px 10px"}}><span style={{background:m.tipo==="recepcion"?"#E8F5E9":"#FBE9E7",color:m.tipo==="recepcion"?"#2E7D32":"#D84315",padding:"2px 6px",borderRadius:4,fontWeight:700,fontSize:10}}>{m.tipo==="recepcion"?"📥":"📤"}</span></td>
+                  <td style={{padding:"6px 10px"}}><span style={{background:T.surface2,padding:"2px 6px",borderRadius:4,fontSize:10}}>{m.categoria||"-"}</span></td>
+                  <td style={{padding:"6px 10px",color:T.text,fontWeight:600,fontSize:12}}>{m.insumo}</td>
+                  <td style={{padding:"6px 10px",textAlign:"center",color:T.text,fontSize:12}}>{m.cantidad}</td>
+                  <td style={{padding:"6px 10px",color:T.textMuted,fontSize:11}}>{m.origen||m.destino||m.origenDestino||"-"}{m.remitenteNombre&&<br/>}<span style={{fontSize:9}}>{m.remitenteNombre||""}</span></td>
+                  <td style={{padding:"6px 10px",color:T.textMuted,fontSize:11}}>{m.recibidoPor||"-"}</td>
+                  <td style={{padding:"6px 10px",color:T.textMuted,fontSize:10}}>{m.transporte?`${TRANSPORT_ICONS[m.transporte.tipo]||"📦"} ${m.transporte.placa||""}${m.transporte.conductor?" · "+m.transporte.conductor:""}`:"-"}</td>
                 </tr>
               ))}
             </tbody>
@@ -1480,11 +1495,11 @@ function DashboardCentro({centro,onClose,T,addToast,saveFirebase,darkMode,toggle
       </div>}
       {seccion==="addMovR"&&<div>
         <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>📥 Registrar Recepción</div>
-        <AddMovForm tipo="recepcion" onAdd={addMov} onBack={()=>setSeccion("movimientos")} T={T}/>
+        <AddMovForm tipo="recepcion" onAdd={addMov} onBack={()=>setSeccion("movimientos")} T={T} invLocal={invLocal} updateInv={updateInv}/>
       </div>}
       {seccion==="addMovE"&&<div>
         <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>📤 Registrar Envío</div>
-        <AddMovForm tipo="envio" onAdd={addMov} onBack={()=>setSeccion("movimientos")} T={T}/>
+        <AddMovForm tipo="envio" onAdd={addMov} onBack={()=>setSeccion("movimientos")} T={T} invLocal={invLocal} updateInv={updateInv}/>
       </div>}
       {seccion==="alertas"&&<div>
         <div style={{fontWeight:800,fontSize:18,color:T.text,marginBottom:16}}>🔔 Alertas del Centro</div>
@@ -1634,24 +1649,111 @@ function AddInvForm({onAdd,onBack,T}){
   </div>);
 }
 
-function AddMovForm({tipo,onAdd,onBack,T}){
-  const [form,setForm]=useState({insumo:"",cantidad:"",origenDestino:""});
+function AddMovForm({tipo,onAdd,onBack,T,invLocal,updateInv}){
+  const [form,setForm]=useState({insumo:"",cantidad:"",categoria:"Alimentos",origen:"",destino:"",recibidoPor:"",transporte:{tipo:"camion",placa:"",conductor:"",telefono:""}});
+  const CATEGORIAS=["Alimentos","Agua","Medicina","Higiene","Ropa","Cobijas","Útiles","Electrónica","Otros"];
+  const REMITENTES=["Particulares","Gobierno","ONG","Iglesia","Empresa","Cruz Roja","Alcaldía","Hospital","Otro"];
+  const TRANSPORTES=["camion","furgoneta","moto","automovil","pie","otro"];
+  const TRANSPORT_ICONS={camion:"🚚",furgoneta:"🚐",moto:"🏍️",automovil:"🚗",pie:"🚶",otro:"📦"};
   const s={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
   const col=tipo==="recepcion"?"#4CAF50":"#FF5722";
-  return(<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"20px",maxWidth:400}}>
-    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-      <span style={{fontSize:24}}>{tipo==="recepcion"?"📥":"📤"}</span>
-      <span style={{fontWeight:700,fontSize:14,color:col}}>{tipo==="recepcion"?"Recepción de Ayuda":"Envío de Ayuda"}</span>
-    </div>
-    {[["Insumo","insumo","text","Ej: Agua, medicinas"],["Cantidad","cantidad","number","0"],[tipo==="recepcion"?"Origen (quién envía)":"Destino (a quién)","origenDestino","text",tipo==="recepcion"?"Ej: Cruz Roja, Alcaldía":"Ej: Centro X, Hospital Y"]].map(([lbl,key,type,ph])=>(
-      <div key={key} style={{marginBottom:10}}>
-        <label style={{color:T.textMuted,fontSize:12,display:"block",marginBottom:4,fontWeight:600}}>{lbl} *</label>
-        <input type={type} value={form[key]} onChange={e=>setForm({...form,[key]:e.target.value})} placeholder={ph} style={{...s,borderColor:!form[key]?T.border:col}}/>
+  const insumosCat=invLocal.filter(i=>i.categoria===form.categoria);
+  const invItem=insumosCat.find(i=>i.nombre===form.insumo);
+  const maxCant=tipo==="envio"&&invItem?invItem.cantidad:99999;
+  const exceedMax=tipo==="envio"&&Number(form.cantidad)>maxCant;
+
+  const handleSend=()=>{
+    if(tipo==="envio"&&invItem){
+      const nuevaCant=invItem.cantidad-Number(form.cantidad);
+      updateInv(invItem.id,nuevaCant);
+    }
+    onAdd({...form,tipo,cantidad:Number(form.cantidad)});
+  };
+
+  return(<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"20px",maxWidth:480}}>
+    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+      <span style={{fontSize:26}}>{tipo==="recepcion"?"📥":"📤"}</span>
+      <div>
+        <div style={{fontWeight:700,fontSize:15,color:col}}>{tipo==="recepcion"?"Recepción de Ayuda":"Envío de Ayuda"}</div>
+        <div style={{fontSize:11,color:T.textMuted}}>{tipo==="recepcion"?"Registrar insumos recibidos":"Registrar insumos enviados"}</div>
       </div>
-    ))}
-    <div style={{display:"flex",gap:8,marginTop:14}}>
-      <button onClick={()=>onAdd({...form,tipo})} disabled={!form.insumo||!form.cantidad} style={{flex:1,background:form.insumo&&form.cantidad?col:"#999",color:"#fff",border:"none",borderRadius:8,padding:"9px",cursor:form.insumo&&form.cantidad?"pointer":"not-allowed",fontWeight:700,fontSize:12}}>✅ Registrar</button>
-      <button onClick={onBack} style={{flex:1,background:"none",border:`1px solid ${T.border}`,color:T.textMuted,borderRadius:8,padding:"9px",cursor:"pointer",fontSize:12}}>← Volver</button>
+    </div>
+
+    <div style={{fontWeight:700,fontSize:12,color:T.text,marginBottom:8,borderBottom:`1px solid ${T.border}`,paddingBottom:6}}>📦 Datos del Insumo</div>
+    <div style={{marginBottom:10}}>
+      <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Categoría *</label>
+      <select value={form.categoria} onChange={e=>setForm({...form,categoria:e.target.value,insumo:""})} style={s}>{CATEGORIAS.map(c=><option key={c} value={c}>{c}</option>)}</select>
+    </div>
+    <div style={{marginBottom:10}}>
+      <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Insumo *</label>
+      {tipo==="envio"?<select value={form.insumo} onChange={e=>setForm({...form,insumo:e.target.value})} style={s}>
+        <option value="">Seleccionar del inventario...</option>
+        {insumosCat.map(i=><option key={i.id} value={i.nombre}>{i.nombre} (Disponible: {i.cantidad} {i.unidad})</option>)}
+      </select>:<input value={form.insumo} onChange={e=>setForm({...form,insumo:e.target.value})} placeholder="Ej: Agua potable, medicinas" style={s}/>}
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+      <div>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Cantidad *</label>
+        <input type="number" value={form.cantidad} onChange={e=>setForm({...form,cantidad:e.target.value})} placeholder="0" max={maxCant} style={{...s,borderColor:exceedMax?"#FF3B3B":T.border}}/>
+        {tipo==="envio"&&invItem&&<div style={{fontSize:10,color:T.textFaint,marginTop:2}}>Disponible: {invItem.cantidad} {invItem.unidad}</div>}
+      </div>
+      <div>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Unidad</label>
+        <select value={form.unidad||"unidades"} onChange={e=>setForm({...form,unidad:e.target.value})} style={s}><option value="kg">Kg</option><option value="unidades">Unidades</option><option value="litros">Litros</option><option value="cajas">Cajas</option><option value="bolsas">Bolsas</option></select>
+      </div>
+    </div>
+
+    {tipo==="recepcion"&&<div>
+      <div style={{fontWeight:700,fontSize:12,color:T.text,marginBottom:8,marginTop:14,borderBottom:`1px solid ${T.border}`,paddingBottom:6}}>👤 Datos de Recepción</div>
+      <div style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Quién envía (Remitente) *</label>
+        <select value={form.origen} onChange={e=>setForm({...form,origen:e.target.value})} style={s}><option value="">Seleccionar...</option>{REMITENTES.map(r=><option key={r} value={r}>{r}</option>)}</select>
+      </div>
+      <div style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Nombre del remitente / organización</label>
+        <input value={form.remitenteNombre||""} onChange={e=>setForm({...form,remitenteNombre:e.target.value})} placeholder="Ej: Juan Pérez, Alcaldía de Caracas" style={s}/>
+      </div>
+      <div style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Recibido por *</label>
+        <input value={form.recibidoPor} onChange={e=>setForm({...form,recibidoPor:e.target.value})} placeholder="Nombre de quien recibe" style={s}/>
+      </div>
+    </div>}
+
+    {tipo==="envio"&&<div>
+      <div style={{fontWeight:700,fontSize:12,color:T.text,marginBottom:8,marginTop:14,borderBottom:`1px solid ${T.border}`,paddingBottom:6}}>🚚 Datos del Envío</div>
+      <div style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Destino (quién recibe) *</label>
+        <input value={form.destino} onChange={e=>setForm({...form,destino:e.target.value})} placeholder="Ej: Centro X, Hospital Y" style={s}/>
+      </div>
+      <div style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Tipo de transporte</label>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+          {TRANSPORTES.map(t=>(
+            <button key={t} onClick={()=>setForm({...form,transporte:{...form.transporte,tipo:t}})} style={{background:form.transporte.tipo===t?col:T.surface2,color:form.transporte.tipo===t?"#fff":T.text,border:`1px solid ${form.transporte.tipo===t?col:T.border}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:11,fontWeight:600}}>
+              {TRANSPORT_ICONS[t]} {t.charAt(0).toUpperCase()+t.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+        <div>
+          <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Placa / Identificación</label>
+          <input value={form.transporte.placa} onChange={e=>setForm({...form,transporte:{...form.transporte,placa:e.target.value}})} placeholder="Ej: ABC-123" style={s}/>
+        </div>
+        <div>
+          <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Conductor / Responsable</label>
+          <input value={form.transporte.conductor} onChange={e=>setForm({...form,transporte:{...form.transporte,conductor:e.target.value}})} placeholder="Nombre" style={s}/>
+        </div>
+      </div>
+      <div style={{marginBottom:10}}>
+        <label style={{color:T.textMuted,fontSize:11,display:"block",marginBottom:4,fontWeight:600}}>Teléfono del transportista</label>
+        <input value={form.transporte.telefono} onChange={e=>setForm({...form,transporte:{...form.transporte,telefono:e.target.value}})} placeholder="Ej: 04121234567" style={s}/>
+      </div>
+    </div>}
+
+    <div style={{display:"flex",gap:8,marginTop:16}}>
+      <button onClick={handleSend} disabled={!form.insumo||!form.cantidad} style={{flex:1,background:form.insumo&&form.cantidad?col:"#999",color:"#fff",border:"none",borderRadius:8,padding:"10px",cursor:form.insumo&&form.cantidad?"pointer":"not-allowed",fontWeight:700,fontSize:13}}>✅ {tipo==="recepcion"?"Registrar Recepción":"Registrar Envío"}</button>
+      <button onClick={onBack} style={{flex:1,background:"none",border:`1px solid ${T.border}`,color:T.textMuted,borderRadius:8,padding:"10px",cursor:"pointer",fontSize:13}}>← Volver</button>
     </div>
   </div>);
 }
@@ -1822,7 +1924,7 @@ function App(){
               <button title="Gestión de Voluntarios" onClick={()=>setShowVoluntarios(true)} style={{background:"rgba(76,175,80,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{voluntarios.length} 👥</button>
               <button title="Control de Inventario" onClick={()=>setShowInventario(true)} style={{background:"rgba(255,140,0,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📦 {inventario.length}</button>
               <button title="Analíticas y Gráficos" onClick={()=>setShowAnalytics(true)} style={{background:"rgba(156,39,176,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>📊</button>
-              <button title="Panel del Centro" onClick={()=>setShowLoginCentro(true)} style={{background:"rgba(33,150,243,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>🏢 Panel</button>
+              <button title="Gestión de Centros" onClick={()=>setShowLoginCentro(true)} style={{background:"rgba(33,150,243,.85)",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>🏢 Gestión</button>
               <button title={forceOffline?"Volver online":"Simular offline"} onClick={()=>setForceOffline(!forceOffline)} style={{background:forceOffline?"rgba(255,140,0,.9)":"rgba(255,255,255,.18)",color:"#fff",border:forceOffline?"none":"1px solid rgba(255,255,255,.35)",borderRadius:8,padding:"6px 10px",cursor:"pointer",fontWeight:700,fontSize:11,backdropFilter:"blur(4px)"}}>{forceOffline?"🟢 Online":"📴 Offline"}</button>
               <button title="Registrar Centro de Acopio" onClick={()=>setRegistro(true)} style={{background:"#fff",color:"#CF1A2F",border:"none",borderRadius:8,padding:"7px 15px",cursor:"pointer",fontWeight:700,fontSize:12}}>+ Registrar Centro</button>
             </div>
