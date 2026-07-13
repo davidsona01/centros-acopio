@@ -1649,6 +1649,64 @@ function AddInvForm({onAdd,onBack,T}){
   </div>);
 }
 
+function EtiquetaEnvio({mov,T,onClose}){
+  if(!mov||!mov.trackingCode)return null;
+  const printLabel=()=>{window.print();};
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}} onClick={onClose}>
+      <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:16,width:"100%",maxWidth:420,maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+        <div style={{background:"linear-gradient(135deg,#FF5722,#BF360C)",padding:"15px 20px",borderRadius:"16px 16px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,.7)"}}>Etiqueta de Envío</div>
+            <div style={{fontWeight:800,fontSize:15,color:"#fff"}}>Etiqueta del Paquete</div>
+          </div>
+          <button onClick={onClose} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",width:28,height:28,borderRadius:7,cursor:"pointer",fontSize:16}}>x</button>
+        </div>
+        <div style={{padding:20}}>
+          <div style={{background:"#fff",border:"2px solid #333",borderRadius:12,padding:16,marginBottom:16}}>
+            <div style={{textAlign:"center",borderBottom:"2px dashed #333",paddingBottom:12,marginBottom:12}}>
+              <div style={{fontSize:18,fontWeight:900,color:"#333",letterSpacing:1}}>RED DE ACOPIO VENEZUELA</div>
+              <div style={{fontSize:10,color:"#666",marginTop:2}}>Emergencia Sismica 2026</div>
+            </div>
+            <div style={{textAlign:"center",marginBottom:12}}>
+              <div style={{fontSize:9,color:"#666",textTransform:"uppercase",letterSpacing:1}}>Codigo de Rastreo</div>
+              <div style={{fontSize:20,fontWeight:900,color:"#FF5722",letterSpacing:2,fontFamily:"monospace",marginTop:4}}>{mov.trackingCode}</div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,fontSize:11,color:"#333",marginBottom:12}}>
+              <div><strong>Insumo:</strong> {mov.insumo}</div>
+              <div><strong>Cantidad:</strong> {mov.cantidad} {mov.unidad||"unidades"}</div>
+              <div><strong>Categoria:</strong> {mov.categoria||"-"}</div>
+              <div><strong>Transporte:</strong> {mov.transporte?mov.transporte.tipo:"-"}</div>
+              <div><strong>Placa:</strong> {mov.transporte?mov.transporte.placa:"-"}</div>
+              <div><strong>Conductor:</strong> {mov.transporte?mov.transporte.conductor:"-"}</div>
+            </div>
+            <div style={{fontSize:11,color:"#333",marginBottom:12,borderTop:"1px dashed #999",paddingTop:8}}>
+              <div><strong>Destino:</strong> {mov.destino||"-"}</div>
+              <div><strong>Fecha:</strong> {mov.fecha} {mov.hora||""}</div>
+            </div>
+            {mov.fotoPaquete&&<div style={{textAlign:"center",marginBottom:12}}>
+              <div style={{fontSize:9,color:"#666",marginBottom:4}}>FOTO DEL PAQUETE</div>
+              <img src={mov.fotoPaquete} alt="Paquete" style={{maxWidth:200,maxHeight:150,borderRadius:8,border:"1px solid #ccc"}}/>
+            </div>}
+            <div style={{textAlign:"center"}}>
+              <CertQR value={"ACOPIO-"+mov.trackingCode+"-"+mov.insumo+"-"+mov.cantidad+(mov.unidad||"un")+"-"+(mov.destino||"")+"-"+mov.fecha} size={120}/>
+              <div style={{fontSize:9,color:"#999",marginTop:4}}>Escanea para rastrear</div>
+            </div>
+          </div>
+          {mov.fotoVehiculo&&<div style={{marginBottom:16}}>
+            <div style={{fontSize:11,fontWeight:700,color:T.text,marginBottom:6}}>Foto del Vehiculo</div>
+            <img src={mov.fotoVehiculo} alt="Vehiculo" style={{width:"100%",maxHeight:200,objectFit:"cover",borderRadius:8,border:`1px solid ${T.border}`}}/>
+          </div>}
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={printLabel} style={{flex:1,background:"#FF5722",color:"#fff",border:"none",borderRadius:8,padding:"10px",cursor:"pointer",fontWeight:700,fontSize:12}}>Imprimir Etiqueta</button>
+            <button onClick={onClose} style={{flex:1,background:"none",border:`1px solid ${T.border}`,color:T.textMuted,borderRadius:8,padding:"10px",cursor:"pointer",fontSize:12}}>Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AddMovForm({tipo,onAdd,onBack,T,invLocal,updateInv}){
   const [form,setForm]=useState({insumo:"",cantidad:"",categoria:"Alimentos",origen:"",destino:"",recibidoPor:"",transporte:{tipo:"camion",placa:"",conductor:"",telefono:""}});
   const CATEGORIAS=["Alimentos","Agua","Medicina","Higiene","Ropa","Cobijas","Útiles","Electrónica","Otros"];
