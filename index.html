@@ -27,6 +27,7 @@ var checkLogo=setInterval(function(){
 <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes slideUp{0%{transform:translateY(20px);opacity:0}100%{transform:translateY(0);opacity:1}}</style>
 </head>
 <body>
@@ -1005,7 +1006,7 @@ function Registro({centros,onClose,onGuardar,T}){
   };const ciudades=CIUDADES[form.estado]||[];const ok1=form.nombre&&form.estado&&form.tipo&&form.responsable&&form.whatsapp&&form.usuario&&form.password&&form.password===form.passwordConfirm&&form.preguntaSecreta&&form.respuestaSecreta;
   const toggle=(ins,nv)=>setNiveles(n=>{const x={...n};x[ins]===nv?delete x[ins]:(x[ins]=nv);return x;});
   const validate=()=>{const e={};if(!form.nombre.trim())e.nombre="El nombre es obligatorio";if(!form.estado)e.estado="Selecciona un estado";if(!form.tipo)e.tipo="Selecciona un tipo";if(!form.responsable.trim())e.responsable="El coordinador es obligatorio";if(!form.whatsapp.trim())e.whatsapp="El WhatsApp es obligatorio";else if(form.whatsapp.replace(/\D/g,"").length<10)e.whatsapp="Debe tener al menos 10 dígitos";if(!form.usuario.trim())e.usuario="El usuario es obligatorio";if(!form.password.trim())e.password="La contraseña es obligatoria";else if(form.password.length<6)e.password="Mínimo 6 caracteres";if(form.password!==form.passwordConfirm)e.passwordConfirm="Las contraseñas no coinciden";if(!form.preguntaSecreta.trim())e.preguntaSecreta="La pregunta secreta es obligatoria";if(!form.respuestaSecreta.trim())e.respuestaSecreta="La respuesta es obligatoria";setErrors(e);return Object.keys(e).length===0;};
-  const registrar=()=>{if(!validate())return;const id=genId(centros||[]);const c={...form,id,capacidad:parseInt(form.capacidad)||200,recibido:0,verificado:false,necesidades:niveles,lat:lat,lng:lng,fecha:new Date().toISOString().slice(0,10),usuario:form.usuario.trim(),password:form.password,preguntaSecreta:form.preguntaSecreta.trim(),respuestaSecreta:form.respuestaSecreta.trim().toLowerCase()};delete c.passwordConfirm;onGuardar(c);setIdGen(id);setNuevoC(c);setStep(3);};
+  const registrar=async()=>{if(!validate())return;const id=genId(centros||[]);const c={...form,id,capacidad:parseInt(form.capacidad)||200,recibido:0,verificado:false,necesidades:niveles,lat:lat,lng:lng,fecha:new Date().toISOString().slice(0,10),usuario:form.usuario.trim(),password:form.password,preguntaSecreta:form.preguntaSecreta.trim(),respuestaSecreta:form.respuestaSecreta.trim().toLowerCase()};delete c.passwordConfirm;try{await migrateCenterAuth(c);}catch(e){console.error("Error creando cuenta Auth:",e);}onGuardar(c);setIdGen(id);setNuevoC(c);setStep(3);};
   const copiarCert=()=>{if(!nuevoC)return;const t=`📋 CERTIFICADO CENTRO DE ACOPIO\nID: ${idGen}\nCentro: ${nuevoC.nombre}\nCoordinador: ${nuevoC.responsable}\nWhatsApp: +58 ${fmtWA(nuevoC.whatsapp)}\nEstado: ${nuevoC.estado} · Ciudad: ${nuevoC.ciudad}`;navigator.clipboard.writeText(t).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);});};
   const si={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none",boxSizing:"border-box"};
   const ss={width:"100%",background:T.inputBg,border:`1px solid ${T.border}`,borderRadius:8,padding:"9px 12px",color:T.text,fontSize:13,outline:"none"};
@@ -1170,6 +1171,42 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
+
+function centerEmail(centerId) {
+  return centerId.toLowerCase().replace(/[^a-z0-9]/g, "_") + "@acopio.local";
+}
+
+async function migrateCenterAuth(center) {
+  const email = centerEmail(center.id);
+  const pass = center.password || "acopio2026";
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.ref("acopio/auth/" + center.id).set({
+      uid: cred.user.uid,
+      email: email,
+      rol: "centro"
+    });
+    console.log("Migrado: " + center.id);
+    return true;
+  } catch (e) {
+    if (e.code === "auth/email-already-in-use") {
+      console.log("Ya existe: " + center.id);
+      return true;
+    }
+    console.error("Error migrando " + center.id + ":", e.message);
+    return false;
+  }
+}
+
+async function migrateAllCenters(centros) {
+  const withAuth = centros.filter(c => c.password && c.password !== "acopio2026");
+  for (const c of withAuth) {
+    await migrateCenterAuth(c);
+  }
+  await auth.signOut();
+  localStorage.setItem("acopio_auth_migrated", "true");
+}
 
 async function firebaseSave(path, data) {
   try {
@@ -1225,17 +1262,35 @@ function LoginCentro({onLogin,T,centros}){
   const [recErr,setRecErr]=useState("");
   const [recOk,setRecOk]=useState(false);
   const [recCentro,setRecCentro]=useState(null);
+  const [migrating,setMigrating]=useState(false);
 
-  const intentar=()=>{
+  const intentar=async()=>{
     setLoading(true);setErr("");
     const q=user.toLowerCase().trim();
     const cById=centros.find(x=>x.id.toLowerCase()===q);
     const cByUser=centros.find(x=>x.usuario&&x.usuario.toLowerCase()===q);
     const centro=cById||cByUser;
     if(!centro){setErr("No se encontro centro con ese ID o usuario.");setPass("");setLoading(false);return;}
-    if(pass==="acopio2026"){onLogin(centro);setLoading(false);return;}
-    if(centro.password&&pass===centro.password){onLogin(centro);setLoading(false);return;}
-    setErr("Contrasena incorrecta.");setPass("");
+    const email=centerEmail(centro.id);
+    try{
+      await auth.signInWithEmailAndPassword(email,pass);
+      onLogin(centro);
+    }catch(e){
+      if(pass==="acopio2026"||pass===(centro.password||"")){
+        setMigrating(true);
+        try{
+          await migrateCenterAuth(centro);
+          await auth.signInWithEmailAndPassword(email,pass==="acopio2026"?"acopio2026":pass);
+          onLogin(centro);
+        }catch(migErr){
+          setErr("Error de autenticacion: "+migErr.message);
+        }
+        setMigrating(false);
+      }else{
+        setErr("Contrasena incorrecta.");
+      }
+      setPass("");
+    }
     setLoading(false);
   };
 
@@ -1249,15 +1304,31 @@ function LoginCentro({onLogin,T,centros}){
     setRecPregunta(c.preguntaSecreta);
   };
 
-  const recuperarClave=()=>{
+  const recuperarClave=async()=>{
     setRecErr("");
     if(!recCentro)return;
     const r=recRespuesta.trim().toLowerCase();
     if(r!==recCentro.respuestaSecreta){setRecErr("La respuesta es incorrecta.");return;}
     if(recNewPass.length<6){setRecErr("La nueva contraseña debe tener al menos 6 caracteres.");return;}
     if(recNewPass!==recNewPass2){setRecErr("Las contraseñas no coinciden.");return;}
-    recCentro.password=recNewPass;
-    setRecOk(true);
+    try{
+      const email=centerEmail(recCentro.id);
+      try{await auth.signInWithEmailAndPassword(email,recCentro.password||"acopio2026");}catch(e){}
+      if(auth.currentUser){
+        await auth.currentUser.updatePassword(recNewPass);
+        await auth.signOut();
+      }
+      await db.ref("acopio/centros").once("value").then(snap=>{
+        const arr=snap.val();
+        if(Array.isArray(arr)){
+          const idx=arr.findIndex(c=>c.id===recCentro.id);
+          if(idx>=0){arr[idx].password=recNewPass;db.ref("acopio/centros").set(arr);}
+        }
+      });
+      setRecOk(true);
+    }catch(e){
+      setRecErr("Error actualizando contraseña: "+e.message);
+    }
   };
 
   if(view==="recuperar"){
@@ -1322,7 +1393,7 @@ function LoginCentro({onLogin,T,centros}){
           <span onClick={()=>setShowPass(!showPass)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",cursor:"pointer",fontSize:16,opacity:.6}}>{showPass?"\ud83d\udc41\ufe0f\u200d\ud83d\udde3\ufe0f":"\ud83d\udc41\ufe0f"}</span>
         </div>
         {err&&<div style={{color:"#DC2626",fontSize:12,marginBottom:10,marginTop:6}}>{"\u26a0 "+err}</div>}
-        <button onClick={intentar} disabled={loading||!user||!pass} style={{width:"100%",marginTop:10,background:loading||!user||!pass?"#999":"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:loading?"wait":"pointer",fontWeight:700,fontSize:14,transition:"background .2s"}}>{loading?"\u23f3 Entrando...":"\ud83d\ude80 Entrar al Panel"}</button>
+        <button onClick={intentar} disabled={loading||!user||!pass||migrating} style={{width:"100%",marginTop:10,background:loading||!user||!pass||migrating?"#999":"#1A73E8",color:"#fff",border:"none",borderRadius:8,padding:"11px",cursor:loading?"wait":"pointer",fontWeight:700,fontSize:14,transition:"background .2s"}}>{migrating?"\u23f3 Migrando cuenta...":loading?"\u23f3 Entrando...":"\ud83d\ude80 Entrar al Panel"}</button>
         <div style={{textAlign:"center",marginTop:14}}>
           <span onClick={()=>setView("recuperar")} style={{color:"#1A73E8",fontSize:12,cursor:"pointer",fontWeight:600,textDecoration:"underline"}}>{"\ud83d\udd10"} Olvidé mi contraseña</span>
         </div>
@@ -1392,7 +1463,8 @@ function DashboardCentro({centro,onClose,T,addToast,saveFirebase,darkMode,toggle
   };
   const sendChat=()=>{
     if(!chatInput.trim())return;
-    const msg={id:Date.now(),autor:centro.nombre,texto:chatInput,fecha:new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit"}),centroId:centro.id};
+    const uid=auth.currentUser?auth.currentUser.uid:"";
+    const msg={id:Date.now(),autor:centro.nombre,texto:chatInput,fecha:new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit"}),centroId:centro.id,uid:uid};
     const nuevo=[...chatMsgs,msg];
     setChatMsgs(nuevo);
     setChatInput("");
@@ -1912,9 +1984,9 @@ function App(){
   const [systemDark,setSystemDark]=useState(()=>window.matchMedia?.("(prefers-color-scheme:dark)").matches);
   useEffect(()=>{const mq=window.matchMedia?.("(prefers-color-scheme:dark)");if(!mq)return;const h=e=>setSystemDark(e.matches);mq.addEventListener?.("change",h);return()=>mq.removeEventListener?.("change",h);},[]);
   useEffect(()=>{try{localStorage.setItem("acopio_theme",themeMode);}catch{}},[themeMode]);
-  useEffect(()=>{document.documentElement.style.transition="background .3s,color .3s";document.documentElement.style.background=T.bg;document.documentElement.style.color=T.text;},[T]);
   const darkMode=themeMode==="dark"||(themeMode==="system"&&systemDark);
   const T=darkMode?T_DARK:T_LIGHT;
+  useEffect(()=>{document.documentElement.style.transition="background .3s,color .3s";document.documentElement.style.background=T.bg;document.documentElement.style.color=T.text;},[T]);
   const [lang,setLang]=useState("es");
   currentLang=lang;
   const [centros,setCentros]=useState(()=>loadLocal("centros")||CENTROS_INIT);
@@ -1964,9 +2036,28 @@ function App(){
     return()=>window.removeEventListener("popstate",onPop);
   },[dashCentro,showLoginCentro,showDash,showLogin]);
 
+  useEffect(()=>{
+    const unsub=auth.onAuthStateChanged(async(user)=>{
+      if(user&&!dashCentro){
+        const snap=await db.ref("acopio/auth").once("value");
+        const authMap=snap.val()||{};
+        const entries=Object.entries(authMap);
+        const match=entries.find(([k,v])=>v.uid===user.uid);
+        if(match){
+          const centroId=match[0];
+          const centrosSnap=await db.ref("acopio/centros").once("value");
+          const arr=centrosSnap.val()||[];
+          const c=Array.isArray(arr)?arr.find(x=>x.id===centroId):null;
+          if(c){setDashCentro(c);setShowLoginCentro(false);window.history.pushState({dashCentro:true},"");}
+        }
+      }
+    });
+    return()=>unsub();
+  },[]);
+
   const openLoginCentro=()=>{setShowLoginCentro(true);window.history.pushState({loginCentro:true},"");};
   const openDash=(c)=>{setDashCentro(c);setShowLoginCentro(false);window.history.pushState({dashCentro:true},"");};
-  const closeDash=()=>{setDashCentro(null);window.history.back();};
+  const closeDash=()=>{setDashCentro(null);auth.signOut();window.history.back();};
   const closeLoginCentro=()=>{setShowLoginCentro(false);window.history.back();};
 
   useEffect(()=>{
@@ -1976,6 +2067,12 @@ function App(){
     window.addEventListener("offline",handleOffline);
     return()=>{window.removeEventListener("online",handleOnline);window.removeEventListener("offline",handleOffline);};
   },[]);
+
+  useEffect(()=>{
+    if(!localStorage.getItem("acopio_auth_migrated")&&centros.length>0){
+      migrateAllCenters(centros);
+    }
+  },[centros]);
 
   useEffect(()=>{
     const loadAll=async()=>{
