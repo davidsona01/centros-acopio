@@ -2022,6 +2022,7 @@ function App(){
   const [showHeatMap,setShowHeatMap]=useState(false);
   const [heatFilter,setHeatFilter]=useState("todos");
   const mapaRef=useRef({flyTo:null});
+  const savingRef=useRef(false);
 
   useEffect(()=>{if(window.location.search.includes("admin=true")){setShowLogin(true);window.history.replaceState({},'',window.location.pathname);}},[]);
 
@@ -2102,14 +2103,14 @@ function App(){
       setCargando(false);
     };
     loadAll();
-    firebaseListen("acopio/centros",data=>{if(data&&Array.isArray(data)){setCentros(data);saveLocal("centros",data);}});
-    firebaseListen("acopio/voluntarios",data=>{if(data){setVoluntarios(data);saveLocal("voluntarios",data);}});
-    firebaseListen("acopio/inventario",data=>{if(data){setInventario(data);saveLocal("inventario",data);}});
+    firebaseListen("acopio/centros",data=>{if(!savingRef.current&&data&&Array.isArray(data)){setCentros(data);saveLocal("centros",data);}});
+    firebaseListen("acopio/voluntarios",data=>{if(!savingRef.current&&data){setVoluntarios(data);saveLocal("voluntarios",data);}});
+    firebaseListen("acopio/inventario",data=>{if(!savingRef.current&&data){setInventario(data);saveLocal("inventario",data);}});
   },[effectiveOnline]);
 
-  useEffect(()=>{if(!cargando){saveLocal("centros",centros);if(effectiveOnline){const ok=firebaseSave("acopio/centros",centros);if(!ok)queueSync("acopio/centros",centros);}else{queueSync("acopio/centros",centros);}}},[centros,cargando,effectiveOnline]);
-  useEffect(()=>{if(!cargando){saveLocal("voluntarios",voluntarios);if(effectiveOnline){const ok=firebaseSave("acopio/voluntarios",voluntarios);if(!ok)queueSync("acopio/voluntarios",voluntarios);}else{queueSync("acopio/voluntarios",voluntarios);}}},[voluntarios,cargando,effectiveOnline]);
-  useEffect(()=>{if(!cargando){saveLocal("inventario",inventario);if(effectiveOnline){const ok=firebaseSave("acopio/inventario",inventario);if(!ok)queueSync("acopio/inventario",inventario);}else{queueSync("acopio/inventario",inventario);}}},[inventario,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("centros",centros);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/centros",centros).then(ok=>{savingRef.current=false;if(!ok)queueSync("acopio/centros",centros);}).catch(()=>{savingRef.current=false;queueSync("acopio/centros",centros);});}else{queueSync("acopio/centros",centros);}}},[centros,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("voluntarios",voluntarios);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/voluntarios",voluntarios).then(ok=>{savingRef.current=false;if(!ok)queueSync("acopio/voluntarios",voluntarios);}).catch(()=>{savingRef.current=false;queueSync("acopio/voluntarios",voluntarios);});}else{queueSync("acopio/voluntarios",voluntarios);}}},[voluntarios,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("inventario",inventario);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/inventario",inventario).then(ok=>{savingRef.current=false;if(!ok)queueSync("acopio/inventario",inventario);}).catch(()=>{savingRef.current=false;queueSync("acopio/inventario",inventario);});}else{queueSync("acopio/inventario",inventario);}}},[inventario,cargando,effectiveOnline]);
 
   const filtrados=centros.filter(c=>{
     if(busqCiudad&&!c.ciudad.toLowerCase().includes(busqCiudad.toLowerCase())&&!c.estado.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
