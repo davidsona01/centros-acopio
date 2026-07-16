@@ -2076,41 +2076,52 @@ function App(){
   },[centros]);
 
   useEffect(()=>{
+    if(!effectiveOnline){
+      const localCentros=loadLocal("centros");
+      const localVol=loadLocal("voluntarios");
+      const localInv=loadLocal("inventario");
+      if(localCentros)setCentros(localCentros);
+      if(localVol)setVoluntarios(localVol);
+      if(localInv)setInventario(localInv);
+      setLoadError("Modo offline. Usando datos locales guardados.");
+      setCargando(false);
+      return;
+    }
     const loadAll=async()=>{
-      if(!effectiveOnline){
-        const localCentros=loadLocal("centros");
-        const localVol=loadLocal("voluntarios");
-        const localInv=loadLocal("inventario");
-        if(localCentros)setCentros(localCentros);
-        if(localVol)setVoluntarios(localVol);
-        if(localInv)setInventario(localInv);
-        setLoadError("Modo offline. Usando datos locales guardados.");
-        setCargando(false);
-        return;
-      }
       try{
         const centrosData=await firebaseLoad("acopio/centros");
-        if(centrosData&&Array.isArray(centrosData)&&centrosData.length>0){setCentros(centrosData);saveLocal("centros",centrosData);}
+        if(centrosData){
+          const arr=Array.isArray(centrosData)?centrosData:Object.values(centrosData);
+          if(arr.length>0){setCentros(arr);saveLocal("centros",arr);}
+        }
       }catch(e){setLoadError("Error de conexión. Usando datos locales.");addToast("Error cargando centros","error");}
       try{
         const volData=await firebaseLoad("acopio/voluntarios");
-        if(volData){setVoluntarios(volData);saveLocal("voluntarios",volData);}
+        if(volData){const arr=Array.isArray(volData)?volData:Object.values(volData);setVoluntarios(arr);saveLocal("voluntarios",arr);}
       }catch(e){}
       try{
         const invData=await firebaseLoad("acopio/inventario");
-        if(invData){setInventario(invData);saveLocal("inventario",invData);}
+        if(invData){const arr=Array.isArray(invData)?invData:Object.values(invData);setInventario(arr);saveLocal("inventario",arr);}
       }catch(e){}
       setCargando(false);
     };
     loadAll();
-    firebaseListen("acopio/centros",data=>{if(!savingRef.current&&data&&Array.isArray(data)){setCentros(data);saveLocal("centros",data);}});
-    firebaseListen("acopio/voluntarios",data=>{if(!savingRef.current&&data){setVoluntarios(data);saveLocal("voluntarios",data);}});
-    firebaseListen("acopio/inventario",data=>{if(!savingRef.current&&data){setInventario(data);saveLocal("inventario",data);}});
+    const onCentros=data=>{if(!savingRef.current&&data){const arr=Array.isArray(data)?data:Object.values(data);setCentros(arr);saveLocal("centros",arr);}};
+    const onVol=data=>{if(!savingRef.current&&data){const arr=Array.isArray(data)?data:Object.values(data);setVoluntarios(arr);saveLocal("voluntarios",arr);}};
+    const onInv=data=>{if(!savingRef.current&&data){const arr=Array.isArray(data)?data:Object.values(data);setInventario(arr);saveLocal("inventario",arr);}};
+    db.ref("acopio/centros").on("value",snap=>onCentros(snap.val()));
+    db.ref("acopio/voluntarios").on("value",snap=>onVol(snap.val()));
+    db.ref("acopio/inventario").on("value",snap=>onInv(snap.val()));
+    return()=>{
+      db.ref("acopio/centros").off("value");
+      db.ref("acopio/voluntarios").off("value");
+      db.ref("acopio/inventario").off("value");
+    };
   },[effectiveOnline]);
 
-  useEffect(()=>{if(!cargando){saveLocal("centros",centros);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/centros",centros).then(ok=>{savingRef.current=false;if(!ok)queueSync("acopio/centros",centros);}).catch(()=>{savingRef.current=false;queueSync("acopio/centros",centros);});}else{queueSync("acopio/centros",centros);}}},[centros,cargando,effectiveOnline]);
-  useEffect(()=>{if(!cargando){saveLocal("voluntarios",voluntarios);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/voluntarios",voluntarios).then(ok=>{savingRef.current=false;if(!ok)queueSync("acopio/voluntarios",voluntarios);}).catch(()=>{savingRef.current=false;queueSync("acopio/voluntarios",voluntarios);});}else{queueSync("acopio/voluntarios",voluntarios);}}},[voluntarios,cargando,effectiveOnline]);
-  useEffect(()=>{if(!cargando){saveLocal("inventario",inventario);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/inventario",inventario).then(ok=>{savingRef.current=false;if(!ok)queueSync("acopio/inventario",inventario);}).catch(()=>{savingRef.current=false;queueSync("acopio/inventario",inventario);});}else{queueSync("acopio/inventario",inventario);}}},[inventario,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("centros",centros);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/centros",centros).then(ok=>{setTimeout(()=>{savingRef.current=false;},500);if(!ok)queueSync("acopio/centros",centros);}).catch(()=>{setTimeout(()=>{savingRef.current=false;},500);queueSync("acopio/centros",centros);});}else{queueSync("acopio/centros",centros);}}},[centros,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("voluntarios",voluntarios);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/voluntarios",voluntarios).then(ok=>{setTimeout(()=>{savingRef.current=false;},500);if(!ok)queueSync("acopio/voluntarios",voluntarios);}).catch(()=>{setTimeout(()=>{savingRef.current=false;},500);queueSync("acopio/voluntarios",voluntarios);});}else{queueSync("acopio/voluntarios",voluntarios);}}},[voluntarios,cargando,effectiveOnline]);
+  useEffect(()=>{if(!cargando){saveLocal("inventario",inventario);if(effectiveOnline){savingRef.current=true;firebaseSave("acopio/inventario",inventario).then(ok=>{setTimeout(()=>{savingRef.current=false;},500);if(!ok)queueSync("acopio/inventario",inventario);}).catch(()=>{setTimeout(()=>{savingRef.current=false;},500);queueSync("acopio/inventario",inventario);});}else{queueSync("acopio/inventario",inventario);}}},[inventario,cargando,effectiveOnline]);
 
   const filtrados=centros.filter(c=>{
     if(busqCiudad&&!c.ciudad.toLowerCase().includes(busqCiudad.toLowerCase())&&!c.estado.toLowerCase().includes(busqCiudad.toLowerCase()))return false;
